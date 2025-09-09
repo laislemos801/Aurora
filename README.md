@@ -1,4 +1,4 @@
-# 📚 Aurora: Projeto de Gestão de Projetos Semestrais
+# 📚 Aurora: Plataforma de Gestão de Projetos Semestrais
 
 Este repositório contém o desenvolvimento de um **aplicativo desktop** voltado para a **gestão de projetos semestrais no ensino superior**, de uso exclusivo dos professores.
 
