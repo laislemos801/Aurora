@@ -1,0 +1,97 @@
+'use client'
+import Image from 'next/image';
+import { Lexend_Exa } from 'next/font/google';
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+
+const lexendExa = Lexend_Exa({
+  weight: '400',
+  subsets: ['latin'],
+});
+
+export default function Register() {
+  return (
+    <div
+      className="min-h-screen bg-no-repeat bg-center bg-cover bg-right flex items-center justify-center"
+      style={{ backgroundImage: "url('/bg.png')" }}
+    >
+      <div className="flex flex-col">
+        
+        <div className="relative flex w-80 h-[550px] py-8 border border-white/40 bg-white/25 rounded-[40px] backdrop-blur-sm justify-center">
+
+          <div className="absolute -top-18 left-1/2 -translate-x-1/2">
+            <Image
+              src="/logo_original.png"
+              alt="Logo"
+              width={120}
+              height={120}
+              quality={100}
+              className="w-33 h-33"
+            />
+          </div>
+          <div className='flex flex-col'>
+            <h1 className={`${lexendExa.className} text-xl text-center text-[#90416B]`}>AURORA</h1>
+            <h1 className="text-2xl text-center text-[#614281] font-medium mt-2">Bem-vindo!</h1>
+            <p className='text-[10px] text-white text-center px-6 font-light'>
+              Crie sua conta e faça parte do nascer de uma <br></br> <span className='font-medium italic'>nova forma</span> de integrar e compartilhar ideias.
+            </p>
+            <div className='flex flex-col gap-1 mt-4 px-4'>
+                <div className="grid w-full max-w-sm items-center gap-1">
+                    <Label htmlFor="nome" className='text-[11px] ml-1 text-[#7B6294]'>Nome</Label>
+                    <Input 
+                    type="nome" 
+                    id="nome" 
+                    placeholder="Nome" 
+                    className='border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] focus:outline-none shadow-none focus:ring-0'
+                    />
+                </div>
+                <div className="grid w-full max-w-sm items-center gap-1">
+                    <Label htmlFor="email" className='text-[11px] ml-1 text-[#7B6294]'>Email</Label>
+                    <Input 
+                    type="email" 
+                    id="email" 
+                    placeholder="Email" 
+                    className='border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] focus:outline-none shadow-none focus:ring-0'
+                    />
+                </div>
+                <div className="grid w-full max-w-sm items-center gap-1">
+                    <Label htmlFor="telefone" className='text-[11px] ml-1 text-[#7B6294]'>Telefone</Label>
+                    <Input 
+                    type="number" 
+                    id="telefone" 
+                    placeholder="Telefone" 
+                    className='border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] focus:outline-none shadow-none focus:ring-0'
+                    />
+                </div>
+                <div className="grid w-full max-w-sm items-center gap-1">
+                    <Label htmlFor="senha" className='text-[11px] ml-1 text-[#7B6294]'>Senha</Label>
+                    <Input 
+                    type="password" 
+                    id="senha" 
+                    placeholder="Senha" 
+                    className='border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] focus:outline-none shadow-none focus:ring-0'
+                    />
+                </div>
+                <div className="grid w-full max-w-sm items-center gap-1">
+                    <Label htmlFor="confirmar_senha" className='text-[11px] ml-1 text-[#7B6294]'>Confirmar senha</Label>
+                    <Input 
+                    type="password" 
+                    id="confirmar_senha" 
+                    placeholder="Confirmar senha" 
+                    className='border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] focus:outline-none shadow-none focus:ring-0'
+                    />
+                </div>
+            </div>
+            <div className='flex flex-col px-4 mt-4 gap-2'>
+                <Button className='rounded-sm h-8 bg-[#C288B3] font-light'>Cadastrar</Button>
+                <p className='text-[10px] text-center font-medium'>Já tem uma conta? <span className='underline text-[#7B6294] font-semibold'>Login</span></p>
+            </div>
+
+          </div>
+        
+        </div>
+      </div>
+    </div>
+  );
+}
