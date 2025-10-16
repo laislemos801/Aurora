@@ -1,10 +1,13 @@
 'use client'
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Lexend_Exa } from 'next/font/google';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { auth, db } from '@/firebase/clientApp';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, reload } from "firebase/auth";
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
 import Logo from "@/public/logo.png"
 import EyeOpen from "@/public/eye_open.svg"
 import EyeClosed from "@/public/eye_closed.svg"
@@ -20,6 +23,91 @@ const lexendExa = Lexend_Exa({
 export default function Register() {
 
   const [showPassword, setShowPassword] = useState(false);
+
+  const [formData, setFormData] = useState({
+    nome: '',
+    email: '',
+    telefone: '',
+    nascimento: '',
+    senha: '',
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleRegister = async () => {
+    setError('');
+    setLoading(true);
+  
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.senha
+      );
+  
+      const user = userCredential.user;
+  
+      await updateProfile(user, { displayName: formData.nome });
+  
+      await sendEmailVerification(user);
+  
+      await setDoc(doc(db, "Professores", user.uid), {
+        uid: user.uid,
+        nome: formData.nome,
+        email: formData.email,
+        telefone: formData.telefone,
+        nascimento: formData.nascimento,
+        emailVerificado: false,
+        createdAt: new Date(),
+      });
+  
+      alert("Conta criada! Enviamos um link de verificação para seu e-mail.");
+  
+      setFormData({ nome: '', email: '', telefone: '', nascimento: '', senha: '' });
+    } catch (err: any) {
+      console.error(err);
+      if (err.code === 'auth/email-already-in-use') {
+        setError("Este e-mail já está cadastrado.");
+      } else if (err.code === 'auth/invalid-email') {
+        setError("E-mail inválido. Verifique e tente novamente.");
+      } else if (err.code === 'auth/weak-password') {
+        setError("A senha deve ter pelo menos 8 caracteres.");
+      } else {
+        setError("Erro ao cadastrar. Tente novamente.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let interval: number;
+
+    const checkEmailVerified = () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      reload(user).then(async () => {
+        if (user.emailVerified) {
+          await updateDoc(doc(db, "Professores", user.uid), {
+            emailVerificado: true,
+          });
+          console.log("E-mail verificado atualizado no Firestore.");
+
+          clearInterval(interval);
+        }
+      }).catch(console.error);
+    };
+
+    interval = window.setInterval(checkEmailVerified, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div
@@ -115,6 +203,8 @@ export default function Register() {
                     <Input 
                     type="nome" 
                     id="nome" 
+                    onChange={handleChange} 
+                    value={formData.nome}
                     placeholder="Nome" 
                     className='border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
                     focus:outline-none shadow-none focus:ring-0 md:text-[12px] md:w-75 lg:w-85 2xl:w-90'
@@ -125,6 +215,8 @@ export default function Register() {
                     <Input 
                     type="email" 
                     id="email" 
+                    onChange={handleChange} 
+                    value={formData.email}
                     placeholder="Email" 
                     className='border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
                     focus:outline-none shadow-none focus:ring-0 md:text-[12px]'
@@ -135,6 +227,8 @@ export default function Register() {
                     <Input 
                     type="number" 
                     id="telefone" 
+                    onChange={handleChange} 
+                    value={formData.telefone}
                     placeholder="Telefone" 
                     className='border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
                     focus:outline-none shadow-none focus:ring-0 md:text-[12px]'
@@ -145,6 +239,8 @@ export default function Register() {
                     <Input 
                     type="string" 
                     id="nascimento" 
+                    onChange={handleChange} 
+                    value={formData.nascimento}
                     placeholder="Data de Nascimento" 
                     className='border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
                     focus:outline-none shadow-none focus:ring-0 md:text-[12px]'
@@ -159,6 +255,8 @@ export default function Register() {
                     <Input
                       type={showPassword ? "text" : "password"}
                       id="senha"
+                      onChange={handleChange} 
+                      value={formData.senha}
                       placeholder="Senha"
                       className="border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
                       focus:outline-none shadow-none focus:ring-0 w-full pr-8 md:text-[12px]"
@@ -174,8 +272,21 @@ export default function Register() {
                 </div>
             </div>
             <div className='flex flex-col px-4 mt-4 gap-2 md:mt-6 md:gap-3'>
-                <Button className='rounded-sm h-8 bg-[#C288B3] font-light md:text-[16px] md:h-8.5 2xl:h-9 2xl:text-[18px] 2xl:font-regular'>Cadastrar</Button>
-                <p className='text-[10px] text-center font-medium md:text-[11px] xl:mt-1 2xl:text-[12px]'>Já tem uma conta? <span className='underline text-[#7B6294] font-semibold'>Login</span></p>
+                <Button 
+                  className='rounded-sm h-8 bg-[#C288B3] font-light md:text-[16px] md:h-8.5 2xl:h-9 2xl:text-[18px] 2xl:font-regular'
+                  disabled={loading} 
+                  onClick={handleRegister}
+                >
+                  {loading ? "Cadastrando..." : "Cadastrar"}
+                </Button>
+                {error && (
+                  <p className='text-[11px] text-center text-red-500 font-medium'>
+                    {error}
+                  </p>
+                )}
+                <p className='text-[10px] text-center font-medium md:text-[11px] xl:mt-1 2xl:text-[12px]'>
+                  Já tem uma conta? <span className='underline text-[#7B6294] font-semibold'>Login</span>
+                </p>
             </div>
 
           </div>
