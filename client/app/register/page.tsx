@@ -34,6 +34,7 @@ export default function Register() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let { id, value } = e.target;
@@ -86,41 +87,39 @@ export default function Register() {
 
   const validateForm = () => {
     const { nome, email, telefone, nascimento, senha } = formData;
+    let newErrors: { [key: string]: string } = {};
 
     if (!nome || nome.trim().length < 3) {
-      setError("O nome deve ter pelo menos 3 caracteres.");
-      return false;
+      newErrors.nome = "O nome deve ter pelo menos 3 caracteres.";
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Digite um e-mail válido.");
-      return false;
+      newErrors.email = "Digite um e-mail válido.";
     }
 
     const digits = telefone.replace(/\D/g, "");
     if (digits.length < 10 || digits.length > 11) {
-      setError("Digite um telefone válido (com DDD).");
-      return false;
+      newErrors.telefone = "Digite um telefone válido (com DDD).";
     }
 
     if (!/^\d{2}\/\d{2}\/\d{4}$/.test(nascimento)) {
-      setError("Digite a data de nascimento no formato dd/mm/aaaa.");
-      return false;
-    }
-
-    const [dia, mes, ano] = nascimento.split("/").map(Number);
-    const data = new Date(ano, mes - 1, dia);
-    if (data > new Date() || ano < 1900) {
-      setError("Digite uma data de nascimento válida.");
-      return false;
+      newErrors.nascimento = "Digite a data de nascimento no formato dd/mm/aaaa.";
+    } else {
+      const [dia, mes, ano] = nascimento.split("/").map(Number);
+      const data = new Date(ano, mes - 1, dia);
+      if (data > new Date() || ano < 1900) {
+        newErrors.nascimento = "Digite uma data de nascimento válida.";
+      }
     }
 
     if (senha.length < 8) {
-      setError("A senha deve ter pelo menos 8 caracteres.");
-      return false;
+      newErrors.senha = "A senha deve ter pelo menos 8 caracteres.";
     }
 
-    return true;
+    setErrors(newErrors);
+    setError(Object.values(newErrors)[0] || "");
+    
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleRegister = async () => {
@@ -270,8 +269,9 @@ export default function Register() {
                     onChange={handleChange} 
                     value={formData.nome}
                     placeholder="Nome" 
-                    className='border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
-                    focus:outline-none shadow-none focus:ring-0 md:text-[12px] md:w-75 lg:w-85 2xl:w-90'
+                    className={`border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
+                    focus:outline-none shadow-none focus:ring-0 md:text-[12px] md:w-75 lg:w-85 2xl:w-90]
+                    ${errors.nome ? "border-red-500" : "border-[#7B6294]"}`}
                     />
                 </div>
                 <div className="grid w-full max-w-sm items-center gap-1">
@@ -282,8 +282,9 @@ export default function Register() {
                     onChange={handleChange} 
                     value={formData.email}
                     placeholder="Email" 
-                    className='border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
-                    focus:outline-none shadow-none focus:ring-0 md:text-[12px]'
+                    className={`border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
+                    focus:outline-none shadow-none focus:ring-0 md:text-[12px]
+                    ${errors.email ? "border-red-500" : "border-[#7B6294]"}`}
                     />
                 </div>
                 <div className="grid w-full max-w-sm items-center gap-1">
@@ -294,8 +295,9 @@ export default function Register() {
                     onChange={handleChange} 
                     value={formData.telefone}
                     placeholder="Telefone" 
-                    className='border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
-                    focus:outline-none shadow-none focus:ring-0 md:text-[12px]'
+                    className={`border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
+                    focus:outline-none shadow-none focus:ring-0 md:text-[12px]
+                    ${errors.telefone ? "border-red-500" : "border-[#7B6294]"}`}
                     />
                 </div>
                 <div className="grid w-full max-w-sm items-center gap-1">
@@ -306,8 +308,9 @@ export default function Register() {
                     onChange={handleChange} 
                     value={formData.nascimento}
                     placeholder="Data de Nascimento" 
-                    className='border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
-                    focus:outline-none shadow-none focus:ring-0 md:text-[12px]'
+                    className={`border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
+                    focus:outline-none shadow-none focus:ring-0 md:text-[12px]
+                    ${errors.nascimento ? "border-red-500" : "border-[#7B6294]"}`}
                     />
                 </div>
                 <div className="grid w-full max-w-sm items-center gap-1">
@@ -322,8 +325,9 @@ export default function Register() {
                       onChange={handleChange} 
                       value={formData.senha}
                       placeholder="Senha"
-                      className="border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
-                      focus:outline-none shadow-none focus:ring-0 w-full pr-8 md:text-[12px]"
+                      className={`border-[#7B6294] rounded-lg text-[11px] placeholder-[#7B6294] !placeholder-[#7B6294] 
+                      focus:outline-none shadow-none focus:ring-0 w-full pr-8 md:text-[12px]
+                      ${errors.senha ? "border-red-500" : "border-[#7B6294]"}`}
                     />
 
                     <Image
