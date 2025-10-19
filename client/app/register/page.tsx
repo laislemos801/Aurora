@@ -36,12 +36,101 @@ export default function Register() {
   const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    let { id, value } = e.target;
+
+    if (id === "telefone") {
+      let digits = e.target.value.replace(/\D/g, "");
+
+      if (digits.length === 0) {
+        setFormData({ ...formData, telefone: "" });
+        return;
+      }
+
+      if (digits.length > 11) digits = digits.slice(0, 11);
+
+      let formatted = "";
+      if (digits.length < 3) {
+        formatted = `(${digits}`;
+      } else if (digits.length < 7) {
+        formatted = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+      } else if (digits.length <= 10) {
+        formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+      } else {
+        formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+      }
+
+      setFormData({ ...formData, telefone: formatted });
+      return;
+    }
+
+    if (id === "nascimento") {
+      let digits = e.target.value.replace(/\D/g, "");
+
+      if (digits.length > 8) digits = digits.slice(0, 8);
+
+      let formatted = "";
+      if (digits.length <= 2) {
+        formatted = digits;
+      } else if (digits.length <= 4) {
+        formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+      } else {
+        formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+      }
+
+      setFormData({ ...formData, nascimento: formatted });
+      return; 
+    }
+
+    setFormData({ ...formData, [id]: value });
+  };
+
+  const validateForm = () => {
+    const { nome, email, telefone, nascimento, senha } = formData;
+
+    if (!nome || nome.trim().length < 3) {
+      setError("O nome deve ter pelo menos 3 caracteres.");
+      return false;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Digite um e-mail válido.");
+      return false;
+    }
+
+    const digits = telefone.replace(/\D/g, "");
+    if (digits.length < 10 || digits.length > 11) {
+      setError("Digite um telefone válido (com DDD).");
+      return false;
+    }
+
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(nascimento)) {
+      setError("Digite a data de nascimento no formato dd/mm/aaaa.");
+      return false;
+    }
+
+    const [dia, mes, ano] = nascimento.split("/").map(Number);
+    const data = new Date(ano, mes - 1, dia);
+    if (data > new Date() || ano < 1900) {
+      setError("Digite uma data de nascimento válida.");
+      return false;
+    }
+
+    if (senha.length < 8) {
+      setError("A senha deve ter pelo menos 8 caracteres.");
+      return false;
+    }
+
+    return true;
   };
 
   const handleRegister = async () => {
     setError('');
     setLoading(true);
+
+    if (!validateForm()) {
+      setLoading(false);
+      return;
+    }
   
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -62,7 +151,6 @@ export default function Register() {
         email: formData.email,
         telefone: formData.telefone,
         nascimento: formData.nascimento,
-        emailVerificado: false,
         createdAt: new Date(),
       });
   
@@ -84,30 +172,6 @@ export default function Register() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    let interval: number;
-
-    const checkEmailVerified = () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      reload(user).then(async () => {
-        if (user.emailVerified) {
-          await updateDoc(doc(db, "Professores", user.uid), {
-            emailVerificado: true,
-          });
-          console.log("E-mail verificado atualizado no Firestore.");
-
-          clearInterval(interval);
-        }
-      }).catch(console.error);
-    };
-
-    interval = window.setInterval(checkEmailVerified, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div
@@ -193,15 +257,15 @@ export default function Register() {
           </div>
           <div className='flex flex-col'>
             <h1 className={`${lexendExa.className} text-xl text-center text-[#90416B] md:text-[26px] xl:text-[30px]`}>AURORA</h1>
-            <h1 className="text-2xl text-center text-[#614281] font-medium mt-2 md:text-3xl xl:text-4xl">Bem-vindo!</h1>
-            <p className='text-[10px] text-white text-center px-6 font-light md:text-[12px] md:mt-2 xl:text-[13px] 2xl:text-[14px]'>
+            <h1 className="text-2xl text-center text-[#614281] font-medium mt-1 md:text-3xl xl:text-4xl">Bem-vindo!</h1>
+            <p className='text-[10px] text-white text-center px-6 font-light md:text-[12px] md:mt-1 xl:text-[13px] 2xl:text-[14px]'>
               Crie sua conta e faça parte do nascer de uma <br></br> <span className='font-medium italic'>nova forma</span> de integrar e compartilhar ideias.
             </p>
-            <div className='flex flex-col gap-1 mt-4 px-4 md:gap-2 xl:gap-2 xl:mt-6'>
+            <div className='flex flex-col gap-1 mt-4 px-4 md:gap-2 xl:gap-2 xl:mt-4'>
                 <div className="grid w-full max-w-sm items-center gap-1">
                     <Label htmlFor="nome" className='text-[11px] ml-1 text-[#7B6294] md:text-[12px] 2xl:text-[14px]'>Nome</Label>
                     <Input 
-                    type="nome" 
+                    type="text"
                     id="nome" 
                     onChange={handleChange} 
                     value={formData.nome}
@@ -225,7 +289,7 @@ export default function Register() {
                 <div className="grid w-full max-w-sm items-center gap-1">
                     <Label htmlFor="telefone" className='text-[11px] ml-1 text-[#7B6294] md:text-[12px] 2xl:text-[14px]'>Telefone</Label>
                     <Input 
-                    type="number" 
+                    type="text"
                     id="telefone" 
                     onChange={handleChange} 
                     value={formData.telefone}
