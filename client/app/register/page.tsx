@@ -1,13 +1,14 @@
 'use client'
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useRouter } from "next/navigation";
 import { Lexend_Exa } from 'next/font/google';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { auth, db } from '@/firebase/clientApp';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, reload } from "firebase/auth";
-import { doc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import Logo from "@/public/logo.png"
 import EyeOpen from "@/public/eye_open.svg"
 import EyeClosed from "@/public/eye_closed.svg"
@@ -32,6 +33,7 @@ export default function Register() {
     senha: '',
   });
 
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -156,6 +158,7 @@ export default function Register() {
       alert("Conta criada! Enviamos um link de verificação para seu e-mail.");
   
       setFormData({ nome: '', email: '', telefone: '', nascimento: '', senha: '' });
+      router.push("/login");
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/email-already-in-use') {
