@@ -38,11 +38,10 @@ export default function ResetPassword() {
         {/* LOGO CIRCULAR */}
         <div className="absolute -top-12 left-1/2 -translate-x-1/2">
           <Image
-            src="/logo_original.png"
+            src="/logo.png"
             alt="Logo Aurora"
             width={90}
             height={90}
-            quality={100}
             className="drop-shadow-md sm:w-[110px] sm:h-[110px]"
           />
         </div>

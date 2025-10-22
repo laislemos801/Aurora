@@ -38,7 +38,7 @@ export default function ProjectInfoPage() {
         {/* Logo no topo da toolbar */}
         <div className="relative w-[64px] h-[64px] rounded-full overflow-hidden -mt-[12px]">
           <Image
-            src="/logo_original.png"
+            src="/logo.png"
             alt="Aurora"
             fill
             className="object-contain object-center scale-[1.5]"
