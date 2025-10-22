@@ -28,7 +28,7 @@ export default function ResetPassword() {
     >
       <div
         className="
-          relative flex flex-col items-center text-center
+          flex flex-col items-center text-center
           w-full max-w-[650px] h-auto sm:h-[720px]
           border border-white/30 rounded-[35px]
           backdrop-blur-md bg-white/25 shadow-lg
@@ -136,17 +136,16 @@ export default function ResetPassword() {
         )}
 
         {/* PERSONAGENS */}
-        <div className="relative mt-10 sm:mt-auto w-full flex justify-center">
-          <Image
+        
+      </div>
+        <Image
             src="/people.png"
             alt="Personagens Aurora"
-            width={300}
-            height={100}
+            width={1920}
+            height={1080}
             quality={100}
-            className="object-contain sm:w-[500px] sm:h-[130px]"
+            className=" w-4/12 absolute bottom-0"
           />
-        </div>
-      </div>
     </div>
   );
 }
