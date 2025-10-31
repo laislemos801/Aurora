@@ -28,7 +28,7 @@ export default function RootLayoutClient({ children }: Props) {
             <ToolBarTop />
           </div>
         )}
-        <div className="w-12/12 h-full">{children}</div>
+        <div className="w-12/12 h-full bg-white pt-8 pl-8 rounded-tl-[80px] shadow-xl">{children}</div>
       </div>
     </main>
   );
