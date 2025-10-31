@@ -26,11 +26,11 @@ export default function ProjectInfoPage() {
   ];
 
   return (
-    <div className="relative min-h-screen bg-[#F4EAF4] overflow-x-hidden flex">
+    <div className="relative h-full w-full bg-[#F4EAF4]  flex">
       {/* ==================== SIDEBAR ==================== */}
       <aside
         className="
-          hidden md:flex fixed left-0 top-0 min-h-screen w-[80px]
+          hidden md:flex fixed left-0 top-0 h-full w-[80px]
           flex-col items-center justify-between border-r border-[#E6DCE8]/60
           bg-[#F4EAF4] z-20 py-5
         "
