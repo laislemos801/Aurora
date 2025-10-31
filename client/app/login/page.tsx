@@ -19,7 +19,7 @@ export default function ResetPassword() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-no-repeat bg-center bg-cover px-4 sm:px-6 md:px-8"
+      className="h-full w-full flex items-center justify-center bg-no-repeat bg-center bg-cover px-4 sm:px-6 md:px-8"
       style={{ backgroundImage: "url('/bg.png')" }}
     >
       <div

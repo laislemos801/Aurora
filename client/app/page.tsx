@@ -2,6 +2,8 @@
 
 export default function Home() {
   return (
-    <div></div>
+    <div className="w-full h-full bg-red-500">
+        
+    </div>
   );
 }
