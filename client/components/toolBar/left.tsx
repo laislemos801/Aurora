@@ -20,7 +20,7 @@ export default function ToolBarLeft() {
       </div>
 
      
-      <div className="hidden sm:flex flex-col gap-8 items-center text-[#C288B3]">
+      <div className="hidden sm:flex flex-col gap-8 items-center text-[#C288B3] 2xl:gap-11">
         <div
           className={`${
             pathname === "/" && "bg-[#90416B] text-white p-1.5 rounded-full 2xl:p-2"

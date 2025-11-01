@@ -14,6 +14,10 @@ export default function RootLayoutClient({ children }: Props) {
     pathname
   );
 
+  if (showToolBar) {
+    return <main className="w-full h-screen bg-[#FCF3FA]">{children}</main>;
+  }
+
   return (
     <main className="w-full h-screen flex bg-[#FCF3FA] overflow-hidden">
       {!showToolBar && (
