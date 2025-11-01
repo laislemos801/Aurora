@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { IoMdClose } from "react-icons/io";
 import { IoTrashOutline } from "react-icons/io5";
 import { FaUserCircle } from "react-icons/fa";
+import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue,} from "@/components/ui/select";
 
 interface Professor {
   email: string;
@@ -47,7 +48,7 @@ export default function ModalInviteProfessor({
     <>
       {isInviteOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-98 md:w-full max-w-lg sm:max-w-lg animate-fadeIn relative">
+          <div className="bg-white rounded-2xl shadow-xl p-4 w-98 md:w-full max-w-lg sm:max-w-lg animate-fadeIn relative">
             <button
               onClick={() => setIsInviteOpen(false)}
               className="absolute top-2 right-4 text-[#3B3B3B] rounded-full p-2 hover:bg-gray-200 transition cursor-pointer">
@@ -93,7 +94,7 @@ export default function ModalInviteProfessor({
                         <p className="text-[#333333] font-medium text-xs sm:text-sm md:text-base truncate">
                           {nomeSimples}
                         </p>
-                        <p className="text-[#333333] text-xs sm:text-xs md:text-xs truncate">
+                        <p className="text-[#333333] text-xs sm:text-xs md:text-sm truncate">
                           {p.email}
                         </p>
                       </div>
@@ -101,13 +102,15 @@ export default function ModalInviteProfessor({
 
                     {/* Botões de ação */}
                     <div className="flex items-center justify-end sm:gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                      <select
-                        className="rounded-lg bg-[#EFEFEF] text-[#515151] text-xs sm:text-sm md:text-sm p-1 sm:p-2 w-20 sm:w-auto"
-                        defaultValue="visualizar"
-                      >
-                        <option value="visualizar">ler</option>
-                        <option value="editar">editar</option>
-                      </select>
+                      <Select defaultValue="visualizar">
+                        <SelectTrigger className="rounded-lg bg-[#EFEFEF] text-[#515151] text-xs sm:text-sm md:text-sm p-2 sm:p-2 w-16 sm:w-16 md:w-28 border-none focus:ring-0">
+                          <SelectValue placeholder="Permissão" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="visualizar">ler</SelectItem>
+                          <SelectItem value="editar">editar</SelectItem>
+                        </SelectContent>
+                      </Select>
 
                       <button
                         onClick={() => handleRemoverProfessor(i)}
