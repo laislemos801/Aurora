@@ -68,7 +68,6 @@ export default function EmailSent() {
             alt="Personagens Aurora"
             width={500}
             height={130}
-            quality={100}
             className="object-contain"
           />
         </div>

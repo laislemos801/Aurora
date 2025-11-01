@@ -15,20 +15,25 @@ export default function RootLayoutClient({ children }: Props) {
   );
 
   return (
-    <main className="w-full h-screen flex bg-[#FCF3FA]">
+    <main className="w-full h-screen flex bg-[#FCF3FA] overflow-hidden">
       {!showToolBar && (
-        <div className="h-full w-1/15">
+        <div className="h-full w-3 sm:w-20 xl:w-22 2xl:w-26">
           {" "}
           <ToolBarLeft />
         </div>
       )}
       <div className="flex flex-col w-full">
         {!showToolBar && (
-          <div className="w-12/12 h-1/9">
+          <div className="">
             <ToolBarTop />
           </div>
         )}
-        <div className="w-12/12 h-full bg-white pt-8 pl-8 rounded-tl-[80px] shadow-xl">{children}</div>
+        <div
+          className="w-full h-full bg-white pt-8 pl-8 mt-2 rounded-tl-[20px] sm:rounded-tl-[40px]
+          xl:rounded-tl-[50px] shadow-[0_4px_12px_rgba(0,0,0,0.15),0_-4px_2px_rgba(0,0,0,0.01)]"
+        >
+          {children}
+        </div>
       </div>
     </main>
   );

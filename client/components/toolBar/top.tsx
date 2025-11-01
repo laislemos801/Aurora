@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import aurora from "@/public/AURORA.png";
+import aurora from "@/public/AURORA.svg";
 import avatar from "@/public/avatar.png";
+import widget from "@/public/widgets.svg";
 import { MdOutlineCircleNotifications } from "react-icons/md";
 import ModalAddProject from "../ui/modaladdproject"; // import do novo componente
 
@@ -25,47 +26,59 @@ export default function ToolBarTop() {
   if (!mounted) return null;
 
   return (
-    <>
-      {/* Toolbar */}
-      <div className="bg-[#FCF3FA] w-full h-full flex items-center justify-between pr-8 relative">
-        {/* Logo */}
-        <div>
-          <Image
-            src={aurora}
-            alt="aurora"
-            width={1920}
-            height={1080}
-            className="w-12/12 mt-6"
-          />
-        </div>
+  <>
+    {/* Toolbar */}
+    <div className="bg-[#FCF3FA] w-full h-14 flex items-center justify-between pr-3 mt-3 relative xl:h-16">
+      {/* Grupo esquerdo: widget + aurora */}
+      <div className="flex items-center gap-5 ml-3 xl:mt-3">
+        <Image
+          src={widget}
+          alt="widget"
+          width={28}
+          height={28}
+          className="sm:hidden"
+        />
+        <Image
+          src={aurora}
+          alt="aurora"
+          width={1920}
+          height={1080}
+          className="w-28 sm:w-20 xl:ml-4 xl:w-23 2xl:w-25"
+        />
+      </div>
 
         {/* Botões e usuário */}
-        <div className="flex items-center w-auto gap-6">
+        <div className="flex items-center w-auto gap-3 sm:gap-5 xl:mt-3 xl:gap-8">
+          {/* Botão Novo Projeto */}
           <button
             onClick={() => setIsOpen(true)}
-            className="text-white bg-[#7B6294] rounded-md p-2 px-7 hover:bg-[#6a5583] transition"
-          >
-            Novo projeto
+            className="text-white bg-[#7B6294] rounded-md p-1.5 h-7 hover:bg-[#6a5583] transition flex items-center justify-center
+            "
+            >
+            {/* Texto só aparece em sm e maiores */}
+            <span className="hidden sm:inline text-sm p-4 xl:px-5">Novo projeto</span>
+            {/* + aparece sempre */}
+            <span className="sm:hidden text-3xl font-light">+</span>
           </button>
 
           <button>
             <MdOutlineCircleNotifications
-              size={37}
-              className="text-[#C288B3] mr-4"
+              size={34}
+              className="text-[#C288B3]"
             />
           </button>
 
-          <div className="w-[2px] h-8 bg-[#C288B3] mx-2 opacity-70" />
+          <div className="hidden sm:block w-[1.5px] h-9 bg-[#C288B3] mx-2 opacity-70 xl:w-[2px]" />
 
-          <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-3 pr-3 xl:pr-6">
             <Image
               src={avatar}
               alt="avatar"
-              width={1920}
-              height={1080}
-              className="w-5/12"
+              width={28}
+              height={28}
+              className="rounded-full"
             />
-            <p className="w-full font-medium text-[#90416B]">Prof. Silva</p>
+            <p className="font-medium text-[#90416B] text-sm">Prof. Silvia</p>
           </div>
         </div>
       </div>
