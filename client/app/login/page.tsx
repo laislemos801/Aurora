@@ -121,7 +121,6 @@ export default function ResetPassword() {
         alt="Personagens Aurora"
         width={1920}
         height={1080}
-        quality={100}
         className=" w-4/12 absolute bottom-0"
       />
     </div>
