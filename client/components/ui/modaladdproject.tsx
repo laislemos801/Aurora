@@ -6,7 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { IoMdClose } from "react-icons/io";
 import { GoPlus } from "react-icons/go";
 import { FiUpload } from "react-icons/fi";
-import { IoTrashOutline } from "react-icons/io5";
+import { IoTrashOutline, IoLinkSharp } from "react-icons/io5";
+import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue,} from "@/components/ui/select";
+import ModalInviteProfessor from "../ui/modalinviteprofessor";
 
 interface Turma {
   nome: string;
@@ -30,28 +32,31 @@ export default function ModalAddProject({
   turmas,
   setTurmas,
 }: ModalAddProjectProps) {
-  const [nomeTurma, setNomeTurma] = useState("");
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+    const [nomeTurma, setNomeTurma] = useState("");
+    const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+    const [professores, setProfessores] = useState<{ nome: string; email: string }[]>([]);
+    const [isInviteOpen, setIsInviteOpen] = useState(false);
 
-  const handleSalvarTurma = () => {
-    if (nomeTurma.trim() === "") return;
+    const handleSalvarTurma = () => {
+        if (nomeTurma.trim() === "") return;
 
-    const novaTurma: Turma = {
-      nome: nomeTurma,
-      arquivo: uploadedFile,
+        const novaTurma: Turma = {
+        nome: nomeTurma,
+        arquivo: uploadedFile,
+        };
+
+        setTurmas([...turmas, novaTurma]);
+        setUploadedFile(null);
+        setNomeTurma("");
+        setIsAddClassOpen(false);
     };
 
-    setTurmas([...turmas, novaTurma]);
-    setUploadedFile(null);
-    setNomeTurma("");
-    setIsAddClassOpen(false);
-  };
-
-  const handleRemoverTurma = (index: number) => {
-    const novasTurmas = [...turmas];
-    novasTurmas.splice(index, 1);
-    setTurmas(novasTurmas);
-  };
+    const handleRemoverTurma = (index: number) => {
+        const novasTurmas = [...turmas];
+        novasTurmas.splice(index, 1);
+        setTurmas(novasTurmas);
+    };
 
   return (
     <>
@@ -159,23 +164,31 @@ export default function ModalAddProject({
             <label className="text-[#353535] font-medium mb-1 text-sm md:text-lg">
                 Professor
             </label>
-            <div className="flex flex-row gap-6 w-full sm:w-full">
-                <select
-                className="border-2 rounded-lg p-2 pt-4 pb-4 sm:w-5/5 w-64 text-sm md:text-lg border-[#C288B3] focus:outline-[#C288B3] text-[#A1A1A1]"
-                defaultValue=""
-                >
-                <option value="" disabled>
-                    Selecione o professor
-                </option>
-                <option value="silva">Prof. Silva</option>
-                <option value="almeida">Prof. Almeida</option>
-                <option value="sousa">Prof. Sousa</option>
-                </select>
+            <div className="flex flex-row justify-start gap-6 w-full sm:w-full">
+                <Select>
+                    <SelectTrigger className="w-full sm:w-full border-2 pt-6 pb-6 border-[#C288B3] focus:ring-0 focus:border-[#C288B3]">
+                        <SelectValue placeholder="Selecione o professor" />
+                    </SelectTrigger>
+                    <SelectContent className="w-50 sm:w-full">
+                        <SelectItem value="silva">Prof. Silva</SelectItem>
+                        <SelectItem value="almeida">Prof. Almeida</SelectItem>
+                        <SelectItem value="sousa">Prof. Sousa</SelectItem>
+                        <div className="border-t border-[#E8CBE0] my-1" />
+                        <button
+                        type="button"
+                        onClick={() => setIsInviteOpen(true)}
+                        className="flex items-center gap-2 text-[#C288B3] px-3 py-2 hover:bg-[#F3EAF5] w-full text-left rounded-md"
+                        >
+                        <IoLinkSharp size={18} />
+                        Convidar um professor
+                        </button>
+                    </SelectContent>
+                </Select>
 
-                <div className="w-full flex justify-end items-end mt-6">
-                <button className="bg-[#C288B3] text-[#FCF3FA] font-semibold px-8 py-2 sm:px-16 sm:py-2 text-center rounded-lg hover:bg-[#90416B] transition">
-                    Salvar
-                </button>
+                <div className="w-full flex justify-end items-end ">
+                    <button className="bg-[#C288B3] text-[#FCF3FA] font-semibold px-8 py-2 sm:px-6 sm:py-2 md:px-16 md:py-2 text-center rounded-lg hover:bg-[#90416B] transition">
+                        Salvar
+                    </button>
                 </div>
             </div>
             </div>
@@ -269,6 +282,11 @@ export default function ModalAddProject({
         </div>
     </div>
     )}
+    <ModalInviteProfessor
+        isInviteOpen={isInviteOpen}
+        setIsInviteOpen={setIsInviteOpen}
+        professores={professores}
+        setProfessores={setProfessores}/>
     </>
   );
 }

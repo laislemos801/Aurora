@@ -40,7 +40,7 @@ export default function ToolBarTop() {
         </div>
 
         {/* Botões e usuário */}
-        <div className="flex items-center w-auto gap-8">
+        <div className="flex items-center w-auto gap-6">
           <button
             onClick={() => setIsOpen(true)}
             className="text-white bg-[#7B6294] rounded-md p-2 px-7 hover:bg-[#6a5583] transition"
@@ -51,9 +51,11 @@ export default function ToolBarTop() {
           <button>
             <MdOutlineCircleNotifications
               size={37}
-              className="text-[#C288B3] mr-8"
+              className="text-[#C288B3] mr-4"
             />
           </button>
+
+          <div className="w-[2px] h-8 bg-[#C288B3] mx-2 opacity-70" />
 
           <div className="flex items-center gap-3">
             <Image
@@ -63,7 +65,7 @@ export default function ToolBarTop() {
               height={1080}
               className="w-5/12"
             />
-            <p className="w-full font-medium text-gray-700">Prof. Silva</p>
+            <p className="w-full font-medium text-[#90416B]">Prof. Silva</p>
           </div>
         </div>
       </div>
