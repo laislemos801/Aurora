@@ -9,7 +9,7 @@ import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue,} from "@/comp
 import { adicionarProfessorAoProjeto } from "@/firebase/addProject";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/firebase/clientApp";
-
+import { toast } from "react-hot-toast";
 
 interface Professor {
   nome: string;
@@ -38,17 +38,17 @@ export default function ModalInviteProfessor({
    
   
     const handleAdicionarProfessor = async () => {
-      if (!emailProfessor) return alert("Digite o email!");
+      if (!emailProfessor) return toast.error("Digite o email!");
 
       // Evita duplicata
       if (professores.some(p => p.email === emailProfessor)) {
-        return alert("Professor já adicionado!");
+        return toast.error("Professor já adicionado!");
       }
 
       const q = query(collection(db, "Professores"), where("email", "==", emailProfessor));
       const querySnapshot = await getDocs(q);
 
-      if (querySnapshot.empty) return alert("Professor não encontrado!");
+      if (querySnapshot.empty) return toast.error("Professor não encontrado!");
 
       const docData = querySnapshot.docs[0];
       const novoProfessor: Professor = {
@@ -60,7 +60,7 @@ export default function ModalInviteProfessor({
       setProfessores([...professores, novoProfessor]); // guarda no estado do modal principal
       setEmailProfessor("");
 
-      alert("Professor adicionado com sucesso!");
+      toast.success("Professor adicionado com sucesso!");
     };
 
   const handleRemoverProfessor = (index: number) => {
