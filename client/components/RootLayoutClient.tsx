@@ -15,11 +15,11 @@ export default function RootLayoutClient({ children }: Props) {
   );
 
   if (showToolBar) {
-    return <main className="w-full h-screen bg-[#FCF3FA]">{children}</main>;
+    return <main className="w-full min-h-screen bg-[#FCF3FA]">{children}</main>;
   }
 
   return (
-    <main className="w-full h-screen flex bg-[#FCF3FA] overflow-hidden">
+    <main className="w-full min-h-screen flex bg-[#FCF3FA]">
       {!showToolBar && (
         <div className="h-full w-3 sm:w-20 xl:w-22 2xl:w-26">
           {" "}

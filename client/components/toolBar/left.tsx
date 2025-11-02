@@ -15,7 +15,7 @@ export default function ToolBarLeft() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="bg-[#FCF3FA] w-full h-full flex flex-col justify-between items-center pb-8">
+    <div className="bg-[#FCF3FA] w-full min-h-screen flex flex-col justify-between items-center pb-8">
       
       <div className="hidden sm:block sm:w-23 -mt-1 xl:w-26">
         <Image src={logo} alt={"logo"} width={1920} height={1080} />

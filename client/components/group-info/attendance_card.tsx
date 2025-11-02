@@ -46,7 +46,7 @@ export default function AttendanceCard() {
       <div className="w-full border-b border-[#D9D9D9] mb-2"></div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-[2fr_1fr_1fr] w-full mb-2 text-[11px] font-normal text-[#000000] pr-3 pl-4">
+      <div className="grid grid-cols-[2fr_1fr_1fr] w-full mb-2 text-[12px] font-normal text-[#000000] pr-3 pl-4">
         <span className="text-left pr-4">Nome</span>
         <span className="text-center">RA</span>
         <span className="text-center">Presença</span>
@@ -56,7 +56,7 @@ export default function AttendanceCard() {
       {attendance.map((student, idx) => (
         <div
           key={idx}
-          className="grid grid-cols-[2fr_1fr_1fr] w-full mb-2 text-[11px] font-normal text-[#000000] leading-none items-center
+          className="grid grid-cols-[2fr_1fr_1fr] w-full mb-2 text-[12px] font-normal text-[#000000] leading-none items-center
           pr-3 pl-4"
         >
           <span className="text-left text-[#3B3B3B]">{student.name}</span>
