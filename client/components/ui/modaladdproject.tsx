@@ -9,10 +9,30 @@ import { FiUpload } from "react-icons/fi";
 import { IoTrashOutline, IoLinkSharp } from "react-icons/io5";
 import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue,} from "@/components/ui/select";
 import ModalInviteProfessor from "../ui/modalinviteprofessor";
+import { criarProjeto } from "@/firebase/addProject";
+import * as XLSX from "xlsx";
+
+interface AlunoXLS {
+  nome: string;
+  ra: number | string; // pode vir como string do Excel
+}
+
+interface Aluno {
+  nome: string;
+  ra: number;
+}
+
+
+interface Professor {
+  uid: string; 
+  nome: string;
+  email: string;
+}
+
 
 interface Turma {
   nome: string;
-  arquivo?: File | null;
+  alunos: Aluno[];
 }
 
 interface ModalAddProjectProps {
@@ -24,39 +44,103 @@ interface ModalAddProjectProps {
   setTurmas: (value: Turma[]) => void;
 }
 
-export default function ModalAddProject({
-  isOpen,
-  setIsOpen,
-  isAddClassOpen,
-  setIsAddClassOpen,
-  turmas,
-  setTurmas,
+//Extrair dados do arquivo xls ou xlsx
+export async function extrairAlunosDoArquivo(file: File): Promise<Aluno[]> {
+    const arrayBuffer = await file.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: "array" });
+    const firstSheet = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheet];
+    const data: AlunoXLS[] = XLSX.utils.sheet_to_json(worksheet);
+
+    const alunos: Aluno[] = data.map((row) => ({
+        nome: String(row.nome),
+        ra: Number(row.ra),
+    }));
+
+    return alunos;
+}
+
+
+export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAddClassOpen,turmas,setTurmas,
 }: ModalAddProjectProps) {
-    const [nomeTurma, setNomeTurma] = useState("");
+    //Estados principais
+    
+    const [nome, setNome] = useState("");
+    const [descricao, setDescricao] = useState("");
+    const [semestre, setSemestre] = useState("");
+    const [ano, setAno] = useState("");
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-    const [professores, setProfessores] = useState<{ nome: string; email: string }[]>([]);
+    const [nomeTurma, setNomeTurma] = useState("");
     const [isInviteOpen, setIsInviteOpen] = useState(false);
+    const [professores, setProfessores] = useState<Professor[]>([]);
+    const [professorSelecionado, setProfessorSelecionado] = useState<string>(""); // uid do professor selecionado
+    const [projeto, setProjeto] = useState<{ uid: string } | null>(null);
+   
 
-    const handleSalvarTurma = () => {
-        if (nomeTurma.trim() === "") return;
+   const handleSalvarTurma = async () => {
+        if (!nomeTurma) return;
 
-        const novaTurma: Turma = {
-        nome: nomeTurma,
-        arquivo: uploadedFile,
-        };
+        let alunos: Aluno[] = [];
 
+        if (uploadedFile) {
+            try {
+            alunos = await extrairAlunosDoArquivo(uploadedFile);
+            } catch (err) {
+            console.error("Erro ao ler arquivo:", err);
+            alert("Não foi possível ler o arquivo. Verifique se ele está correto.");
+            return;
+            }
+        }
+
+        const novaTurma: Turma = { nome: nomeTurma, alunos };
         setTurmas([...turmas, novaTurma]);
-        setUploadedFile(null);
         setNomeTurma("");
+        setUploadedFile(null);
         setIsAddClassOpen(false);
     };
 
+
+    // Remover turma
     const handleRemoverTurma = (index: number) => {
         const novasTurmas = [...turmas];
         novasTurmas.splice(index, 1);
         setTurmas(novasTurmas);
     };
+
+    // Salvar projeto
+    const handleSalvarProjeto = async () => {
+        if (!nome || !descricao || !semestre || !ano) {
+            alert("Preencha os campos obrigatórios!");
+            return;
+        }
+
+        const projetoData = {
+        nome,
+        descricao,
+        semestre,
+        ano,
+        turmas, // cada turma já contém a lista de alunos
+        professores: professores
+            .filter((p) => p.uid === professorSelecionado || p.email === professorSelecionado)
+            .map((p) => ({ uid: p.uid || "", nome: p.nome, email: p.email })),
+        };
+
+        const res = await criarProjeto(projetoData);
+
+        if (res.sucesso) {
+            if (!res.uid) {
+                alert("Erro: UID do projeto não retornou!");
+                return;
+            }
+
+            setProjeto({ uid: res.uid });
+            alert("Projeto criado com sucesso!");
+            setIsOpen(false);
+        } else {
+        alert("Erro ao criar o projeto: " + res.erro);
+        }
+    };
+
 
   return (
     <>
@@ -85,6 +169,8 @@ export default function ModalAddProject({
                 <Input
                 type="text"
                 placeholder="Nome"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
                 className="border-[#C288B3] text-sm md:text-md lg:text-lg pt-6 pb-6 border-2 text-[#A1A1A1]"
                 />
             </div>
@@ -95,6 +181,8 @@ export default function ModalAddProject({
                 <Input
                 type="text"
                 placeholder="Semestre"
+                value={semestre}
+                onChange={(e) => setSemestre(e.target.value)}
                 className="border-[#C288B3] text-sm md:text-lg pt-6 pb-6 border-2 text-[#A1A1A1]"
                 />
             </div>
@@ -105,6 +193,8 @@ export default function ModalAddProject({
                 <Input
                 type="text"
                 placeholder="Ano"
+                value={ano}
+                onChange={(e) => setAno(e.target.value)}
                 className="border-[#C288B3] text-sm md:text-lg pt-6 pb-6 border-2 text-[#A1A1A1]"
                 />
             </div>
@@ -119,6 +209,8 @@ export default function ModalAddProject({
                 <div className="flex flex-row w-full sm:w-full gap-6">
                 <Textarea
                     placeholder="Descrição"
+                    value={descricao}
+                    onChange={(e) => setDescricao(e.target.value)}
                     className="border-[#C288B3] border-2 text-sm md:text-lg text-[#A1A1A1] pb-6"
                     rows={4}
                 />
@@ -170,9 +262,11 @@ export default function ModalAddProject({
                         <SelectValue placeholder="Selecione o professor" />
                     </SelectTrigger>
                     <SelectContent className="w-50 sm:w-full">
-                        <SelectItem value="silva">Prof. Silva</SelectItem>
-                        <SelectItem value="almeida">Prof. Almeida</SelectItem>
-                        <SelectItem value="sousa">Prof. Sousa</SelectItem>
+                         {professores.map((p) => (
+                            <SelectItem key={p.email} value={p.uid || p.email}>
+                                {p.nome}
+                            </SelectItem>
+                        ))}
                         <div className="border-t border-[#E8CBE0] my-1" />
                         <button
                         type="button"
@@ -186,7 +280,7 @@ export default function ModalAddProject({
                 </Select>
 
                 <div className="w-full flex justify-end items-end ">
-                    <button className="bg-[#C288B3] text-[#FCF3FA] font-semibold px-8 py-2 sm:px-6 sm:py-2 md:px-16 md:py-2 text-center rounded-lg hover:bg-[#90416B] transition">
+                    <button onClick={handleSalvarProjeto} className="bg-[#C288B3] text-[#FCF3FA] font-semibold px-8 py-2 sm:px-6 sm:py-2 md:px-16 md:py-2 text-center rounded-lg hover:bg-[#90416B] transition">
                         Salvar
                     </button>
                 </div>
@@ -253,12 +347,12 @@ export default function ModalAddProject({
                     <FiUpload size={40} />
                 </div>
                 <p className="text-[#C288B3] text-sm sm:text-md text-center">
-                    Arraste ou insira um PDF
+                    Arraste ou insira um PDF ou XLS
                 </p>
                 <input
                     type="file"
                     id="fileUpload"
-                    accept="application/pdf"
+                    accept="application/.pdf, .xls, .xlsx"
                     className="hidden"
                     onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
@@ -286,7 +380,9 @@ export default function ModalAddProject({
         isInviteOpen={isInviteOpen}
         setIsInviteOpen={setIsInviteOpen}
         professores={professores}
-        setProfessores={setProfessores}/>
+        setProfessores={setProfessores}
+        projetoUid={projeto?.uid ?? ""}
+        />
     </>
   );
 }

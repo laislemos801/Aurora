@@ -6,9 +6,15 @@ import { IoMdClose } from "react-icons/io";
 import { IoTrashOutline } from "react-icons/io5";
 import { FaUserCircle } from "react-icons/fa";
 import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue,} from "@/components/ui/select";
+import { adicionarProfessorAoProjeto } from "@/firebase/addProject";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/firebase/clientApp";
+
 
 interface Professor {
+  nome: string;
   email: string;
+  uid: string; 
 }
 
 interface ModalInviteProfessorProps {
@@ -16,26 +22,68 @@ interface ModalInviteProfessorProps {
   setIsInviteOpen: (value: boolean) => void;
   professores: Professor[];
   setProfessores: (value: Professor[]) => void;
+  projetoUid?: string;
 }
 
 export default function ModalInviteProfessor({
   isInviteOpen,
   setIsInviteOpen,
   professores,
-  setProfessores,
+  setProfessores
 }: ModalInviteProfessorProps) {
   
-  const [emailProfessor, setEmailProfessor] = useState("");
+    const [emailProfessor, setEmailProfessor] = useState("");
+    const [carregando, setCarregando] = useState(false);
 
-  const handleSalvarProfessor = () => {
-    if (emailProfessor.trim() === "") return;
+   
+  
+  // Adiciona professor baseado no e-mail
+  const handleAdicionarProfessor = async () => {
+    if (!emailProfessor) {
+      alert("Digite o e-mail do professor!");
+      return;
+    }
 
-    const novoProfessor: Professor = {
-      email: emailProfessor,
-    };
+    // Evita duplicatas
+    const existe = professores.some(
+      (p) => p.email.toLowerCase() === emailProfessor.toLowerCase()
+    );
+    if (existe) {
+      alert("Professor já adicionado!");
+      return;
+    }
 
-    setProfessores([...professores, novoProfessor]);
-    setEmailProfessor("");
+    setCarregando(true);
+
+    try {
+      // Consulta Firestore para encontrar o professor
+      const q = query(collection(db, "professores"), where("email", "==", emailProfessor));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        alert("Professor não encontrado no sistema!");
+        setCarregando(false);
+        return;
+      }
+
+      // Pega o primeiro resultado
+      const doc = querySnapshot.docs[0];
+      const data = doc.data();
+      const novoProfessor: Professor = {
+        uid: doc.id,
+        nome: data.nome,
+        email: data.email,
+      };
+
+      setProfessores([...professores, novoProfessor]);
+      setEmailProfessor("");
+      alert("Professor adicionado ao select!");
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao buscar professor!");
+    } finally {
+      setCarregando(false);
+    }
   };
 
   const handleRemoverProfessor = (index: number) => {
@@ -43,6 +91,7 @@ export default function ModalInviteProfessor({
     novos.splice(index, 1);
     setProfessores(novos);
   };
+
 
   return (
     <>
@@ -72,9 +121,10 @@ export default function ModalInviteProfessor({
               />
 
               <button
-                onClick={handleSalvarProfessor}
+                onClick={handleAdicionarProfessor}
+                disabled={carregando}
                 className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#C288B3] text-[#FCF3FA] font-medium text-sm sm:text-sm px-2 py-2 sm:px-2 md:px-4 lg:px-6 mr-2 rounded-lg hover:bg-[#90416B] transition flex items-center gap-2">
-                Convide
+                 {carregando ? "Adicionando..." : "Convide"}  
               </button>
             </div>
 
