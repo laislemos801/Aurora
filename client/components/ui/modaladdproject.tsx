@@ -80,6 +80,13 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
    const handleSalvarTurma = async () => {
         if (!nomeTurma) return;
 
+        if (!uploadedFile) 
+        {
+
+                alert("Por favor, adicione um arquivo PDF ou XLS/XLSX!");
+                return;
+        }
+        
         let alunos: Aluno[] = [];
 
         if (uploadedFile) {
@@ -113,29 +120,38 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
             alert("Preencha os campos obrigatórios!");
             return;
         }
+        
 
         const projetoData = {
-        nome,
-        descricao,
-        semestre,
-        ano,
-        turmas, // cada turma já contém a lista de alunos
-        professores: professores
-            .filter((p) => p.uid === professorSelecionado || p.email === professorSelecionado)
-            .map((p) => ({ uid: p.uid || "", nome: p.nome, email: p.email })),
-        };
+            nome,
+            descricao,
+            semestre,
+            ano,
+            turmas, // cada turma já contém a lista de alunos
+            professores: professores.map(p => p.uid), // só UIDs
+        }
 
         const res = await criarProjeto(projetoData);
 
         if (res.sucesso) {
             if (!res.uid) {
-                alert("Erro: UID do projeto não retornou!");
+                alert("Erro: UID do projeto não retornou!")
                 return;
             }
 
             setProjeto({ uid: res.uid });
             alert("Projeto criado com sucesso!");
+
+            //limpa campos apos add projeto
+            setNome("");
+            setDescricao("");
+            setSemestre("");
+            setAno("");
+            setTurmas([]); 
+            setProfessores([]);
+            setProfessorSelecionado("");
             setIsOpen(false);
+
         } else {
         alert("Erro ao criar o projeto: " + res.erro);
         }

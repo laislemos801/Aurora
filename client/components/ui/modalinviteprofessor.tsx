@@ -37,54 +37,31 @@ export default function ModalInviteProfessor({
 
    
   
-  // Adiciona professor baseado no e-mail
-  const handleAdicionarProfessor = async () => {
-    if (!emailProfessor) {
-      alert("Digite o e-mail do professor!");
-      return;
-    }
+    const handleAdicionarProfessor = async () => {
+      if (!emailProfessor) return alert("Digite o email!");
 
-    // Evita duplicatas
-    const existe = professores.some(
-      (p) => p.email.toLowerCase() === emailProfessor.toLowerCase()
-    );
-    if (existe) {
-      alert("Professor já adicionado!");
-      return;
-    }
-
-    setCarregando(true);
-
-    try {
-      // Consulta Firestore para encontrar o professor
-      const q = query(collection(db, "professores"), where("email", "==", emailProfessor));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        alert("Professor não encontrado no sistema!");
-        setCarregando(false);
-        return;
+      // Evita duplicata
+      if (professores.some(p => p.email === emailProfessor)) {
+        return alert("Professor já adicionado!");
       }
 
-      // Pega o primeiro resultado
-      const doc = querySnapshot.docs[0];
-      const data = doc.data();
+      const q = query(collection(db, "Professores"), where("email", "==", emailProfessor));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) return alert("Professor não encontrado!");
+
+      const docData = querySnapshot.docs[0];
       const novoProfessor: Professor = {
-        uid: doc.id,
-        nome: data.nome,
-        email: data.email,
+        uid: docData.id,
+        nome: docData.data().nome,
+        email: docData.data().email,
       };
 
-      setProfessores([...professores, novoProfessor]);
+      setProfessores([...professores, novoProfessor]); // guarda no estado do modal principal
       setEmailProfessor("");
-      alert("Professor adicionado ao select!");
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao buscar professor!");
-    } finally {
-      setCarregando(false);
-    }
-  };
+
+      alert("Professor adicionado com sucesso!");
+    };
 
   const handleRemoverProfessor = (index: number) => {
     const novos = [...professores];
@@ -152,15 +129,7 @@ export default function ModalInviteProfessor({
 
                     {/* Botões de ação */}
                     <div className="flex items-center justify-end sm:gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                      <Select defaultValue="visualizar">
-                        <SelectTrigger className="rounded-lg bg-[#EFEFEF] text-[#515151] text-xs sm:text-sm md:text-sm p-2 sm:p-2 w-16 sm:w-16 md:w-28 border-none focus:ring-0">
-                          <SelectValue placeholder="Permissão" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="visualizar">ler</SelectItem>
-                          <SelectItem value="editar">editar</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      
 
                       <button
                         onClick={() => handleRemoverProfessor(i)}
