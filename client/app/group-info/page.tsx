@@ -1,19 +1,27 @@
 "use client";
 
-import 'primeicons/primeicons.css';
-        
+import "primeicons/primeicons.css";
+import Image from "next/image";
+import backArrow from "@/public/group-back-button.svg";
+import ProjectCard from "@/components/group-info/project_card";
+import AttendanceCard from "@/components/group-info/attendance_card";
 
 export default function GroupInfo() {
+  return (
+    <div className="flex flex-col items-center w-full h-screen overflow-y-auto">
+      <div className="flex items-center mb-4 self-start">
+        <button>
+          <Image src={backArrow} alt="Voltar" width={32} height={32} />
+        </button>
+        <p className="ml-2">Grupo 01</p>
+      </div>
 
-    return (
-        <div className="px-8">
-            <i className="pi pi-chevron-circle-left"></i>
-            <p>Grupo 1</p>
+      <div className="flex flex-col w-full gap-4 px-2 pr-5">
+        <ProjectCard />
+        <AttendanceCard />
+      </div>
 
-
-
-
-        </div>
-    );
-
+      <div className="h-10"></div>
+    </div>
+  );
 }
