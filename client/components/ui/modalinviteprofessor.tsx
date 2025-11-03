@@ -6,9 +6,15 @@ import { IoMdClose } from "react-icons/io";
 import { IoTrashOutline } from "react-icons/io5";
 import { FaUserCircle } from "react-icons/fa";
 import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue,} from "@/components/ui/select";
+import { adicionarProfessorAoProjeto } from "@/firebase/addProject";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/firebase/clientApp";
+import { toast } from "react-hot-toast";
 
 interface Professor {
+  nome: string;
   email: string;
+  uid: string; 
 }
 
 interface ModalInviteProfessorProps {
@@ -16,33 +22,53 @@ interface ModalInviteProfessorProps {
   setIsInviteOpen: (value: boolean) => void;
   professores: Professor[];
   setProfessores: (value: Professor[]) => void;
+  projetoUid?: string;
 }
 
 export default function ModalInviteProfessor({
   isInviteOpen,
   setIsInviteOpen,
   professores,
-  setProfessores,
+  setProfessores
 }: ModalInviteProfessorProps) {
   
-  const [emailProfessor, setEmailProfessor] = useState("");
+    const [emailProfessor, setEmailProfessor] = useState("");
+    const [carregando, setCarregando] = useState(false);
 
-  const handleSalvarProfessor = () => {
-    if (emailProfessor.trim() === "") return;
+   
+  
+    const handleAdicionarProfessor = async () => {
+      if (!emailProfessor) return toast.error("Digite o email!");
 
-    const novoProfessor: Professor = {
-      email: emailProfessor,
+      // Evita duplicata
+      if (professores.some(p => p.email === emailProfessor)) {
+        return toast.error("Professor já adicionado!");
+      }
+
+      const q = query(collection(db, "Professores"), where("email", "==", emailProfessor));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) return toast.error("Professor não encontrado!");
+
+      const docData = querySnapshot.docs[0];
+      const novoProfessor: Professor = {
+        uid: docData.id,
+        nome: docData.data().nome,
+        email: docData.data().email,
+      };
+
+      setProfessores([...professores, novoProfessor]); // guarda no estado do modal principal
+      setEmailProfessor("");
+
+      toast.success("Professor adicionado com sucesso!");
     };
-
-    setProfessores([...professores, novoProfessor]);
-    setEmailProfessor("");
-  };
 
   const handleRemoverProfessor = (index: number) => {
     const novos = [...professores];
     novos.splice(index, 1);
     setProfessores(novos);
   };
+
 
   return (
     <>
@@ -72,9 +98,10 @@ export default function ModalInviteProfessor({
               />
 
               <button
-                onClick={handleSalvarProfessor}
+                onClick={handleAdicionarProfessor}
+                disabled={carregando}
                 className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#C288B3] text-[#FCF3FA] font-medium text-sm sm:text-sm px-2 py-2 sm:px-2 md:px-4 lg:px-6 mr-2 rounded-lg hover:bg-[#90416B] transition flex items-center gap-2">
-                Convide
+                 {carregando ? "Adicionando..." : "Convide"}  
               </button>
             </div>
 
@@ -102,15 +129,7 @@ export default function ModalInviteProfessor({
 
                     {/* Botões de ação */}
                     <div className="flex items-center justify-end sm:gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                      <Select defaultValue="visualizar">
-                        <SelectTrigger className="rounded-lg bg-[#EFEFEF] text-[#515151] text-xs sm:text-sm md:text-sm p-2 sm:p-2 w-16 sm:w-16 md:w-28 border-none focus:ring-0">
-                          <SelectValue placeholder="Permissão" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="visualizar">ler</SelectItem>
-                          <SelectItem value="editar">editar</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      
 
                       <button
                         onClick={() => handleRemoverProfessor(i)}
