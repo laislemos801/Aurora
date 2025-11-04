@@ -11,7 +11,7 @@ interface Props {
 
 export default function RootLayoutClient({ children }: Props) {
   const pathname = usePathname();
-  const showToolBar = ["/login", "/register", "/reset-password"].includes(
+  const showToolBar = ["/login", "/register", "/reset-password", "/auth/action"].includes(
     pathname
   );
 
