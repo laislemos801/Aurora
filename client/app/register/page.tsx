@@ -16,6 +16,7 @@ import Group1 from "@/public/group1.svg"
 import Group2 from "@/public/group2.png"
 import Horizonte from "@/public/horizonte.png"
 
+
 const lexendExa = Lexend_Exa({
   weight: '400',
   subsets: ['latin'],
@@ -124,6 +125,7 @@ export default function Register() {
     return Object.keys(newErrors).length === 0;
   };
 
+
   const handleRegister = async () => {
     setError('');
     setLoading(true);
@@ -145,6 +147,9 @@ export default function Register() {
       await updateProfile(user, { displayName: formData.nome });
   
       await sendEmailVerification(user);
+
+       // Usa imagem padrão do public
+      const defaultProfilePicture = "/account_circle.png";
   
       await setDoc(doc(db, "Professores", user.uid), {
         uid: user.uid,
@@ -152,13 +157,14 @@ export default function Register() {
         email: formData.email,
         telefone: formData.telefone,
         nascimento: formData.nascimento,
+        profilePicture: defaultProfilePicture,
         createdAt: new Date(),
       });
   
       alert("Conta criada! Enviamos um link de verificação para seu e-mail.");
   
       setFormData({ nome: '', email: '', telefone: '', nascimento: '', senha: '' });
-      router.push("/login");
+      router.push("/edit-profile");
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/email-already-in-use') {
