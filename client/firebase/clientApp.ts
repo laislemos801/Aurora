@@ -34,4 +34,4 @@ if (typeof window !== "undefined") {
 // Storage
 export const storage = getStorage(app);
 
-export { app, db, auth, analytics };
+export { app, db, auth, analytics, initializeApp };

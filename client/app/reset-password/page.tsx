@@ -74,7 +74,7 @@ export default function ResetPassword() {
       {/* CARD */}
       <div
         className="
-          relative z-10
+          relative
           flex flex-col items-center text-center
           w-full max-w-[650px] h-auto sm:h-[720px]
           border border-white/30 rounded-[35px]

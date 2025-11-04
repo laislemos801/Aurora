@@ -82,10 +82,11 @@ export default function GradesCard() {
           >
             <span className="text-[#000000] text-[12px] lg:text-[13px] xl:text-[14px]">{item.label}</span>
             <input
-              type="text"
+              type="number"
               value={grades[item.key] || ""}
               onChange={(e) => handleGradeChange(item.key, e.target.value)}
-              className="bg-[#D9D9D9] border border-gray-300 rounded-md px-2 py-1 w-14 text-sm text-gray-800 text-center shadow-inner"
+              className="bg-[#D9D9D9] border border-gray-300 rounded-md px-2 py-1 w-14 text-sm text-gray-800 text-center shadow-inner
+              appearance-none [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
           </div>
         ))}
