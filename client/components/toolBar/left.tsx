@@ -7,12 +7,10 @@ import icon from "@/public/for_you.svg";
 import logo from "@/public/logo.png";
 import { MdExitToApp } from "react-icons/md";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
 
 export default function ToolBarLeft() {
   const pathname = usePathname();
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="bg-[#FCF3FA] w-full h-full flex flex-col justify-between items-center pb-8">
