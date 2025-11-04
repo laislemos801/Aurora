@@ -20,7 +20,7 @@ export default function HeaderPicture() {
     return (
         <div className="relative -mt-1 w-full">
         {/* Banner fixo no topo */}
-        <div className="w-full h-48 rounded-b-none rounded-tl-2xl sm:rounded-tl-4xl md:rounded-tl-8xl overflow-hidden">
+        <div className="w-full h-48 rounded-b-none rounded-tl-2xl sm:rounded-tl-4xl md:rounded-tl-4xl overflow-hidden">
             <BannerSvg />
         </div>
 
