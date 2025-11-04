@@ -47,7 +47,8 @@ export default function RootLayoutClient({ children }: Props) {
         {!showToolBar && <ToolBarTop />}
         <div
           className="w-full h-full bg-white pt-4 pl-3 mt-2 rounded-tl-[20px] sm:rounded-tl-[40px]
-          xl:rounded-tl-[50px] shadow-[0_4px_12px_rgba(0,0,0,0.15),0_-4px_2px_rgba(0,0,0,0.01)]"
+          xl:rounded-tl-[50px] shadow-[0_4px_12px_rgba(0,0,0,0.15),0_-4px_2px_rgba(0,0,0,0.01)] lg:pl-8 lg:pt-8
+          2xl:pl-14"
         >
           {children}
           {/* Toaster para notificações */}
