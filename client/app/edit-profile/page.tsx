@@ -3,7 +3,7 @@
 import "primeicons/primeicons.css";
 import HeaderPicture from "@/components/edit-profile/headerPicture";
 import PersonalInfo from "@/components/edit-profile/personalInfo";
-import Projects from "@/components/edit-profile/projects";
+import Dashboard from "@/components/edit-profile/dashboards";
 
 
 export default function EditProfile() {
@@ -15,7 +15,7 @@ export default function EditProfile() {
       {/* conteúdo da tela abaixo */}
       <div className="flex flex-col rounded-t-2xl mt-6">
         <PersonalInfo/>
-        <Projects/>
+        <Dashboard/>
       </div>
     </div>
   );
