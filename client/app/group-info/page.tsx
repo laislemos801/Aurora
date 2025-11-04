@@ -6,6 +6,7 @@ import backArrow from "@/public/group-back-button.svg";
 import ProjectCard from "@/components/group-info/project_card";
 import AttendanceCard from "@/components/group-info/attendance_card";
 import GradesCard from "@/components/group-info/grades_card";
+import CommentsCard from "@/components/group-info/comments_card";
 
 export default function GroupInfo() {
   return (
@@ -21,6 +22,8 @@ export default function GroupInfo() {
         <ProjectCard />
         <AttendanceCard />
         <GradesCard />
+        <CommentsCard />
+        <div className="h-1"></div>
       </div>
     </div>
   );
