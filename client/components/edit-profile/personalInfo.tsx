@@ -6,85 +6,90 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/firebase/clientApp";
 import { onAuthStateChanged } from "firebase/auth";
 import { toast } from "react-hot-toast";
+import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 
 export default function PersonalInfo() {
-  const [isEditing, setIsEditing] = useState(false);
-  const [isEditingPassword, setIsEditingPassword] = useState(false);
-  const [user, setUser] = useState(auth.currentUser);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isEditingPassword, setIsEditingPassword] = useState(false);
+    const [user, setUser] = useState(auth.currentUser);
 
-  // Dados do usuário do Firestore
-  const [userData, setUserData] = useState({
-    nome: "",
-    email: "",
-    telefone: "",
-    nascimento: "",
-    profilePicture: "",
-  });
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword ] = useState(false);
 
-  const [passwordData, setPasswordData] = useState({
-    novaSenha: "",
-    confirmarSenha: "",
-  });
 
-  // Detecta o usuário logado
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      if (u) fetchUserData(u.uid);
+    // Dados do usuário do Firestore
+    const [userData, setUserData] = useState({
+        nome: "",
+        email: "",
+        telefone: "",
+        nascimento: "",
+        profilePicture: "",
     });
-    return () => unsubscribe();
-  }, []);
 
-  // Pega dados do Firestore
-  const fetchUserData = async (uid: string) => {
-    try {
-      const userRef = doc(db, "Professores", uid);
-      const snap = await getDoc(userRef);
-      if (snap.exists()) {
-        setUserData(snap.data() as any);
-      } else {
-        console.error("Usuário não existe");
-      }
-    } catch (err) {
-        console.error("Erro ao buscar usuário:", err);
-    }
-  };
+    const [passwordData, setPasswordData] = useState({
+        novaSenha: "",
+        confirmarSenha: "",
+    });
 
-  // Salva dados editados
-  const handleSave = async () => {
-    if (!user) return;
-    try {
-      const userRef = doc(db, "Professores", user.uid);
-      await updateDoc(userRef, {
-        nome: userData.nome,
-        email: userData.email,
-        telefone: userData.telefone,
-        nascimento: userData.nascimento,
-      });
-      setIsEditing(false);
-      toast.success("Dados pessoais atualizados com sucesso!");
-    } catch (err) {
-      console.error("Erro ao atualizar dados:", err);
-      toast.error("Erro ao atualizar os dados.");
-    }
-  };
+    // Detecta o usuário logado
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (u) => {
+        setUser(u);
+        if (u) fetchUserData(u.uid);
+        });
+        return () => unsubscribe();
+    }, []);
 
-  // Salva senha (apenas simula, se usar Firebase Auth real, precisa updatePassword)
-  const handleSavePassword = () => {
-    if (!passwordData.novaSenha || !passwordData.confirmarSenha) {
-      toast.error("Preencha todos os campos de senha.");
-      return;
-    }
-    if (passwordData.novaSenha !== passwordData.confirmarSenha) {
-      toast.error("As senhas não coincidem!");
-      return;
-    }
+    // Pega dados do Firestore
+    const fetchUserData = async (uid: string) => {
+        try {
+        const userRef = doc(db, "Professores", uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+            setUserData(snap.data() as any);
+        } else {
+            console.error("Usuário não existe");
+        }
+        } catch (err) {
+            console.error("Erro ao buscar usuário:", err);
+        }
+    };
 
-    console.log("Senha alterada com sucesso:", passwordData.novaSenha);
-    toast.success("Senha atualizada com sucesso!");
-    setPasswordData({ novaSenha: "", confirmarSenha: "" });
-    setIsEditingPassword(false);
-  };
+    // Salva dados editados
+    const handleSave = async () => {
+        if (!user) return;
+        try {
+        const userRef = doc(db, "Professores", user.uid);
+        await updateDoc(userRef, {
+            nome: userData.nome,
+            email: userData.email,
+            telefone: userData.telefone,
+            nascimento: userData.nascimento,
+        });
+        setIsEditing(false);
+        toast.success("Dados pessoais atualizados com sucesso!");
+        } catch (err) {
+        console.error("Erro ao atualizar dados:", err);
+        toast.error("Erro ao atualizar os dados.");   
+        }
+    };
+
+    // Salva senha (apenas simula, se usar Firebase Auth real, precisa updatePassword)
+    const handleSavePassword = () => {
+        if (!passwordData.novaSenha || !passwordData.confirmarSenha) {
+        toast.error("Preencha todos os campos de senha.");
+        return;
+        }
+        if (passwordData.novaSenha !== passwordData.confirmarSenha) {
+        toast.error("As senhas não coincidem!");
+        return;
+        }
+
+        console.log("Senha alterada com sucesso:", passwordData.novaSenha);
+        toast.success("Senha atualizada com sucesso!");
+        setPasswordData({ novaSenha: "", confirmarSenha: "" });
+        setIsEditingPassword(false);
+    };
 
   return (
     <div className="w-full flex flex-col justify-start items-start sm:px-12 md:px-16 mt-8 p-6">
@@ -208,36 +213,54 @@ export default function PersonalInfo() {
 
           <div className="mt-6 flex flex-col sm:flex-row gap-8 sm:gap-8">
             <div className="flex flex-col gap-6">
-              <div>
-                <p className="font-medium text-[#2E1F36]">Nova Senha</p>
-                {isEditingPassword ? (
-                  <input
-                    type="password"
-                    value={passwordData.novaSenha}
-                    onChange={(e) =>
-                      setPasswordData({ ...passwordData, novaSenha: e.target.value })
-                    }
-                    className="border border-gray-300 rounded-lg px-1 py-1 w-full"
-                  />
-                ) : (
-                  <p className="text-gray-700">********</p>
-                )}
-              </div>
+                <div>
+                    <p className="font-medium text-[#2E1F36]">Nova Senha</p>
+                    {isEditingPassword ? (
+                        <div className="relative w-full flex items-center">
+                            <input
+                                type={showNewPassword ? "text" : "password"}
+                                placeholder="Senha"
+                                className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                className="absolute right-2 text-[#7B6294]"
+                            >
+                                {showNewPassword ? (
+                                <MdVisibility size={20} />
+                                ) : (
+                                <MdVisibilityOff size={20} />
+                                )}
+                            </button>
+                        </div>
+
+                    ) : (
+                    <p className="text-gray-700">********</p>
+                    )}
+                </div>
 
               <div>
                 <p className="font-medium text-[#2E1F36]">Confirmar Senha</p>
                 {isEditingPassword ? (
-                  <input
-                    type="password"
-                    value={passwordData.confirmarSenha}
-                    onChange={(e) =>
-                      setPasswordData({
-                        ...passwordData,
-                        confirmarSenha: e.target.value,
-                      })
-                    }
-                    className="border border-gray-300 rounded-lg px-1 py-1 w-full"
-                  />
+                    <div className="relative w-full flex items-center">
+                        <input
+                            type={showConfirmPassword  ? "text" : "password"}
+                            placeholder="Senha"
+                            className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword )}
+                            className="absolute right-2 text-[#7B6294]"
+                        >
+                            {showConfirmPassword  ? (
+                            <MdVisibility size={20} />
+                            ) : (
+                            <MdVisibilityOff size={20} />
+                            )}
+                        </button>
+                    </div>
                 ) : (
                   <p className="text-gray-700">********</p>
                 )}
