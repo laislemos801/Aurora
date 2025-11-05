@@ -9,6 +9,7 @@ import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db, storage } from "@/firebase/clientApp";
 import { onAuthStateChanged } from "firebase/auth";
+import { toast } from "react-hot-toast";
 
 export default function HeaderPicture() {
  const [profilePic, setProfilePic] = useState<string | null>(null);
@@ -48,7 +49,7 @@ export default function HeaderPicture() {
 
     // Limite de tamanho (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert("Arquivo muito grande! Máximo 5MB.");
+      toast.error("Arquivo muito grande! Máximo 5MB.");
       return;
     }
 
@@ -67,7 +68,7 @@ export default function HeaderPicture() {
         },
         (error) => {
           console.error("Erro no upload:", error);
-          alert("Erro ao enviar a imagem.");
+          toast.error("Erro ao enviar a imagem.");
         },
         async () => {
           // Upload concluído
@@ -79,12 +80,13 @@ export default function HeaderPicture() {
 
           setProfilePic(downloadURL);
           setLoading(false);
+          toast.success("Foto de perfil atualizada com sucesso!");
         }
       );
     } catch (error) {
       console.error("Erro ao atualizar foto:", error);
       setLoading(false);
-      alert("Não foi possível atualizar a foto. Tente novamente.");
+      toast.error("Não foi possível atualizar a foto. Tente novamente.");
     }
   };
 
@@ -98,7 +100,10 @@ export default function HeaderPicture() {
         <div className="relative w-28 h-28 sm:w-28 sm:h-28 md:w-46 md:h-46 rounded-full overflow-hidden shadow-lg">
         {profilePic === null ? (
             // Enquanto não carregou, não renderiza nada ou um loader
-            <div className="w-28 h-28 rounded-full  animate-pulse" />
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="w-32 h-32 border-4 border-t-[#7B6294] border-gray-300 rounded-full animate-spin"></div>
+            </div>
+
             ) : (
             <Image
                 src={profilePic !== "" ? profilePic : account_circle}

@@ -13,6 +13,10 @@ import { FaRegNoteSticky } from "react-icons/fa6";
 import icon from "@/public/for_you.svg";
 import 'primeicons/primeicons.css';
 import { usePathname, useRouter } from "next/navigation";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { auth, db, storage } from "@/firebase/clientApp";
+import { onAuthStateChanged } from "firebase/auth";
+import account_circle from "@/public/account_circle.png";
 
 interface Turma {
   nome: string;
@@ -26,6 +30,11 @@ export default function ToolBarTop() {
   const [isAddClassOpen, setIsAddClassOpen] = useState(false);
   const [turmas, setTurmas] = useState<Turma[]>([]);
 
+  const [userData, setUserData] = useState<{ nome: string; profilePicture: string }>({
+    nome: "",
+    profilePicture: "",
+  });
+
   const pathname = usePathname();
   const router = useRouter();
 
@@ -38,11 +47,33 @@ export default function ToolBarTop() {
     },
   ];
 
+  // Montagem do componente
   useEffect(() => {
     setMounted(true);
+
+    // Busca o usuário logado e dados do Firestore
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const userRef = doc(db, "Professores", user.uid);
+          const snap = await getDoc(userRef);
+          if (snap.exists()) {
+            const data = snap.data() as any;
+            setUserData({
+              nome: data.nome || "Professor",
+              profilePicture: data.profilePicture || "",
+            });
+          }
+        } catch (err) {
+          console.error("Erro ao buscar dados do professor:", err);
+        }
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted) return null; 
 
   return (
     <>
@@ -84,8 +115,24 @@ export default function ToolBarTop() {
           <div className="hidden sm:block w-[1.5px] h-9 bg-[#C288B3] mx-2 opacity-70 xl:w-[2px]" />
 
           <div className="hidden sm:flex items-center gap-3 pr-3 xl:pr-6">
-            <Image src={avatar} alt="avatar" width={28} height={28} className="rounded-full" />
-            <p className="font-medium text-[#90416B] text-sm">Prof. Silvia</p>
+             <div className="relative w-7 h-7 sm:w-7 sm:h-7 md:w-10 md:h-10 rounded-full overflow-hidden">
+                {userData.profilePicture ? (
+                  <Image
+                    src={userData.profilePicture}
+                    alt={userData.nome || "Perfil"}
+                    width={40}
+                    height={40}
+                    className="object-cover w-full h-full rounded-full"
+                    unoptimized
+                  />
+                ) : (
+                  
+                   <div className="w-full h-full border-4 border-t-[#7B6294] border-gray-300 rounded-full animate-spin"></div>
+                )}
+              </div>
+              <p className="font-medium text-[#90416B] text-sm">
+                {userData.nome || "Carregando..."}
+              </p>
           </div>
         </div>
       </div>
