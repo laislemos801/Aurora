@@ -164,7 +164,7 @@ export default function Register() {
       alert("Conta criada! Enviamos um link de verificação para seu e-mail.");
   
       setFormData({ nome: '', email: '', telefone: '', nascimento: '', senha: '' });
-      router.push("/edit-profile");
+      router.push("/login");
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/email-already-in-use') {
@@ -362,7 +362,12 @@ export default function Register() {
                   </p>
                 )}
                 <p className='text-[10px] text-center font-medium md:text-[11px] xl:mt-1 2xl:text-[12px]'>
-                  Já tem uma conta? <span className='underline text-[#7B6294] font-semibold'>Login</span>
+                  Já tem uma conta?  
+                  <span
+                    onClick={() => router.push("/login")}
+                    className="text-[#7B6294] italic font-bold cursor-pointer underline">
+                    Login
+                  </span>
                 </p>
             </div>
 

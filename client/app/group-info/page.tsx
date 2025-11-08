@@ -7,8 +7,21 @@ import ProjectCard from "@/components/group-info/project_card";
 import AttendanceCard from "@/components/group-info/attendance_card";
 import GradesCard from "@/components/group-info/grades_card";
 import CommentsCard from "@/components/group-info/comments_card";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 export default function GroupInfo() {
+    // const router = useRouter();
+    const { user, loading } = useAuthGuard();
+
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-[#F4EAF4]">
+          <p className="text-[#7A4C77] text-lg">Carregando informações...</p>
+        </div>
+      );
+    }
+
+    if (!user) return null; 
   return (
     <div className="flex flex-col items-center w-full min-h-screen">
       {/* Header */}
