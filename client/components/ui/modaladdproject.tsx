@@ -12,6 +12,7 @@ import ModalInviteProfessor from "../ui/modalinviteprofessor";
 import { criarProjeto } from "@/firebase/addProject";
 import * as XLSX from "xlsx";
 import { toast } from "react-hot-toast";
+import { getAuth } from "firebase/auth";
 
 interface AlunoXLS {
   nome: string;
@@ -175,7 +176,19 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
             toast.error("Preencha os campos obrigatórios!");
             return;
         }
-        
+
+        const auth = getAuth();
+        const user = auth.currentUser;
+
+        if (!user) {
+            toast.error("Usuário não autenticado!");
+            return;
+        }
+
+        // 🔹 Garante que o criador seja adicionado como professor
+        const professoresUIDs = Array.from(
+            new Set([user.uid, ...professores.map((p) => p.uid)])
+        );
 
         const projetoData = {
             nome,
@@ -184,36 +197,34 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
             ano,
             curso,
             turmas, // cada turma já contém a lista de alunos
-            professores: professores.map(p => p.uid), // só UIDs
-        }
+            professores: professoresUIDs, // inclui o criador
+        };
 
         const res = await criarProjeto(projetoData);
 
         if (res.sucesso) {
             if (!res.uid) {
-                toast.error("Erro: UID do projeto não retornou!")
-                return;
+            toast.error("Erro: UID do projeto não retornou!");
+            return;
             }
 
             setProjeto({ uid: res.uid });
             toast.success("Projeto criado com sucesso!");
 
-            //limpa campos apos add projeto
+            // limpa campos após adicionar projeto
             setNome("");
             setDescricao("");
             setSemestre("");
             setAno("");
             setCurso("");
-            setTurmas([]); 
+            setTurmas([]);
             setProfessores([]);
             setProfessorSelecionado("");
             setIsOpen(false);
-
         } else {
-        toast.error("Erro ao criar o projeto: " + res.erro);
+            toast.error("Erro ao criar o projeto: " + res.erro);
         }
-    };
-
+        };
 
   return (
     <>
