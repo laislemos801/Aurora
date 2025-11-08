@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebase/clientApp";
-import { onAuthStateChanged, getAuth } from "firebase/auth";
 import TemplateCard from "@/components/all-projects/card";
 import { IoSearchSharp } from "react-icons/io5";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 interface Projeto {
   id: string;
@@ -18,47 +18,51 @@ interface Projeto {
 
 export default function AllProjectsCards() {
   const [projetos, setProjetos] = useState<Projeto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingpage, setLoading] = useState(true);
 
-    useEffect(() => {
-    const auth = getAuth();
+  const { user, loading } = useAuthGuard();
 
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        console.warn("Nenhum usuário logado encontrado.");
-        setProjetos([]);
-        setLoading(false);
-        return;
-      }
 
-      console.log("Usuário logado:", user.uid);
+  useEffect(() => {
+      const fetchProjetos = async () => {
+        if (!user) return;
 
-      try {
-        const projetosRef = collection(db, "Projetos");
-        const q = query(projetosRef, where("professores", "array-contains", user.uid));
-        const querySnapshot = await getDocs(q);
+        setLoading(true);
+        try {
+          const projetosRef = collection(db, "Projetos");
+          const q = query(projetosRef, where("professores", "array-contains", user.uid));
+          const querySnapshot = await getDocs(q);
 
-        const list: Projeto[] = [];
-        querySnapshot.forEach((doc) => {
-          list.push({
+          const list: Projeto[] = querySnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
-          } as Projeto);
-        });
+          })) as Projeto[];
 
-        setProjetos(list);
-      } catch (error) {
-        console.error("Erro ao buscar projetos:", error);
-      } finally {
-        setLoading(false);
-      }
-    });
+          setProjetos(list);
+        } catch (error) {
+          console.error("Erro ao buscar projetos:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-    return () => unsubscribe();
-  }, []);
+      if (!loading && user) fetchProjetos();
+    }, [user, loading]);
 
-  if (loading) {
-    return <p>Carregando projetos...</p>;
+   if (loading) {
+      return (
+        <div className="flex items-center justify-center min-h-screen bg-[#F4EAF4]">
+          <p className="text-[#7A4C77] text-lg">Carregando informações...</p>
+        </div>
+      );
+    }
+
+  if (loadingpage) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-[#7A4C77] text-lg">Carregando projetos...</p>
+      </div>
+    );
   }
 
   return (
