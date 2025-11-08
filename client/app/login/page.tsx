@@ -5,6 +5,7 @@ import { Lexend_Exa } from "next/font/google";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { toast } from 'react-hot-toast';
 
 const lexendExa = Lexend_Exa({
   weight: "400",

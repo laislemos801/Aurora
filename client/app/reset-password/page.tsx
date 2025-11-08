@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { auth } from '@/firebase/clientApp';
 import { sendPasswordResetEmail } from 'firebase/auth';
+import { toast } from 'react-hot-toast';
 
 const lexendExa = Lexend_Exa({
   weight: '400',
@@ -39,7 +40,7 @@ export default function ResetPassword() {
 
     const alvo = email.trim();
     if (!alvo) {
-      setError('Informe seu e-mail.');
+      toast.error('Informe seu e-mail.');
       return;
     }
 
@@ -55,6 +56,7 @@ export default function ResetPassword() {
           : undefined;
 
       await sendPasswordResetEmail(auth, alvo, actionCodeSettings);
+      toast.success('E-mail de redefinição enviado com sucesso!');
 
       // Sempre exibe "E-mail enviado"
       setStep('sent');
@@ -68,59 +70,57 @@ export default function ResetPassword() {
 
   return (
     <div
-      className="relative min-h-screen flex items-center justify-center bg-no-repeat bg-center bg-cover px-4 sm:px-6 md:px-8"
-      style={{ backgroundImage: "url('/bg.png')" }}
+      className="relative min-h-screen flex items-center justify-center bg-no-repeat bg-center bg-cover"
+      style={{ backgroundImage: "url('/bg_login.png')" }}
     >
       {/* CARD */}
       <div
         className="
-          relative
-          flex flex-col items-center text-center
-          w-full max-w-[650px] h-auto sm:h-[720px]
+          relative flex flex-col justify-center items-center text-center
+          w-80 h-[550px] sm:w-120 sm:h-[600px] md:w-120 md:h-[650px] md:py-12 lg:w-160 xl:h-[680px] 2xl:mr-10
           border border-white/30 rounded-[35px]
           backdrop-blur-md bg-white/25 shadow-lg
-          py-10 sm:py-12 px-6 sm:px-10
-          pb-20
         "
       >
         {/* LOGO */}
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2">
+        <div className="absolute -top-8 sm:-top-8 left-1/2 -translate-x-1/2">
           <Image
-            src="/logo.png"
+            src="/logo aurora em svg.svg"
             alt="Logo Aurora"
-            width={90}
-            height={90}
-            className="drop-shadow-md sm:w-[110px] sm:h-[110px]"
+            width={80}
+            height={80}
+            className="drop-shadow-md w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20"
           />
         </div>
 
         <h1
-          className={`${lexendExa.className} text-[#90416B] text-[28px] sm:text-[36px] font-semibold mt-10 sm:mt-12 tracking-[0.3em]`}
+          className={`${lexendExa.className} text-[#90416B] text-xl md:text-[26px] xl:text-[30px] font-semibold mt-2 tracking-[0.3em]`}
         >
           AURORA
         </h1>
 
-        <Image
-          src="/closed_lock.png"
-          alt="Ícone Cadeado"
-          width={85}
-          height={85}
-          className="mt-6 sm:mt-5 sm:w-[110px] sm:h-[110px]"
-        />
+        
 
         {/* FORM */}
         {step === 'email' && (
           <>
-            <h2 className="text-[26px] sm:text-[38px] text-[#614281] font-semibold mt-4 leading-tight">
+            <Image
+              src="/lock.svg"
+              alt="Ícone Cadeado"
+              width={85}
+              height={85}
+              className="mt-6 sm:mt-5 sm:w-[110px] sm:h-[110px]"
+            />
+            <h2 className="text-xl md:text-2xl xl:text-4xl text-[#614281] font-semibold mt-4 leading-tight">
               Redefinição de senha
             </h2>
-            <p className="text-[14px] sm:text-[18px] text-[#614281]/90 mt-1 leading-5 px-4 sm:px-8">
+            <p className="text-xs sm:text-sm md:text-md text-[#353535]/90 mt-1 leading-5 px-4 sm:px-8">
               Digite seu e-mail para redefinir a senha.
             </p>
 
             <form
               onSubmit={handleSubmit}
-              className="flex flex-col mt-10 sm:mt-12 w-[90%] sm:w-3/5"
+              className="flex flex-col mt-6 sm:mt-10 w-64 sm:w-3/5 gap-2"
             >
               <Label
                 htmlFor="email"
@@ -147,9 +147,9 @@ export default function ResetPassword() {
                 type="submit"
                 disabled={loading}
                 className="
-                  mt-5 sm:mt-6 h-11 sm:h-12 bg-[#C288B3] text-white font-medium rounded-md
+                  mt-2 sm:mt-4 h-11 sm:h-12 bg-[#C288B3] text-white font-medium rounded-md
                   hover:bg-[#b676a2] transition-all text-[15px] sm:text-[17px]
-                  disabled:opacity-60 disabled:cursor-not-allowed
+                  disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer
                 "
               >
                 {loading ? 'Enviando…' : 'Enviar'}
@@ -162,19 +162,26 @@ export default function ResetPassword() {
           </>
         )}
 
-        {/* VISUAL DE SUCESSO */}
+        {/* VISUAL DE SUCESSO emailsend */}
         {step === 'sent' && (
           <>
-            <h2 className="text-[38px] text-[#614281] font-semibold mt-4">
+            <Image
+              src="/emailsend.svg"
+              alt="Ícone Cadeado"
+              width={85}
+              height={85}
+              className="mt-6 sm:mt-5 sm:w-[110px] sm:h-[110px]"
+            />
+            <h2 className="text-2xl md:text-4xl xl:text-4xl text-[#614281] font-semibold mt-4">
               E-mail enviado!
             </h2>
-            <p className="text-[18px] text-[#614281]/90 mt-4 leading-6 px-6 sm:px-12">
+            <p className="text-sm sm:text-sm md:text-md lg:text-xl text-[#353535]/90 text-center mt-4 leading-6 px-6 sm:px-12">
               Verifique sua <span className="italic font-semibold">caixa de mensagens</span> ou <span className="italic font-semibold">spam</span>, 
               para redefinir sua senha.
             </p>
-            <div className="mt-10 sm:mt-16">
+            <div className="mt-6 sm:mt-10">
               <Button
-                className="w-[240px] sm:w-[280px] h-11 sm:h-12 bg-[#C288B3] text-white font-medium rounded-md hover:bg-[#b676a2] transition-all text-[15px] sm:text-[17px]"
+                className="w-[240px] sm:w-[280px] h-11 sm:h-12 bg-[#C288B3] cursor-pointer text-white font-medium rounded-md hover:bg-[#b676a2] transition-all"
                 onClick={() => (window.location.href = '/login')}
               >
                 Voltar para o Login
@@ -184,20 +191,21 @@ export default function ResetPassword() {
         )}
       </div>
 
-      {/* IMAGEM DE FUNDO */}
-      <Image
-        src="/people.png"
-        alt="Personagens Aurora"
-        width={1200}
-        height={300}
-        className="
-          pointer-events-none select-none
-          absolute bottom-0 left-1/2 -translate-x-1/2
-          w-8/12 sm:w-6/12 md:w-4/12 lg:w-3/12
-          max-w-[520px]
-          z-0
-        "
-      />
+      {/* IMAGEM PEOPLE */}
+      <div className="fixed bottom-0 w-full flex justify-center pointer-events-none z-0">
+        <Image
+          src="/people.png"
+          alt="Personagens Aurora"
+          width={1920}
+          height={1080}
+          className="
+            w-10/12 sm:w-2/12 md:w-4/12 lg:w-4/12 xl:w-3/10
+            h-auto
+            object-contain
+            drop-shadow-lg
+          "
+        />
+      </div>
     </div>
   );
 }
