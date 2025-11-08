@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { auth } from '@/firebase/clientApp';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { toast } from 'react-hot-toast';
+import { useRouter } from "next/navigation";
 
 const lexendExa = Lexend_Exa({
   weight: '400',
@@ -20,6 +21,7 @@ export default function ResetPassword() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter();
 
   const mapError = (code: string) => {
     switch (code) {
@@ -154,6 +156,16 @@ export default function ResetPassword() {
               >
                 {loading ? 'Enviando…' : 'Enviar'}
               </Button>
+              <p
+                onClick={() => router.push("/login")}
+                className="
+                  text-xs sm:text-sm md:text-md lg:text-md hover:underline font-medium
+                  text-[#353535]/90 text-center mt-2 mb-4 leading-6 px-6 sm:px-12
+                  cursor-pointer hover:text-[#90416B] transition-colors duration-200
+                "
+              >
+                Voltar para o Login
+              </p>
 
               {error && (
                 <p className="mt-3 text-red-500 text-[13px]">{error}</p>

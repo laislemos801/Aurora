@@ -4,7 +4,7 @@ import Image from "next/image";
 import { PiHouseBold } from "react-icons/pi";
 import { FaRegNoteSticky } from "react-icons/fa6";
 import icon from "@/public/for_you.svg";
-import logo from "@/public/logo.png";
+import logo from "@/public/logo aurora em svg.svg";
 import { MdExitToApp } from "react-icons/md";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -13,12 +13,19 @@ export default function ToolBarLeft() {
   const router = useRouter();
 
   return (
-    <div className="bg-[#FCF3FA] w-full min-h-screen flex flex-col justify-between items-center pb-8">
-      
-      <div className="hidden sm:block sm:w-23 -mt-1 xl:w-26">
-        <Image src={logo} alt={"logo"} width={1920} height={1080} />
+    <div className="bg-[#FCF3FA] w-full min-h-screen flex flex-col justify-between items-center py-6">
+      {/* LOGO CENTRALIZADO */}
+      <div className="hidden sm:flex justify-center items-center w-full mb-2">
+        <Image
+          src={logo}
+          alt="Logo Aurora"
+          width={40}
+          height={40}
+          className="w-12 sm:w-12 md:w-12 lg:w-12"
+        />
       </div>
- 
+
+      {/* ÍCONES */}
       <div className="hidden sm:flex flex-col gap-12 items-center text-[#C288B3]">
         <div
           className={`${
@@ -48,7 +55,7 @@ export default function ToolBarLeft() {
         >
           <Image
             src={icon}
-            alt={"icone"}
+            alt="icone"
             width={1920}
             height={1080}
             className="w-[26px]"
@@ -56,8 +63,11 @@ export default function ToolBarLeft() {
         </div>
       </div>
 
-      <button className="hidden sm:block rotate-180">
-        <MdExitToApp size={25} className="text-[#C288B3]" />
+       {/* BOTÃO SAIR */}
+      <button
+        onClick={() => router.push("/login")}
+        className="hidden sm:block rotate-180 cursor-pointer text-[#C288B3] hover:text-white p-1.5 rounded-full hover:bg-[#90416B] transition-colors duration-200">
+        <MdExitToApp size={30} />
       </button>
     </div>
   );
