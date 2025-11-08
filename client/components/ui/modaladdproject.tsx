@@ -45,21 +45,70 @@ interface ModalAddProjectProps {
   setTurmas: (value: Turma[]) => void;
 }
 
-//Extrair dados do arquivo xls ou xlsx
+// Extrair dados do arquivo .xls, .xlsx ou .csv
 export async function extrairAlunosDoArquivo(file: File): Promise<Aluno[]> {
-    const arrayBuffer = await file.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: "array" });
-    const firstSheet = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[firstSheet];
-    const data: AlunoXLS[] = XLSX.utils.sheet_to_json(worksheet);
+  const fileName = file.name.toLowerCase();
 
-    const alunos: Aluno[] = data.map((row) => ({
-        nome: String(row.nome),
-        ra: Number(row.ra),
-    }));
+  let data: any[] = [];
 
+  try {
+    if (fileName.endsWith(".csv")) {
+      // CSV (que é o que vem do canvas)
+      const text = await file.text();
+      const workbook = XLSX.read(text, { type: "string" });
+      const firstSheet = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheet];
+      data = XLSX.utils.sheet_to_json(worksheet);
+    } else {
+      // XLS ou XLSX
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+      const firstSheet = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheet];
+      data = XLSX.utils.sheet_to_json(worksheet);
+    }
+
+    // Extrai apenas o nome; o RA ta como opcional
+    const alunos: Aluno[] = data
+      .map((row: any) => {
+        const nome =
+          row.Student || // CSV do Canvas (em inglês)
+          row.Nome || // XLS genérico
+          row.Aluno || // XLS customizado
+          row["Nome do Aluno"] ||
+          null;
+
+        const ra =
+          row.RA ||
+          row.Id ||
+          null;
+
+        // Se não houver nome, ignora a linha
+        if (!nome) return null;
+
+        return {
+          nome: String(nome).trim(),
+          ra: ra ? Number(ra) || 0 : 0, // RA opcional
+        };
+      })
+      .filter(
+        (a): a is Aluno =>
+          !!a && a.nome.toUpperCase() !== "POINTS POSSIBLE" // remove cabeçalho do arquivo
+      );
+
+        
+    if (!alunos.length) {
+        toast.error("Nenhum aluno encontrado no arquivo selecionado.");
+    }
     return alunos;
+
+  } catch (error) {
+    console.error("Erro ao extrair alunos:", error);
+    throw new Error("Não foi possível ler o arquivo. Verifique o formato.");
+  }
 }
+
+
 
 
 export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAddClassOpen,turmas,setTurmas,
@@ -380,12 +429,12 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
                                     <FiUpload size={40} />
                                 </div>
                                 <p className="text-[#C288B3] text-sm sm:text-md text-center">
-                                    Arraste ou insira um PDF ou XLS
+                                    Arraste ou insira um arquivo xls, xlsx ou csv
                                 </p>
                                 <input
                                     type="file"
                                     id="fileUpload"
-                                    accept="application/.pdf, .xls, .xlsx"
+                                    accept="application/.xls, .xlsx, .csv"
                                     className="hidden"
                                     onChange={(e) => {
                                     if (e.target.files && e.target.files[0]) {
