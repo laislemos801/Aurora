@@ -9,13 +9,13 @@ import { Button } from "@/components/ui/button"
 import { auth, db } from '@/firebase/clientApp';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, reload } from "firebase/auth";
 import { doc, setDoc } from 'firebase/firestore';
-import Logo from "@/public/logo aurora em svg.svg"
+import Logo from "@/public/logo.png"
 import EyeOpen from "@/public/eye_open.svg"
 import EyeClosed from "@/public/eye_closed.svg"
 import Group1 from "@/public/group1.svg"
 import Group2 from "@/public/group2.png"
 import Horizonte from "@/public/horizonte.png"
-import { toast } from 'react-hot-toast';
+
 
 const lexendExa = Lexend_Exa({
   weight: '400',
@@ -161,10 +161,10 @@ export default function Register() {
         createdAt: new Date(),
       });
   
-      toast.success("Conta criada! Enviamos um link de verificação para seu e-mail.");
+      alert("Conta criada! Enviamos um link de verificação para seu e-mail.");
   
       setFormData({ nome: '', email: '', telefone: '', nascimento: '', senha: '' });
-      router.push("/login");
+      router.push("/edit-profile");
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/email-already-in-use') {
@@ -184,7 +184,7 @@ export default function Register() {
   return (
     <div
       className="min-h-screen bg-no-repeat bg-center bg-cover bg-right flex items-center justify-center md:justify-end md:overflow-hidden"
-      style={{ backgroundImage: "url('/bg_login.png')" }}
+      style={{ backgroundImage: "url('/bg.png')" }}
     >
 
       <div className="absolute top-0 left-0 z-20 hidden md:block">
@@ -254,13 +254,13 @@ export default function Register() {
         <div className="relative flex w-80 h-[550px] py-8 border border-white/40 bg-white/25 rounded-[40px] backdrop-blur-sm justify-center
         md:w-120 md:h-[650px] md:py-12 md:left-8 lg:w-160 xl:h-[680px] 2xl:left-auto 2xl:mr-10 margin-3xl">
 
-          <div className="absolute -top-8 left-1/2 -translate-x-1/2">
+          <div className="absolute -top-18 left-1/2 -translate-x-1/2">
             <Image
               src={Logo}
               alt="Logo"
               width={120}
               height={120}
-              className="drop-shadow-md w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20"
+              className="w-33 h-33"
             />
           </div>
           <div className='flex flex-col'>
@@ -350,7 +350,7 @@ export default function Register() {
             </div>
             <div className='flex flex-col px-4 mt-4 gap-2 md:mt-6 md:gap-3'>
                 <Button 
-                  className='rounded-sm h-8 bg-[#C288B3] hover:bg-[#b676a2] cursor-pointer font-light md:text-[16px] md:h-8.5 2xl:h-9 2xl:text-[18px] 2xl:font-regular'
+                  className='rounded-sm h-8 bg-[#C288B3] font-light md:text-[16px] md:h-8.5 2xl:h-9 2xl:text-[18px] 2xl:font-regular'
                   disabled={loading} 
                   onClick={handleRegister}
                 >
@@ -362,12 +362,7 @@ export default function Register() {
                   </p>
                 )}
                 <p className='text-[10px] text-center font-medium md:text-[11px] xl:mt-1 2xl:text-[12px]'>
-                  Já tem uma conta?
-                  <span
-                    onClick={() => router.push("/login")}
-                    className="text-[#90416B] italic font-bold cursor-pointer hover:underline">
-                    Login
-                  </span>
+                  Já tem uma conta? <span className='underline text-[#7B6294] font-semibold'>Login</span>
                 </p>
             </div>
 
