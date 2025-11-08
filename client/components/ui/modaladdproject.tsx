@@ -77,7 +77,7 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
     const [professorSelecionado, setProfessorSelecionado] = useState<string>(""); // uid do professor selecionado
     const [projeto, setProjeto] = useState<{ uid: string } | null>(null);
     const [turmaEditandoIndex, setTurmaEditandoIndex] = useState<number | null>(null);
-
+    const [curso, setCurso] = useState("");
 
     const handleSalvarTurma = async () => {
         if (!nomeTurma) return toast.error("Por favor, digite o nome da turma!");
@@ -122,7 +122,7 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
 
     // Salvar projeto
     const handleSalvarProjeto = async () => {
-        if (!nome || !descricao || !semestre || !ano) {
+        if (!nome || !descricao || !semestre || !ano || !curso) {
             toast.error("Preencha os campos obrigatórios!");
             return;
         }
@@ -133,6 +133,7 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
             descricao,
             semestre,
             ano,
+            curso,
             turmas, // cada turma já contém a lista de alunos
             professores: professores.map(p => p.uid), // só UIDs
         }
@@ -153,6 +154,7 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
             setDescricao("");
             setSemestre("");
             setAno("");
+            setCurso("");
             setTurmas([]); 
             setProfessores([]);
             setProfessorSelecionado("");
@@ -269,39 +271,56 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
             </div>
 
             {/* Professor + salvar */}
-            <div className="flex flex-col p-2">
-                <label className="text-[#353535] font-medium mb-1 text-sm md:text-lg">
-                    Professor
-                </label>
-                <div className="flex flex-row justify-start gap-6 w-full sm:w-full">
-                    <Select>
-                        <SelectTrigger className="w-full sm:w-full border-2 pt-6 pb-6 border-[#C288B3] focus:ring-0 focus:border-[#C288B3]">
+            <div className="flex flex-col p-2 w-full">
+
+                <div className="flex flex-row justify-between items-end w-full gap-3">
+                    {/* Select */}
+                    <div className="w-1/2 flex flex-col">
+                        <label className="text-[#353535] font-medium mb-1 text-sm md:text-lg">
+                            Professor
+                        </label>
+                        <Select>
+                            <SelectTrigger className="w-full border-2 pt-6 pb-6 border-[#C288B3] focus:ring-0 focus:border-[#C288B3]">
                             <SelectValue placeholder="Selecione o professor" />
-                        </SelectTrigger>
-                        <SelectContent className="w-50 sm:w-full">
+                            </SelectTrigger>
+                            <SelectContent className="w-50 sm:w-full">
                             {professores.map((p) => (
                                 <SelectItem key={p.email} value={p.uid || p.email}>
-                                    {p.nome}
+                                {p.nome}
                                 </SelectItem>
                             ))}
                             <div className="border-t border-[#E8CBE0] my-1" />
                             <button
-                            type="button"
-                            onClick={() => setIsInviteOpen(true)}
-                            className="flex items-center gap-2 text-[#C288B3] px-3 py-2 hover:bg-[#F3EAF5] w-full text-left rounded-md"
-                            >
-                            <IoLinkSharp size={18} />
-                            Convidar um professor
+                                type="button"
+                                onClick={() => setIsInviteOpen(true)}
+                                className="flex items-center gap-2 text-[#C288B3] px-3 py-2 hover:bg-[#F3EAF5] w-full text-left rounded-md">
+                                <IoLinkSharp size={18} />
+                                Convidar um professor
                             </button>
-                        </SelectContent>
-                    </Select>
+                            </SelectContent>
+                        </Select>
+                    </div>
 
-                    <div className="w-full flex justify-end items-end ">
-                        <button onClick={handleSalvarProjeto} className="bg-[#C288B3] text-[#FCF3FA] font-semibold px-8 py-2 sm:px-6 sm:py-2 md:px-16 md:py-2 text-center rounded-lg hover:bg-[#90416B] transition">
-                            Salvar
-                        </button>
+                    {/* Campo Curso */}
+                    <div className="w-1/2 flex flex-col">
+                        <label className="text-[#353535] font-medium mb-1 text-sm md:text-lg">
+                            Curso
+                        </label>
+                        <Input
+                            type="text"
+                            placeholder="Curso"
+                            value={curso}
+                            onChange={(e) => setCurso(e.target.value)}
+                            className="border-[#C288B3] text-sm md:text-md lg:text-lg pt-6 pb-6 border-2 text-[#A1A1A1] w-full"
+                        />
                     </div>
                 </div>
+            </div>
+
+            <div className="w-full flex justify-end items-end pt-2">
+                <button onClick={handleSalvarProjeto} className="bg-[#C288B3] text-[#FCF3FA] font-semibold px-8 py-2 sm:px-6 sm:py-2 md:px-16 md:py-2 text-center rounded-lg hover:bg-[#90416B] transition">
+                Salvar
+                </button>
             </div>
         </div>
     </div>
@@ -370,7 +389,7 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
                                     className="hidden"
                                     onChange={(e) => {
                                     if (e.target.files && e.target.files[0]) {
-                                        setUploadedFile(e.target.files[0]);}
+                                    setUploadedFile(e.target.files[0]);}
                             }}
                             />
                         </div>

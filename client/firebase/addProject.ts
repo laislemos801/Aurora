@@ -18,6 +18,7 @@ export async function criarProjeto({
   descricao,
   semestre,
   ano,
+  curso,
   turmas,
   professores,
 }: {
@@ -25,11 +26,12 @@ export async function criarProjeto({
   descricao: string;
   semestre: string | number;
   ano: string | number;
+  curso: string;
   turmas: Turma[];
   professores: string[];
 }) {
   try {
-    console.log("Iniciando criação do projeto:", { nome, descricao, semestre, ano });
+    console.log("Iniciando criação do projeto:", { nome, descricao, semestre, ano, curso });
 
     // Cria documento principal
     const projetoRef = await addDoc(collection(db, "Projetos"), {
@@ -37,6 +39,7 @@ export async function criarProjeto({
       descricao,
       semestre: Number(semestre),
       ano: Number(ano),
+      curso,
       professores: professores || [],
       createdAt: serverTimestamp(),
     });
