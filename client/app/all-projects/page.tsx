@@ -106,7 +106,7 @@ export default function AllProjectsCards() {
             </div>
           ))
         ) : (
-          <p>Nenhum projeto encontrado.</p>
+          <p>Você ainda não criou ou foi convidado para nenhum projeto.</p>
         )}
       </div>
 
