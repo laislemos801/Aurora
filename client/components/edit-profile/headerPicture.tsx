@@ -81,6 +81,7 @@ export default function HeaderPicture() {
           setProfilePic(downloadURL);
           setLoading(false);
           toast.success("Foto de perfil atualizada com sucesso!");
+
         }
       );
     } catch (error) {
@@ -92,7 +93,7 @@ export default function HeaderPicture() {
 
   return (
     <div className="relative -mt-1 w-full">
-      <div className="w-full h-48 rounded-b-none rounded-tl-2xl sm:rounded-tl-4xl md:rounded-tl-4xl overflow-hidden">
+      <div className="w-full h-48 flex justify-center overflow-hidden rounded-tl-2xl sm:rounded-tl-4xl md:rounded-tl-4xl">
         <BannerSvg />
       </div>
 
