@@ -19,45 +19,43 @@ export default function ResetPassword() {
 
   return (
     <div
-      className="h-full w-full flex items-center justify-center bg-no-repeat bg-center bg-cover px-4 sm:px-6 md:px-8"
-      style={{ backgroundImage: "url('/bg.png')" }}
-    >
+      className="h-full w-full flex flex-col items-center justify-center bg-no-repeat bg-center bg-cover"
+      style={{ backgroundImage: "url('/bg_login.png')" }}>
       <div
         className="
-          flex flex-col items-center text-center
-          w-full max-w-[650px] h-auto sm:h-[720px]
+          relative flex flex-col justify-center items-center text-center
+          w-80 h-[550px] sm:w-120 sm:h-[600px] md:w-120 md:h-[650px] md:py-12 lg:w-160 xl:h-[680px] 2xl:mr-10
           border border-white/30 rounded-[35px]
           backdrop-blur-md bg-white/25 shadow-lg
-          py-10 sm:py-12 px-6 sm:px-10
         "
       >
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2">
+        <div className="absolute -top-8 sm:-top-8 left-1/2 -translate-x-1/2">
           <Image
-            src="/logo.png"
+            src="/logo aurora em svg.svg"
             alt="Logo Aurora"
-            width={90}
-            height={90}
-            className="drop-shadow-md sm:w-[110px] sm:h-[110px]"
+            width={80}
+            height={80}
+            className="drop-shadow-md w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20"
           />
         </div>
 
         <h1
-          className={`${lexendExa.className} text-[#90416B] text-[28px] sm:text-[36px] font-semibold mt-6 tracking-[0.3em]`}
+          className={`${lexendExa.className} text-[#90416B] text-xl md:text-[26px] xl:text-[30px] font-semibold mt-2 tracking-[0.3em]`}
         >
           AURORA
         </h1>
 
         <>
-          <p className="text-5xl  text-[#7B6294] mt-6 ">Bem vindo</p>
-          <p className="text-3xl text-[#7B6294]">de volta!</p>
-          <p className="text-xl text-white mt-3">
+          <p className="text-2xl md:text-4xl xl:text-6xl text-[#7B6294] mt-6 font-medium">Bem vindo</p>
+          <p className="text-xl md:text-3xl xl:text-4xl text-[#7B6294] font-medium">de volta!</p>
+          <p className="text-sm sm:text-sm md:text-lg text-white mt-3">
             Faça <span className="text-[#90416B] font-bold italic">login</span>{" "}
             e comece <br /> ampliando seu horizonte.
           </p>
 
           <form
             onSubmit={handleSubmit}
-            className="flex flex-col mt-10 sm:mt-12 w-[90%] sm:w-3/5 gap-2"
+            className="flex flex-col mt-10 sm:mt-10 w-64 sm:w-3/5 gap-2"
           >
             <div>
               <Label
@@ -100,7 +98,7 @@ export default function ResetPassword() {
               />
             </div>
             <div className="w-full flex justify-end">
-            <p className="text-xs">
+            <p className="text-xs sm:text-sm">
               Esqueceu sua senha? <span className="text-[#90416B] italic font-bold ">Lembrar-me</span>
             </p></div>
 
@@ -108,7 +106,7 @@ export default function ResetPassword() {
               type="submit"
               className="
                   mt-5 sm:mt-6 h-11 sm:h-12 bg-[#C288B3] text-white font-medium rounded-md
-                  hover:bg-[#b676a2] transition-all text-[15px] sm:text-[17px]
+                  hover:bg-[#b676a2] transition-all text-[15px] sm:text-[17px] cursor-pointer
                 "
             >
               Login
@@ -116,13 +114,23 @@ export default function ResetPassword() {
           </form>
         </>
       </div>
-      <Image
-        src="/people.png"
-        alt="Personagens Aurora"
-        width={1920}
-        height={1080}
-        className=" w-4/12 absolute bottom-0"
-      />
+      {/* IMAGEM PEOPLE */}
+      <div className="fixed bottom-0 w-full flex justify-center pointer-events-none z-0">
+        <Image
+          src="/people.png"
+          alt="Personagens Aurora"
+          width={1920}
+          height={1080}
+          className="
+            w-10/12 sm:w-8/12 md:w-6/12 lg:w-4/12 xl:w-3/12
+            h-auto
+            object-contain
+            drop-shadow-lg
+          "
+        />
+      </div>
+
+
     </div>
   );
 }
