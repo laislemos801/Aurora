@@ -41,7 +41,7 @@ export function ProjectHeader({ nome, curso, semestre, ano, professores = [], on
   return (
     <div className="flex flex-col self-start w-full">
       <div className="flex items-center w-full">
-        <button className="flex-shrink-0" onClick={onBack}>
+        <button className="flex-shrink-0 cursor-pointer" onClick={onBack}>
           <Image src={backArrow} alt="Voltar" width={32} height={32} />
         </button>
 

@@ -329,6 +329,7 @@ export default function ProjectInfoPage() {
       onDelete={handleDeleteProject}
       projetoUid={projectId}
       setProfessores={setProfessoresData}
+      onBack={() => router.push("/all-projects")}
     />
 
 
