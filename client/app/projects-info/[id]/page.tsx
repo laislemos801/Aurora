@@ -288,11 +288,41 @@ export default function ProjectInfoPage() {
     }
   };
 
+  const handleExcluirAluno = async (alunoRa: number) => {
+    if (!turmaSelecionadaId) {
+      toast.error("Nenhuma turma selecionada");
+      return;
+    }
+
+    try {
+      const turmaRef = doc(db, "Projetos", projectId, "Turmas", turmaSelecionadaId);
+      const turmaAtual = turmas.find(t => t.id === turmaSelecionadaId);
+      if (!turmaAtual) return;
+
+      const novaLista = turmaAtual.alunos.filter(a => a.ra !== alunoRa);
+
+      await updateDoc(turmaRef, { alunos: novaLista });
+
+      setTurmas(prev =>
+        prev.map(t =>
+          t.id === turmaSelecionadaId ? { ...t, alunos: novaLista } : t
+        )
+      );
+
+      toast.success("Aluno excluído!");
+    } catch (error) {
+      console.error("Erro ao excluir aluno:", error);
+      toast.error("Erro ao excluir aluno");
+    }
+  };
+
+
 
   return (
   <div className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2 sm:pl-4 lg:pl-6">
     <ProjectHeader
       nome={project?.nome}
+      curso={project?.curso}
       semestre={project?.semestre}
       ano={project?.ano}
       professores={professoresData}
@@ -317,6 +347,7 @@ export default function ProjectInfoPage() {
               <AlunosList
                 alunos={turmaSelecionada.alunos ?? []}
                 onAdd={handleAddAluno}
+                onDelete={handleExcluirAluno} 
                 grupos={grupos}
                 turmaId={turmaSelecionada.id}
                 projectId={projectId}

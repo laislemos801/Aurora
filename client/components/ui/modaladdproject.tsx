@@ -307,7 +307,7 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
                                         e.stopPropagation(); // previne abrir o modal ao clicar no botão de remover
                                         handleRemoverTurma(i);
                                     }}
-                                    className="text-[#90416B] hover:bg-[#C288B3] rounded-full p-1 transition"
+                                    className="text-[#90416B] hover:bg-[#C288B3] cursor-pointer rounded-full p-1 transition"
                                     >
                                     <IoTrashOutline size={20} />
                                     </button>

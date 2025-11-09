@@ -15,6 +15,7 @@ interface ProfessorData {
 
 interface Props {
   nome: string;
+  curso?: string;
   semestre?: number;
   ano?: number;
   professores?: ProfessorData[];
@@ -22,7 +23,7 @@ interface Props {
   onDelete?: () => void;
 }
 
-export function ProjectHeader({ nome, semestre, ano, professores = [], onBack, onDelete }: Props) {
+export function ProjectHeader({ nome, curso, semestre, ano, professores = [], onBack, onDelete }: Props) {
 
   const [showModal, setShowModal] = useState(false);
   const getProfileImage = (path?: string) => {
@@ -40,8 +41,9 @@ export function ProjectHeader({ nome, semestre, ano, professores = [], onBack, o
         </button>
 
         <p className="ml-2 text-lg font-medium text-[#3B3B3B] flex-1">
-          {nome}
+          {nome} - {curso}
         </p>
+        
 
         {/* Botão excluir */}
         <div className="flex gap-2 pr-4 pl-3 py-1.5 justify-start sm:mt-0">

@@ -5,6 +5,7 @@ import { FiMoreVertical, FiSearch, FiPlus } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import { doc, updateDoc, arrayUnion, getDocs, collection } from 'firebase/firestore';
 import { db } from '@/firebase/clientApp';
+import { RiDeleteBin6Line } from "react-icons/ri";
 
 interface Aluno {
   nome: string;
@@ -20,12 +21,13 @@ interface Grupo {
 interface Props {
   alunos: Aluno[];
   onAdd: (nome: string, ra: number) => void;
+  onDelete: (ra: number) => void;
   grupos?: Grupo[];
   turmaId: string;
   projectId: string;
 }
 
-export function AlunosList({ alunos, onAdd, grupos = [], turmaId, projectId }: Props) {
+export function AlunosList({ alunos, onAdd, grupos = [], turmaId, projectId, onDelete }: Props) {
   const [search, setSearch] = useState("");
   const [nomeAlunoNovo, setNomeAlunoNovo] = useState("");
   const [raAlunoNovo, setRaAlunoNovo] = useState("");
@@ -134,9 +136,18 @@ export function AlunosList({ alunos, onAdd, grupos = [], turmaId, projectId }: P
           >
             <span className="text-sm text-gray-800">{aluno.nome}</span>
 
-            <div className="relative">
+            <div className="flex items-center gap-2 relative">
+              {/*Botão de excluir antes dos três pontinhos */}
+              <RiDeleteBin6Line
+                className=" flex-shrink-0 text-[#90416B] p-2 hover:bg-[#C288B3] rounded-full transition"
+                size={30}
+                onClick={() => onDelete(aluno.ra)}
+                title="Excluir aluno"
+              />
+
+              {/* ⋮ Botão de menu */}
               <FiMoreVertical
-                className="text-[#9B6CC5]"
+                className="text-[#9B6CC5] cursor-pointer"
                 size={15}
                 onClick={() => setMenuAberto(menuAberto === aluno.ra ? null : aluno.ra)}
               />
@@ -174,6 +185,7 @@ export function AlunosList({ alunos, onAdd, grupos = [], turmaId, projectId }: P
           </div>
         ))}
       </div>
+
 
       {/* ADICIONAR ALUNO */}
       <div className="mt-3">
