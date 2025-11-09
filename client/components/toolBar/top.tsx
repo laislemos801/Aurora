@@ -79,7 +79,7 @@ export default function ToolBarTop() {
   return (
     <>
       {/* Toolbar */}
-      <div className="bg-[#FCF3FA] w-full h-14 flex items-center justify-between pr-3 mt-3 relative xl:h-16">
+      <div className="bg-[#FCF3FA] w-full h-14 flex items-center justify-between pr-3 mt-3 relative xl:h-20">
         {/* Grupo esquerdo: widget + aurora */}
         <div className="flex items-center gap-5 ml-3 xl:mt-3">
           {/* Widget mobile */}

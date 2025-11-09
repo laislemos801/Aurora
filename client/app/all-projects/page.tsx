@@ -66,55 +66,70 @@ export default function AllProjectsCards() {
   }
 
   return (
-    <div className="flex flex-col items-start w-full min-h-screen pr-4 gap-4 sm:pl-4 sm:pt-4 md:pr-8">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:w-full lg:mb-4">
-        <p className="font-medium text-xl mb-3 sm:mb-0">Meus projetos</p>
+  <div
+    className="
+      flex flex-col items-start 
+      w-full 
+      min-h-0 
+      flex-1
+      pr-4 gap-4 
+      sm:pl-4 sm:pt-4 md:pr-8 
+      overflow-y-auto
+    "
+  >
+    {/* Topo */}
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:w-full lg:mb-4 flex-shrink-0">
+      <p className="font-medium text-xl mb-3 sm:mb-0">Meus projetos</p>
 
-        <div className="flex bg-[#F6F6F6] text-[#8C8C8C] items-center gap-2 py-1.5 px-4 rounded-full text-[13px] w-60 md:w-80 2xl:w-100">
-          <IoSearchSharp />
-          <input
-            type="text"
-            placeholder="Pesquisar"
-            className="bg-transparent outline-none w-full"
-          />
-        </div>
+      <div className="flex bg-[#F6F6F6] text-[#8C8C8C] items-center gap-2 py-1.5 px-4 rounded-full text-[13px] w-60 md:w-80 2xl:w-100">
+        <IoSearchSharp />
+        <input
+          type="text"
+          placeholder="Pesquisar"
+          className="bg-transparent outline-none w-full"
+        />
       </div>
-
-      <div
-        className="
-          grid 
-          grid-cols-2        
-          md:grid-cols-3     
-          lg:grid-cols-4  
-          xl:grid-cols-5
-          2xl:grid-cols-6
-          gap-x-2
-          gap-y-2
-          sm:gap-x-3
-          sm:gap-y-4
-          sm:gap-y-6
-          w-full
-        "
-      >
-        {projetos.length > 0 ? (
-          projetos.map((proj) => (
-            <div key={proj.id} className="w-full">
-              <TemplateCard
-                nome={proj.nome}
-                curso={proj.curso}
-                semestre={proj.semestre}
-                descricao={proj.descricao}
-                professores={proj.professores}
-                projetoUid={proj.id}
-              />
-            </div>
-          ))
-        ) : (
-          <p>Você ainda não criou ou foi convidado para nenhum projeto.</p>
-        )}
-      </div>
-
-      <div className="h-1"></div>
     </div>
-  );
+
+    {/* Grid de projetos */}
+    <div
+      className="
+        grid 
+        grid-cols-2        
+        md:grid-cols-3     
+        lg:grid-cols-4  
+        xl:grid-cols-5
+        2xl:grid-cols-6
+        gap-x-2
+        gap-y-2
+        sm:gap-x-3
+        sm:gap-y-4
+        sm:gap-y-6
+        w-full
+        flex-1
+      "
+    >
+      {projetos.length > 0 ? (
+        projetos.map((proj) => (
+          <div key={proj.id} className="w-full">
+            <TemplateCard
+              nome={proj.nome}
+              curso={proj.curso}
+              semestre={proj.semestre}
+              descricao={proj.descricao}
+              professores={proj.professores}
+              projetoUid={proj.id}
+            />
+          </div>
+        ))
+      ) : (
+        <p>Você ainda não criou ou foi convidado para nenhum projeto.</p>
+      )}
+    </div>
+
+    {/* Pequeno espaçamento final */}
+    <div className="h-2 flex-shrink-0"></div>
+  </div>
+);
+
 }

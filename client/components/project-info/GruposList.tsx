@@ -4,23 +4,30 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, addDoc } from "firebase/firestore";
 import { db } from "@/firebase/clientApp";
 import { FiPlus } from "react-icons/fi";
+import { useRouter } from "next/navigation";
 
 interface Grupo {
   id: string;
   nome: string;
-  nomeProjeto?: string; // opcional
+  nomeProjeto?: string; 
 }
 
 interface Props {
   projectId: string;
   turmaId: string;
-  projectName?: string; // nome do projeto opcional
-  onManage: (grupoId: string) => void; 
+  projectName?: string;
 }
 
-export function GruposList({ projectId, turmaId, projectName, onManage }: Props) {
+export function GruposList({ projectId, turmaId, projectName }: Props) {
+  const router = useRouter();
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleManage = (grupoId: string) => {
+    router.push(
+      `/group-info?page=group-info&projectId=${projectId}&turmaId=${turmaId}&grupoId=${grupoId}`
+    );
+  };
 
   useEffect(() => {
     if (!turmaId) return;
@@ -35,7 +42,7 @@ export function GruposList({ projectId, turmaId, projectName, onManage }: Props)
       const gruposData = snap.docs.map(doc => ({
         id: doc.id,
         ...(doc.data() as any),
-        nomeProjeto: projectName || undefined, // adiciona apenas se existir
+        nomeProjeto: projectName || undefined, 
       }));
 
       setGrupos(gruposData);
@@ -59,7 +66,8 @@ export function GruposList({ projectId, turmaId, projectName, onManage }: Props)
   };
 
   return (
-    <div className="bg-white shadow-xl rounded-2xl py-4 w-full flex flex-col mt-4 px-4 max-h-[240px]">
+    <div className="bg-white shadow-xl rounded-2xl py-4 w-full flex flex-col mt-4 px-4 max-h-[240px] md:max-h-[300px] 
+    md:ml-4 lg:h-full">
       {/* Lista de grupos — rolagem apenas aqui */}
       <div className="flex flex-col gap-2 overflow-y-auto flex-1">
         {loading && <p className="text-sm text-gray-500">Carregando grupos...</p>}
@@ -74,7 +82,7 @@ export function GruposList({ projectId, turmaId, projectName, onManage }: Props)
             </span>
 
             <button
-              onClick={() => onManage(g.id)}
+              onClick={() => handleManage(g.id)}
               className="px-4 py-0.5 text-xs rounded-md bg-[#3B3B3B] text-[#FCF3FA] font-medium"
             >
               Gerenciar

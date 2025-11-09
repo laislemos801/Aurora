@@ -26,6 +26,20 @@ interface Aluno {
   ra: number;
 }
 
+interface ProfessorData {
+  profilePicture?: string;
+  nome: string;
+  email?: string;
+  uid?: string;
+}
+
+interface Grupo {
+  id: string;
+  nome: string;
+  alunos: Aluno[];
+}
+
+// Função para extrair alunos de arquivo CSV ou XLSX
 export async function extrairAlunosDoArquivo(file: File): Promise<Aluno[]> {
   const fileName = file.name.toLowerCase();
   let data: any[] = [];
@@ -60,91 +74,29 @@ export default function ProjectInfoPage() {
   const projectId = params.id as string;
 
   const [user, setUser] = useState<any>(null);
-  const [turmas, setTurmas] = useState<Turma[]>([]);
-  const [turmaSelecionadaId, setTurmaSelecionadaId] = useState<string | null>(null);
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const [turmas, setTurmas] = useState<Turma[]>([]);
+  const [grupos, setGrupos] = useState<Grupo[]>([]);
+  const [turmaSelecionadaId, setTurmaSelecionadaId] = useState<string | null>(null);
+  const turmaSelecionada = turmas.find(t => t.id === turmaSelecionadaId) || null;
+
   const [isAddClassOpen, setIsAddClassOpen] = useState(false);
   const [nomeTurma, setNomeTurma] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [turmaEditandoIndex, setTurmaEditandoIndex] = useState<number | null>(null);
 
-  const turmaSelecionada = turmas.find((t) => t.id === turmaSelecionadaId) || null;
+  const [professoresData, setProfessoresData] = useState<ProfessorData[]>([]);
 
-  const handleSalvarTurma = async () => {
-    if (!nomeTurma) return toast.error("Digite o nome da turma!");
-    if (!uploadedFile) return toast.error("Adicione um arquivo!");
-
-    let alunos: Aluno[] = [];
-
-    try {
-      alunos = await extrairAlunosDoArquivo(uploadedFile);
-    } catch {
-      return toast.error("Erro ao ler o arquivo");
-    }
-
-    const novaTurmaSemId = {
-      nome: nomeTurma,
-      alunos,
-      createdAt: new Date().toISOString()
-    };
-
-    if (turmaEditandoIndex !== null) {
-      const copy = [...turmas];
-      copy[turmaEditandoIndex] = { ...copy[turmaEditandoIndex], ...novaTurmaSemId };
-      setTurmas(copy);
-      setTurmaEditandoIndex(null);
-    } else {
-      try {
-        const docRef = await addDoc(
-          collection(db, "Projetos", projectId, "Turmas"),
-          novaTurmaSemId
-        );
-
-        setTurmas(prev => [...prev, { id: docRef.id, ...novaTurmaSemId }]);
-        toast.success("Turma salva!");
-      } catch {
-        return toast.error("Erro ao salvar no banco");
-      }
-    }
-
-    setNomeTurma("");
-    setUploadedFile(null);
-    setIsAddClassOpen(false);
-  };
-
-  const handleAddAluno = async (nome: string, ra: number) => {
-    if (!turmaSelecionada) return;
-
-    try {
-      if (!turmaSelecionada?.id) return;
-      const turmaRef = doc(db, "Projetos", projectId, "Turmas", turmaSelecionada.id);
-      await updateDoc(turmaRef, {
-        alunos: arrayUnion({ nome, ra })
-      });
-
-      setTurmas((prev) =>
-        prev.map((t) =>
-          t.id === turmaSelecionada?.id
-            ? { ...t, alunos: [...t.alunos, { nome, ra }] }
-            : t
-        )
-      );
-    } catch (err) {
-      console.error(err);
-      toast.error("Erro ao adicionar aluno");
-      return;
-    }
-
-    toast.success("Aluno adicionado!");
-  };
-
+  // Autenticação do usuário
   useEffect(() => {
-    const un = onAuthStateChanged(auth, u => setUser(u));
-    return () => un();
+    const unsubscribe = onAuthStateChanged(auth, setUser);
+    return () => unsubscribe();
   }, []);
 
+  // Buscar projeto
   useEffect(() => {
     const fetchProject = async () => {
       try {
@@ -160,6 +112,7 @@ export default function ProjectInfoPage() {
     fetchProject();
   }, [projectId]);
 
+  // Buscar turmas
   useEffect(() => {
     const fetchTurmas = async () => {
       const snap = await getDocs(collection(db, "Projetos", projectId, "Turmas"));
@@ -168,72 +121,162 @@ export default function ProjectInfoPage() {
     fetchTurmas();
   }, [projectId]);
 
+  // Buscar professores
+  useEffect(() => {
+    if (!project?.professores?.length) return;
+
+    const carregarProfessores = async () => {
+      try {
+        const promises = project.professores.map(async (profUid: string) => {
+          const profSnap = await getDoc(doc(db, "Professores", profUid));
+          if (!profSnap.exists()) return { uid: profUid, nome: "Sem nome", profilePicture: "", email: "" };
+          const data = profSnap.data();
+          return {
+            uid: profSnap.id,
+            nome: data.nome || "Sem nome",
+            profilePicture: data.profilePicture || "",
+            email: data.email || "",
+          };
+        });
+        const result = await Promise.all(promises);
+        setProfessoresData(result);
+      } catch (err) {
+        console.error(err);
+        toast.error("Erro ao carregar professores do projeto");
+      }
+    };
+    carregarProfessores();
+  }, [project?.professores]);
+
+  // Buscar grupos da turma selecionada
+  useEffect(() => {
+    if (!turmaSelecionadaId) return;
+    const fetchGrupos = async () => {
+      const snap = await getDocs(collection(db, "Projetos", projectId, "Turmas", turmaSelecionadaId, "Grupos"));
+      setGrupos(
+        snap.docs.map(docSnap => {
+          const data = docSnap.data() as Omit<Grupo, 'id'>;
+          return { id: docSnap.id, ...data };
+        })
+      );
+    };
+    fetchGrupos();
+  }, [turmaSelecionadaId, projectId]);
+
+  // Salvar nova turma
+  const handleSalvarTurma = async () => {
+    if (!nomeTurma) return toast.error("Digite o nome da turma!");
+    if (!uploadedFile) return toast.error("Adicione um arquivo!");
+    let alunos: Aluno[] = [];
+
+    try {
+      alunos = await extrairAlunosDoArquivo(uploadedFile);
+    } catch {
+      return toast.error("Erro ao ler o arquivo");
+    }
+
+    const novaTurma = { nome: nomeTurma, alunos, createdAt: new Date().toISOString() };
+
+    if (turmaEditandoIndex !== null) {
+      const copy = [...turmas];
+      copy[turmaEditandoIndex] = { ...copy[turmaEditandoIndex], ...novaTurma };
+      setTurmas(copy);
+      setTurmaEditandoIndex(null);
+    } else {
+      try {
+        const docRef = await addDoc(collection(db, "Projetos", projectId, "Turmas"), novaTurma);
+        setTurmas(prev => [...prev, { id: docRef.id, ...novaTurma }]);
+        toast.success("Turma salva!");
+      } catch {
+        return toast.error("Erro ao salvar no banco");
+      }
+    }
+
+    setNomeTurma("");
+    setUploadedFile(null);
+    setIsAddClassOpen(false);
+  };
+
+  // Adicionar aluno
+  const handleAddAluno = async (nome: string, ra: number) => {
+    if (!turmaSelecionada) return;
+
+    try {
+      const turmaRef = doc(db, "Projetos", projectId, "Turmas", turmaSelecionada.id);
+      await updateDoc(turmaRef, { alunos: arrayUnion({ nome, ra }) });
+      setTurmas(prev => prev.map(t => t.id === turmaSelecionada.id ? { ...t, alunos: [...t.alunos, { nome, ra }] } : t));
+      toast.success("Aluno adicionado!");
+    } catch {
+      toast.error("Erro ao adicionar aluno");
+    }
+  };
+
   if (loading) return <p>Carregando...</p>;
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="flex flex-col w-full min-h-screen p-1">
+  <div className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2 sm:p-4 lg:p-6">
+    <ProjectHeader
+      nome={project?.nome}
+      semestre={project?.semestre}
+      ano={project?.ano}
+      professores={professoresData}
+    />
 
-      <ProjectHeader
-        nome={project?.nome}
-        semestre={project?.semestre}
-        ano={project?.ano}
-      />
+    <div className="flex-1 w-full pl-3 pt-5">
+      <div className="flex flex-col bg-[#FCF3FA] shadow-md rounded-l-[15px] md:rounded-l-[25px] rounded-r-none 
+      w-full p-3 pr-6 h-full">
+        <p className="self-start text-[13px] font-medium text-[#3B3B3B] mb-2 md:text-[14px] md:pl-4 md:mt-2 pl-2">Turmas</p>
 
-       <div className="flex-1 w-full pl-3 pt-5">
-        <div className="flex flex-col bg-[#FCF3FA] shadow-md rounded-l-[15px] md:rounded-l-[25px] rounded-r-none w-full p-3 pr-6 h-full">
-          <p className="self-start text-[12px] font-medium text-[#3B3B3B] pl-2 mb-2">
-            Turmas
-          </p>
-
-          <TurmasSelector
-            turmas={turmas}
-            turmaSelecionada={turmaSelecionadaId}
-            onSelect={setTurmaSelecionadaId}
-            onAdd={() => setIsAddClassOpen(true)}
-          />
-
-          {turmaSelecionada ? (
-            <AlunosList
-              alunos={turmaSelecionada.alunos ?? []}
-              onAdd={(nome, ra) => handleAddAluno(nome, ra)}
-            />
-          ) : (
-            <div className="flex flex-col justify-center items-center flex-1 bg-white text-gray-500 text-[12px] gap-4 rounded-xl p-4 mt-4 ml-2">
-              <img
-                src="/semTurma.svg"
-                alt="Nenhuma turma selecionada"
-                className="w-56 h-56 object-contain"
-              />
-              <p className="text-center text-sm">
-                <span className="font-semibold text-[#90416B]">Crie</span> ou{' '}
-                <span className="font-semibold text-[#90416B]">selecione</span> uma turma para começar!
-              </p>
-            </div>
-          )}
-
-          {/* Lista de Grupos */}
-          {turmaSelecionadaId && (
-            <GruposList
-              projectId={projectId}
-              turmaId={turmaSelecionadaId}
-              onManage={(grupoId) => {}}
-            />
-          )}
-        </div>
-      </div>
-
-      {isAddClassOpen && (
-        <AddTurmaModal
-          nomeTurma={nomeTurma}
-          setNomeTurma={setNomeTurma}
-          uploadedFile={uploadedFile}
-          setUploadedFile={setUploadedFile}
-          onClose={() => setIsAddClassOpen(false)}
-          onSave={handleSalvarTurma}
+        <TurmasSelector
+          turmas={turmas}
+          turmaSelecionada={turmaSelecionadaId}
+          onSelect={setTurmaSelecionadaId}
+          onAdd={() => setIsAddClassOpen(true)}
         />
-      )}
 
+        {turmaSelecionada ? (
+          <div className="flex flex-col lg:flex-row gap-2 w-full md:pr-4">
+            <div className="flex-1 lg:basis-2/5">
+              <AlunosList
+                alunos={turmaSelecionada.alunos ?? []}
+                onAdd={handleAddAluno}
+                grupos={grupos}
+                turmaId={turmaSelecionada.id}
+                projectId={projectId}
+              />
+            </div>
+
+            <div className="flex-1 lg:basis-3/5">
+              <GruposList
+                projectId={projectId}
+                turmaId={turmaSelecionada.id}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col justify-center items-center flex-1 bg-white text-gray-500 text-[12px] 
+          gap-4 rounded-xl p-4 mt-4 ml-2 md:ml-4">
+            <img src="/semTurma.svg" alt="Nenhuma turma selecionada" className="w-56 h-56 object-contain" />
+            <p className="text-center text-sm">
+              <span className="font-semibold text-[#90416B]">Crie</span> ou <span className="font-semibold text-[#90416B]">selecione</span> uma turma para começar!
+            </p>
+          </div>
+        )}
+      </div>
     </div>
-  );
+
+    {isAddClassOpen && (
+      <AddTurmaModal
+        nomeTurma={nomeTurma}
+        setNomeTurma={setNomeTurma}
+        uploadedFile={uploadedFile}
+        setUploadedFile={setUploadedFile}
+        onClose={() => setIsAddClassOpen(false)}
+        onSave={handleSalvarTurma}
+      />
+    )}
+  </div>
+);
+
 }
