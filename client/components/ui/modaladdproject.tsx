@@ -21,8 +21,9 @@ interface AlunoXLS {
 
 interface Aluno {
   nome: string;
-  ra: number;
+  ra: number | null;
 }
+
 
 
 interface Professor {
@@ -49,67 +50,55 @@ interface ModalAddProjectProps {
 // Extrair dados do arquivo .xls, .xlsx ou .csv
 export async function extrairAlunosDoArquivo(file: File): Promise<Aluno[]> {
   const fileName = file.name.toLowerCase();
-
   let data: any[] = [];
 
   try {
+    // Ler conteúdo dependendo da extensão
     if (fileName.endsWith(".csv")) {
-      // CSV (que é o que vem do canvas)
       const text = await file.text();
       const workbook = XLSX.read(text, { type: "string" });
-      const firstSheet = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheet];
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       data = XLSX.utils.sheet_to_json(worksheet);
     } else {
-      // XLS ou XLSX
       const arrayBuffer = await file.arrayBuffer();
       const workbook = XLSX.read(arrayBuffer, { type: "array" });
-      const firstSheet = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheet];
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       data = XLSX.utils.sheet_to_json(worksheet);
     }
 
-    // Extrai apenas o nome; o RA ta como opcional
-    const alunos: Aluno[] = data
-      .map((row: any) => {
+    // Mapeia e normaliza os alunos
+    const alunos = data
+      .map((row: any, index: number) => {
         const nome =
-          row.Student || // CSV do Canvas (em inglês)
-          row.Nome || // XLS genérico
-          row.Aluno || // XLS customizado
+          row.Student ||
+          row.Nome ||
+          row.Aluno ||
           row["Nome do Aluno"] ||
           null;
 
-        const ra =
-          row.RA ||
-          row.Id ||
-          null;
+        const ra = row.RA || row.Id;
 
-        // Se não houver nome, ignora a linha
         if (!nome) return null;
 
-        return {
-          nome: String(nome).trim(),
-          ra: ra ? Number(ra) || 0 : 0, // RA opcional
-        };
+        // se RA não for número, cria um id único temporário
+        const safeRa =
+          ra && !isNaN(Number(ra)) ? Number(ra) : Date.now() + index;
+
+        return { nome: String(nome).trim(), ra: safeRa };
       })
-      .filter(
-        (a): a is Aluno =>
-          !!a && a.nome.toUpperCase() !== "POINTS POSSIBLE" // remove cabeçalho do arquivo
-      );
+      .filter((a): a is Aluno => !!a && a.nome.toUpperCase() !== "POINTS POSSIBLE");
 
-        
     if (!alunos.length) {
-        toast.error("Nenhum aluno encontrado no arquivo selecionado.");
+      toast.error("Nenhum aluno encontrado no arquivo.");
     }
-    return alunos;
 
+    return alunos;
   } catch (error) {
     console.error("Erro ao extrair alunos:", error);
-    throw new Error("Não foi possível ler o arquivo. Verifique o formato.");
+    toast.error("Não foi possível ler o arquivo.");
+    return [];
   }
 }
-
-
 
 
 export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAddClassOpen,turmas,setTurmas,

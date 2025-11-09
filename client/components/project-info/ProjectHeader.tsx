@@ -1,6 +1,10 @@
+
+
 import Image from "next/image";
 import backArrow from "@/public/group-back-button.svg";
 import Avatar from "../../public/account_circle.png";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { useState } from "react";
 
 interface ProfessorData { 
   profilePicture?: string; 
@@ -15,9 +19,12 @@ interface Props {
   ano?: number;
   professores?: ProfessorData[];
   onBack?: () => void;
+  onDelete?: () => void;
 }
 
-export function ProjectHeader({ nome, semestre, ano, professores = [], onBack }: Props) {
+export function ProjectHeader({ nome, semestre, ano, professores = [], onBack, onDelete }: Props) {
+
+  const [showModal, setShowModal] = useState(false);
   const getProfileImage = (path?: string) => {
     if (!path || path === "") return Avatar;
     if (path.startsWith("http")) return path;
@@ -35,6 +42,25 @@ export function ProjectHeader({ nome, semestre, ano, professores = [], onBack }:
         <p className="ml-2 text-lg font-medium text-[#3B3B3B] flex-1">
           {nome}
         </p>
+
+        {/* Botão excluir */}
+        <div className="flex gap-2 pr-4 pl-3 py-1.5 justify-start sm:mt-0">
+          <button
+            onClick={() => setShowModal(true)}
+            className="
+              flex items-center gap-1 sm:gap-2
+              bg-[#B65254] hover:bg-[#863435] text-white
+              px-2 py-1.5 sm:px-2 sm:py-2
+              text-xs sm:text-sm
+              rounded-lg cursor-pointer transition
+            "
+          >
+            <RiDeleteBin6Line size={12} className="sm:size-4" />
+            
+            <span className="">Excluir projeto</span>
+          </button>
+        </div>
+
 
         <div className="flex -space-x-2 pr-4 bg-[#FCF3FA] rounded-l-[15px] rounded-r-none">
           {professores.slice(0, 8).map((prof, i) => (
@@ -55,6 +81,40 @@ export function ProjectHeader({ nome, semestre, ano, professores = [], onBack }:
         <p className="ml-10 mt-[-4px] text-[12px] font-medium text-[#3B3B3B]">
           {semestre}° semestre - {ano}
         </p>
+      )}
+
+       {/* Modal de confirmação */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white flex flex-col items-center justify-center rounded-2xl p-6 w-80 sm:w-full max-w-md shadow-lg text-center">
+            <h2 className="text-lg font-semibold text-gray-800 mb-3">
+              Excluir projeto?
+            </h2>
+            <p className="text-sm text-center text-gray-600 mb-6">
+              Tem certeza que deseja excluir este projeto e todos os dados associados?
+            </p>
+            <p className="text-sm font-semibold text-center text-[#B65254] mb-6" >
+              Essa ação não poderá ser desfeita.
+            </p>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  onDelete?.(); 
+                }}
+                className="px-4 py-2 rounded-lg bg-[#B65254] hover:bg-[#863435] text-white transition"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
