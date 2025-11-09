@@ -5,6 +5,7 @@ import Image from "next/image";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase/clientApp";
 import Avatar from "../../public/account_circle.png";
+import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import ModalInviteProfessor from "../ui/modalInviteProfAllProjects";
 
@@ -32,6 +33,7 @@ export default function TemplateCard({
   professores,
   projetoUid,
 }: TemplateCardProps) {
+  const router = useRouter();
   const semestreFormatado = String(semestre).padStart(2, "0");
 
   const [professoresData, setProfessoresData] = useState<ProfessorData[]>([]);
@@ -76,6 +78,11 @@ export default function TemplateCard({
     return Avatar;
   };
 
+  const handleVerMais = () => {
+    if (!projetoUid) return;
+    router.push(`/projects-info/${projetoUid}`);
+  };
+
   return (
     <>
       <div className="bg-[#F6F6F6] rounded-xl p-3 w-full flex flex-col h-52 transition text-left md:h-54 xl:p-4 xl:h-56 2xl:h-58">
@@ -117,6 +124,7 @@ export default function TemplateCard({
             </div>
 
             <button
+              onClick={handleVerMais}
               className="px-3 py-1 bg-[#3B3B3B] text-white text-[10px] italic rounded-full hover:opacity-90 transition md:px-4"
             >
               Ver mais

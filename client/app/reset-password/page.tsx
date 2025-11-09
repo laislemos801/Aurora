@@ -160,8 +160,8 @@ export default function ResetPassword() {
                 onClick={() => router.push("/login")}
                 className="
                   text-xs sm:text-sm md:text-md lg:text-md hover:underline font-medium
-                  text-[#353535]/90 text-center mt-2 mb-4 leading-6 px-6 sm:px-12
-                  cursor-pointer hover:text-[#90416B] transition-colors duration-200
+                  text-[#7B6294]/90 text-center mt-2 mb-4 leading-6 px-6 sm:px-12
+                  cursor-pointer hover:text-[#7B6294] transition-colors duration-200
                 "
               >
                 Voltar para o Login

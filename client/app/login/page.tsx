@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/firebase/clientApp"; // seu arquivo de inicialização do Firebase
+import { auth } from "@/firebase/clientApp";
 import { useRouter } from "next/navigation";
+import EyeOpen from "@/public/eye_open.svg";
+import EyeClosed from "@/public/eye_closed.svg";
 
 const lexendExa = Lexend_Exa({
   weight: "400",
@@ -21,6 +23,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // 👁️ estado para alternar visibilidade
 
   const mapError = (code: string) => {
     switch (code) {
@@ -29,6 +32,7 @@ export default function Login() {
       case "auth/user-not-found":
         return "Usuário não encontrado.";
       case "auth/wrong-password":
+      case "auth/invalid-credential":
         return "Senha incorreta.";
       case "auth/too-many-requests":
         return "Muitas tentativas. Tente novamente mais tarde.";
@@ -47,6 +51,12 @@ export default function Login() {
       return;
     }
 
+    // ✅ Validação adicional de formato de e-mail
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      toast.error("Digite um e-mail válido.");
+      return;
+    }
+
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -54,14 +64,24 @@ export default function Login() {
 
       if (!user.emailVerified) {
         toast.error("Verifique seu e-mail antes de fazer login.");
-        await auth.signOut(); //se nao verificado faz logout
+        await auth.signOut();
         return;
       }
 
       toast.success("Login realizado com sucesso!");
-      router.push("/"); // redireciona para a tela principal
+      router.push("/");
     } catch (error: any) {
-      console.error(error);
+      if (error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
+        setPassword("");
+        toast.error("Senha inválida. Tente novamente.");
+        return;
+      }
+
+      if (error.code === "auth/user-not-found") {
+        toast.error("Usuário não encontrado.");
+        return;
+      }
+
       toast.error(mapError(error.code));
     } finally {
       setLoading(false);
@@ -114,6 +134,7 @@ export default function Login() {
           onSubmit={handleSubmit}
           className="flex flex-col mt-10 sm:mt-10 w-64 sm:w-3/5 gap-2"
         >
+          {/* E-MAIL */}
           <div>
             <Label
               htmlFor="email"
@@ -136,7 +157,9 @@ export default function Login() {
               "
             />
           </div>
-          <div>
+
+          {/* SENHA */}
+          <div className="relative">
             <Label
               htmlFor="password"
               className="text-[13px] sm:text-[15px] text-left text-[#7B6294] ml-1"
@@ -145,7 +168,7 @@ export default function Login() {
             </Label>
             <Input
               id="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -154,9 +177,24 @@ export default function Login() {
                 border-[#7B6294] border-2 text-[#7B6294] rounded-md
                 text-[13px] sm:text-[15px] h-11 sm:h-12 w-full
                 placeholder-[#7B6294]
-                focus:outline-none shadow-none focus:ring-0
+                focus:outline-none shadow-none focus:ring-0 pr-10
               "
             />
+            {/* Botão com SVG para alternar visibilidade */}
+            <button
+              type="button"
+              aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              onClick={() => setShowPassword((s) => !s)}
+              className="absolute right-3 top-8 sm:top-9 w-6 h-6 flex items-center justify-center"
+            >
+              <Image
+                src={showPassword ? EyeClosed : EyeOpen}
+                alt={showPassword ? "Ocultar" : "Mostrar"}
+                width={20}
+                height={20}
+                priority
+              />
+            </button>
           </div>
 
           <div className="w-full flex justify-end">
@@ -164,13 +202,14 @@ export default function Login() {
               Esqueceu sua senha?{" "}
               <span
                 onClick={() => router.push("/reset-password")}
-                className="text-[#90416B] italic font-bold cursor-pointer hover:underline"
+                className="text-[#7B6294] italic font-bold cursor-pointer hover:underline"
               >
                 Lembrar-me
               </span>
             </p>
           </div>
 
+          {/* BOTÃO LOGIN */}
           <Button
             type="submit"
             disabled={loading}
@@ -183,13 +222,15 @@ export default function Login() {
             {loading ? "Entrando..." : "Login"}
           </Button>
         </form>
+
         <p className="text-xs sm:text-sm md:text-md lg:text-md text-[#353535]/90 text-center mt-4 mb-6 leading-6 px-6 sm:px-12">
-             Nao tem uma conta?
-             <span
-                onClick={() => router.push("/register")}
-                className="text-[#90416B] italic font-bold cursor-pointer hover:underline">
-                Cadastre-se
-              </span>
+          Não tem uma conta?{" "}
+          <span
+            onClick={() => router.push("/register")}
+            className="text-[#7B6294] italic font-bold cursor-pointer hover:underline"
+          >
+            Cadastre-se
+          </span>
         </p>
       </div>
 
