@@ -66,8 +66,19 @@ export default function AllProjectsCards() {
   }
 
   return (
-    <div className="flex flex-col items-start w-full min-h-screen pr-4 gap-4 sm:pl-4 sm:pt-4 md:pr-8">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:w-full lg:mb-4">
+    <div
+    className="
+      flex flex-col items-start 
+      w-full 
+      min-h-0 
+      flex-1
+      pr-4 gap-4 
+      sm:pl-4 sm:pt-4 md:pr-8 
+      overflow-y-auto
+    "
+  >
+    {/* Topo */}
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:w-full lg:mb-4 flex-shrink-0">
         <p className="font-medium text-xl mb-3 sm:mb-0">Meus projetos</p>
 
         <div className="flex bg-[#F6F6F6] text-[#8C8C8C] items-center gap-2 py-1.5 px-4 rounded-full text-[13px] w-60 md:w-80 2xl:w-100">

@@ -10,7 +10,7 @@ interface Props {
 
 export function TurmasSelector({ turmas, turmaSelecionada, onSelect, onAdd }: Props) {
   return (
-    <div className="flex overflow-x-auto gap-2 pl-2 pb-1 scrollbar-hide">
+    <div className="flex overflow-x-auto gap-2 pl-2 pb-1 scrollbar-hide md:pl-4">
       
       {/* BOTÃO ADICIONAR PRIMEIRO */}
       <button

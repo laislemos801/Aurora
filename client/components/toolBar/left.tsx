@@ -13,7 +13,7 @@ export default function ToolBarLeft() {
   const router = useRouter();
 
   return (
-    <div className="bg-[#FCF3FA] w-full min-h-screen flex flex-col justify-between items-center py-6">
+    <div className="bg-[#FCF3FA] w-full flex flex-col justify-between items-center py-6 h-full overflow-hidden">
       {/* LOGO CENTRALIZADO */}
       <div className="hidden sm:flex justify-center items-center w-full mb-2">
         <Image
@@ -21,7 +21,7 @@ export default function ToolBarLeft() {
           alt="Logo Aurora"
           width={40}
           height={40}
-          className="w-12 sm:w-12 md:w-12 lg:w-12"
+          className="w-12 sm:w-12 md:w-12 lg:w-12 xl:mt-4 xl:w-14"
         />
       </div>
 
@@ -38,10 +38,10 @@ export default function ToolBarLeft() {
 
         <div
           className={`${
-            pathname === "/projects-info" &&
+            pathname === "/all-projects" &&
             "bg-[#90416B] text-white p-1.5 rounded-full 2xl:p-2"
           } cursor-pointer`}
-          onClick={() => router.push("/projects-info")}
+          onClick={() => router.push("/all-projects")}
         >
           <FaRegNoteSticky size={22} />
         </div>
