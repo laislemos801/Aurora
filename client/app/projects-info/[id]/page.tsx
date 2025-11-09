@@ -215,7 +215,7 @@ export default function ProjectInfoPage() {
   if (error) return <p>{error}</p>;
 
   return (
-  <div className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2 sm:p-4 lg:p-6">
+  <div className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2 sm:pl-4 lg:pl-6">
     <ProjectHeader
       nome={project?.nome}
       semestre={project?.semestre}
@@ -237,7 +237,7 @@ export default function ProjectInfoPage() {
 
         {turmaSelecionada ? (
           <div className="flex flex-col lg:flex-row gap-2 w-full md:pr-4">
-            <div className="flex-1 lg:basis-2/5">
+            <div className="flex-1 lg:basis-2/5 xl:basis-3/8 2xl:basis-2/8">
               <AlunosList
                 alunos={turmaSelecionada.alunos ?? []}
                 onAdd={handleAddAluno}
@@ -247,7 +247,7 @@ export default function ProjectInfoPage() {
               />
             </div>
 
-            <div className="flex-1 lg:basis-3/5">
+            <div className="flex-1 lg:basis-3/5 xl:basis-5/8 2xl:basis-6/8">
               <GruposList
                 projectId={projectId}
                 turmaId={turmaSelecionada.id}

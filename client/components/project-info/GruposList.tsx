@@ -66,24 +66,24 @@ export function GruposList({ projectId, turmaId, projectName }: Props) {
   };
 
   return (
-    <div className="bg-white shadow-xl rounded-2xl py-4 w-full flex flex-col mt-4 px-4 max-h-[240px] md:max-h-[300px] 
-    md:ml-4 lg:h-full">
+    <div className="bg-white shadow-xl rounded-2xl py-4 w-full flex flex-col mt-5 px-4 max-h-[240px] md:max-h-[300px] 
+    md:ml-4 lg:max-h-[609px]">
       {/* Lista de grupos — rolagem apenas aqui */}
-      <div className="flex flex-col gap-2 overflow-y-auto flex-1">
+      <div className="flex flex-col gap-2 overflow-y-auto flex-1 lg:gap-4">
         {loading && <p className="text-sm text-gray-500">Carregando grupos...</p>}
         {!loading && grupos.length === 0 && <p className="text-sm text-gray-500">Nenhum grupo criado.</p>}
         {grupos.map((g) => (
           <div
             key={g.id}
-            className="flex justify-between items-center px-3 py-2 rounded-md shadow-inner bg-[#FCF3FA]"
+            className="flex justify-between items-center px-3 py-2 rounded-md shadow-inner bg-[#FCF3FA] lg:py-4 lg:px-5"
           >
-            <span className="text-sm font-medium text-[#4A3A55]">
+            <span className="text-sm font-medium text-[#4A3A55] lg:text-[16px]">
               {g.nome}{g.nomeProjeto ? ` - ${g.nomeProjeto}` : ''}
             </span>
 
             <button
               onClick={() => handleManage(g.id)}
-              className="px-4 py-0.5 text-xs rounded-md bg-[#3B3B3B] text-[#FCF3FA] font-medium"
+              className="px-4 py-0.5 text-xs rounded-md bg-[#3B3B3B] text-[#FCF3FA] font-medium lg:py-1 lg:rounded-sm"
             >
               Gerenciar
             </button>

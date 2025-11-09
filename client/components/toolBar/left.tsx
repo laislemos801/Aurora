@@ -38,10 +38,10 @@ export default function ToolBarLeft() {
 
         <div
           className={`${
-            pathname === "/projects-info" &&
+            pathname === "/all-projects" &&
             "bg-[#90416B] text-white p-1.5 rounded-full 2xl:p-2"
           } cursor-pointer`}
-          onClick={() => router.push("/projects-info")}
+          onClick={() => router.push("/all-projects")}
         >
           <FaRegNoteSticky size={22} />
         </div>

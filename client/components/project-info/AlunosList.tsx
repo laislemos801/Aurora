@@ -125,7 +125,7 @@ export function AlunosList({ alunos, onAdd, grupos = [], turmaId, projectId }: P
       </div>
 
       {/* LISTA DE ALUNOS */}
-      <div className="flex flex-col gap-1 overflow-y-auto max-h-[180px] pr-1 relative">
+      <div className="flex flex-col gap-1 overflow-y-auto max-h-[180px] pr-1 relative lg:max-h-[480px]">
         {alunosFiltrados.map((aluno, index) => (
           <div
             key={aluno.ra}

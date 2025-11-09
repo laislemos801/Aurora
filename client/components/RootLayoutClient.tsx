@@ -56,7 +56,7 @@ export default function RootLayoutClient({ children }: Props) {
             pt-4 pl-2
             rounded-tl-[20px] sm:rounded-tl-[40px] xl:rounded-tl-[50px]
             shadow-[0_4px_12px_rgba(0,0,0,0.15),_-4px_0_12px_rgba(0,0,0,0.10),0_-4px_2px_rgba(0,0,0,0.01)]
-            lg:pl-8 lg:pt-8 2xl:pl-8
+            lg:pl-6 lg:pt-8
             overflow-hidden
             min-h-0
           "
