@@ -326,8 +326,11 @@ export default function ProjectInfoPage() {
       semestre={project?.semestre}
       ano={project?.ano}
       professores={professoresData}
-      onDelete={handleDeleteProject} 
+      onDelete={handleDeleteProject}
+      projetoUid={projectId}
+      setProfessores={setProfessoresData}
     />
+
 
     <div className="flex-1 w-full pl-3 pt-5">
       <div className="flex flex-col bg-[#FCF3FA] shadow-md rounded-l-[15px] md:rounded-l-[25px] rounded-r-none 

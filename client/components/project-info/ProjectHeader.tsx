@@ -5,11 +5,12 @@ import backArrow from "@/public/group-back-button.svg";
 import Avatar from "../../public/account_circle.png";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { useState } from "react";
+import ModalInviteProfessor from "../ui/modalinviteprofessor";
 
 interface ProfessorData { 
   profilePicture?: string; 
   nome: string; 
-  email?: string; 
+  email: string; 
   uid?: string; 
 }
 
@@ -21,11 +22,15 @@ interface Props {
   professores?: ProfessorData[];
   onBack?: () => void;
   onDelete?: () => void;
+  projetoUid?: string;
+  setProfessores?: (value: ProfessorData[]) => void;
 }
 
-export function ProjectHeader({ nome, curso, semestre, ano, professores = [], onBack, onDelete }: Props) {
+export function ProjectHeader({ nome, curso, semestre, ano, professores = [], onBack, onDelete,  projetoUid,
+  setProfessores, }: Props) {
 
   const [showModal, setShowModal] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
   const getProfileImage = (path?: string) => {
     if (!path || path === "") return Avatar;
     if (path.startsWith("http")) return path;
@@ -40,7 +45,7 @@ export function ProjectHeader({ nome, curso, semestre, ano, professores = [], on
           <Image src={backArrow} alt="Voltar" width={32} height={32} />
         </button>
 
-        <p className="ml-2 text-lg font-medium text-[#3B3B3B] flex-1">
+        <p className="ml-2 text-sm sm:text-lg font-medium text-[#3B3B3B] flex-1">
           {nome} - {curso}
         </p>
         
@@ -64,9 +69,14 @@ export function ProjectHeader({ nome, curso, semestre, ano, professores = [], on
         </div>
 
 
-        <div className="flex -space-x-2 pr-4 bg-[#FCF3FA] rounded-l-[15px] rounded-r-none">
+        {/* === BOTÃO PROFESSORES === */}
+        <button
+          onClick={() => setIsInviteOpen(true)}
+          className="cursor-pointer flex -space-x-2 pr-4 bg-[#FCF3FA] rounded-l-[15px] rounded-r-none hover:bg-[#f7e4f1] transition"
+          title="Gerenciar professores"
+        >
           {professores.slice(0, 8).map((prof, i) => (
-            <div key={i} title={prof.nome} className={i >= 3 ? "hidden sm:block" : ""}>
+            <div key={i} className={i >= 3 ? "hidden sm:block" : ""}>
               <Image
                 src={getProfileImage(prof.profilePicture)}
                 alt={prof.nome}
@@ -76,7 +86,7 @@ export function ProjectHeader({ nome, curso, semestre, ano, professores = [], on
               />
             </div>
           ))}
-        </div>
+        </button>
       </div>
 
       {semestre && ano && (
@@ -117,6 +127,15 @@ export function ProjectHeader({ nome, curso, semestre, ano, professores = [], on
             </div>
           </div>
         </div>
+      )}
+      {setProfessores && (
+        <ModalInviteProfessor
+          isInviteOpen={isInviteOpen}
+          setIsInviteOpen={setIsInviteOpen}
+          professores={professores}
+          setProfessores={setProfessores}
+          projetoUid={projetoUid}
+        />
       )}
     </div>
   );
