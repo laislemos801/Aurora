@@ -1,18 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, addDoc } from "firebase/firestore";
 import { db } from "@/firebase/clientApp";
 import { FiPlus } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import toast from "react-hot-toast";
 
-
 interface Grupo {
   id: string;
   nome: string;
-  nomeProjeto?: string; 
+  nomeProjeto?: string;
 }
 
 interface Props {
@@ -39,16 +38,20 @@ export function GruposList({ projectId, turmaId, projectName, onDeleteTurma }: P
 
     const fetchGroups = async () => {
       setLoading(true);
-
       const snap = await getDocs(
         collection(db, "Projetos", projectId, "Turmas", turmaId, "Grupos")
       );
 
-      const gruposData = snap.docs.map(doc => ({
+      const gruposData = snap.docs.map((doc) => ({
         id: doc.id,
         ...(doc.data() as any),
-        nomeProjeto: projectName || undefined, 
+        nomeProjeto: projectName || undefined,
       }));
+
+      // 🔽 Ordena naturalmente por nome (Grupo 01, 02, 10 etc.)
+      gruposData.sort((a, b) =>
+        a.nome.localeCompare(b.nome, "pt", { numeric: true })
+      );
 
       setGrupos(gruposData);
       setLoading(false);
@@ -64,10 +67,16 @@ export function GruposList({ projectId, turmaId, projectName, onDeleteTurma }: P
 
     const docRef = await addDoc(
       collection(db, "Projetos", projectId, "Turmas", turmaId, "Grupos"),
-      { nome } // salva só o nome do grupo no Firestore
+      { nome }
     );
 
-    setGrupos(prev => [...prev, { id: docRef.id, nome, nomeProjeto }]);
+    setGrupos((prev) =>
+      [...prev, { id: docRef.id, nome, nomeProjeto }].sort((a, b) =>
+        a.nome.localeCompare(b.nome, "pt", { numeric: true })
+      )
+    );
+
+    toast.success(`${nome} criado com sucesso!`);
   };
 
   return (
@@ -76,14 +85,17 @@ export function GruposList({ projectId, turmaId, projectName, onDeleteTurma }: P
       {/* Lista de grupos — rolagem apenas aqui */}
       <div className="flex flex-col gap-2 overflow-y-auto flex-1 lg:gap-4">
         {loading && <p className="text-sm text-gray-500">Carregando grupos...</p>}
-        {!loading && grupos.length === 0 && <p className="text-sm text-gray-500">Nenhum grupo criado.</p>}
+        {!loading && grupos.length === 0 && (
+          <p className="text-sm text-gray-500">Nenhum grupo criado.</p>
+        )}
         {grupos.map((g) => (
           <div
             key={g.id}
             className="flex justify-between items-center px-3 py-2 rounded-md shadow-inner bg-[#FCF3FA] lg:py-4 lg:px-5"
           >
             <span className="text-sm font-medium text-[#4A3A55] lg:text-[16px]">
-              {g.nome}{g.nomeProjeto ? ` - ${g.nomeProjeto}` : ''}
+              {g.nome}
+              {g.nomeProjeto ? ` - ${g.nomeProjeto}` : ""}
             </span>
 
             <button
@@ -96,7 +108,7 @@ export function GruposList({ projectId, turmaId, projectName, onDeleteTurma }: P
         ))}
       </div>
 
-      {/* Botão “Novo grupo” não ocupa toda a largura */}
+      {/* Botão “Novo grupo” */}
       <div className="mt-3 flex gap-2 pr-4 pl-3 justify-start">
         <button
           onClick={handleAddGroup}
@@ -108,24 +120,19 @@ export function GruposList({ projectId, turmaId, projectName, onDeleteTurma }: P
 
         <button
           onClick={() => setShowModal(true)}
-          className="
-            inline-flex items-center gap-2 justify-start rounded-sm py-1.5 px-4   bg-[#B65254] hover:bg-[#863435] text-[#FCF3FA]
-          text-[12px] font-semibold hover:opacity-90 transition
-          "
+          className="inline-flex items-center gap-2 justify-start rounded-sm py-1.5 px-4 bg-[#B65254] hover:bg-[#863435] text-[#FCF3FA]
+          text-[12px] font-semibold hover:opacity-90 transition"
         >
           <RiDeleteBin6Line size={12} className="sm:size-4" />
-          
-          <span className="">Excluir turma</span>
+          <span>Excluir turma</span>
         </button>
-        
       </div>
+
       {/* Modal de confirmação */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white flex flex-col items-center justify-center rounded-2xl p-6 w-80 sm:w-full max-w-md shadow-lg text-center">
-            <h2 className="text-lg font-semibold text-gray-800 mb-3">
-              Excluir turma?
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-800 mb-3">Excluir turma?</h2>
             <p className="text-sm text-center text-gray-600 mb-6">
               Tem certeza que deseja excluir esta turma e todos os grupos associados?
             </p>
@@ -142,7 +149,7 @@ export function GruposList({ projectId, turmaId, projectName, onDeleteTurma }: P
               <button
                 onClick={() => {
                   setShowModal(false);
-                  onDeleteTurma?.(); 
+                  onDeleteTurma?.();
                 }}
                 className="px-4 py-2 rounded-lg bg-[#B65254] hover:bg-[#863435] text-white transition"
               >

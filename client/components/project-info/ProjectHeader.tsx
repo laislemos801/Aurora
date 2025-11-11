@@ -1,29 +1,21 @@
-
-
 import Image from "next/image";
 import backArrow from "@/public/group-back-button.svg";
 import Avatar from "../../public/account_circle.png";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { useState } from "react";
 import ModalInviteProfessor from "../ui/modalinviteprofessor";
-
-interface ProfessorData { 
-  profilePicture?: string; 
-  nome: string; 
-  email: string; 
-  uid?: string; 
-}
+import { Professor } from "@/types/professor";
 
 interface Props {
   nome: string;
   curso?: string;
   semestre?: number;
   ano?: number;
-  professores?: ProfessorData[];
+  professores?: Professor[];
   onBack?: () => void;
   onDelete?: () => void;
   projetoUid?: string;
-  setProfessores?: (value: ProfessorData[]) => void;
+  setProfessores?: (value: Professor[]) => void;
 }
 
 export function ProjectHeader({ nome, curso, semestre, ano, professores = [], onBack, onDelete,  projetoUid,
@@ -90,12 +82,12 @@ export function ProjectHeader({ nome, curso, semestre, ano, professores = [], on
       </div>
 
       {semestre && ano && (
-        <p className="ml-10 mt-[-4px] text-[12px] font-medium text-[#3B3B3B]">
+        <p className="ml-10 mt-[-4px] text-[12px] font-medium text-[#3B3B3B] lg:text-[14px]">
           {semestre}° semestre - {ano}
         </p>
       )}
 
-       {/* Modal de confirmação */}
+      {/* Modal de confirmação */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white flex flex-col items-center justify-center rounded-2xl p-6 w-80 sm:w-full max-w-md shadow-lg text-center">

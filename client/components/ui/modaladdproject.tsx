@@ -13,6 +13,8 @@ import { criarProjeto } from "@/firebase/addProject";
 import * as XLSX from "xlsx";
 import { toast } from "react-hot-toast";
 import { getAuth } from "firebase/auth";
+import { Turma } from "@/types/turma";
+import { Professor } from "@/types/professor";
 
 interface AlunoXLS {
   nome: string;
@@ -22,20 +24,6 @@ interface AlunoXLS {
 interface Aluno {
   nome: string;
   ra: number | null;
-}
-
-
-
-interface Professor {
-  uid: string; 
-  nome: string;
-  email: string;
-}
-
-
-interface Turma {
-  nome: string;
-  alunos: Aluno[];
 }
 
 interface ModalAddProjectProps {
@@ -68,25 +56,24 @@ export async function extrairAlunosDoArquivo(file: File): Promise<Aluno[]> {
 
     // Mapeia e normaliza os alunos
     const alunos = data
-      .map((row: any, index: number) => {
-        const nome =
-          row.Student ||
-          row.Nome ||
-          row.Aluno ||
-          row["Nome do Aluno"] ||
-          null;
+        .map((row: any, index: number): Aluno | null => {
+            const nome =
+            row.Student ||
+            row.Nome ||
+            row.Aluno ||
+            row["Nome do Aluno"] ||
+            null;
 
-        const ra = row.RA || row.Id;
+            const ra = row.RA || row.Id;
 
-        if (!nome) return null;
+            if (!nome) return null;
 
-        // se RA não for número, cria um id único temporário
-        const safeRa =
-          ra && !isNaN(Number(ra)) ? Number(ra) : Date.now() + index;
+            const safeRa =
+            ra && !isNaN(Number(ra)) ? Number(ra) : null;
 
-        return { nome: String(nome).trim(), ra: safeRa };
-      })
-      .filter((a): a is Aluno => !!a && a.nome.toUpperCase() !== "POINTS POSSIBLE");
+            return { nome: String(nome).trim(), ra: safeRa };
+        })
+        .filter((a): a is Aluno => !!a && a.nome.toUpperCase() !== "POINTS POSSIBLE");
 
     if (!alunos.length) {
       toast.error("Nenhum aluno encontrado no arquivo.");
@@ -180,16 +167,22 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
         );
 
         const projetoData = {
-            nome,
-            descricao,
-            semestre,
-            ano,
-            curso,
-            turmas, // cada turma já contém a lista de alunos
-            professores: professoresUIDs, // inclui o criador
+        nome,
+        descricao,
+        semestre,
+        ano,
+        curso,
+        turmas: turmas.map((t) => ({
+        ...t,
+            alunos: (t.alunos ?? []).map((a) => ({
+                ...a,
+                ra: a.ra ?? 0,
+            })),
+        })),
+        professores: professoresUIDs,
         };
 
-        const res = await criarProjeto(projetoData);
+        const res = await criarProjeto(projetoData as Parameters<typeof criarProjeto>[0]);
 
         if (res.sucesso) {
             if (!res.uid) {

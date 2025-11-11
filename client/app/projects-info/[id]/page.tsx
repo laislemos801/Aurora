@@ -8,13 +8,13 @@ import { auth, db } from '@/firebase/clientApp';
 import { onAuthStateChanged } from 'firebase/auth';
 import { toast } from "react-hot-toast";
 import * as XLSX from "xlsx";
+import { Professor } from "@/types/professor";
 
 import { ProjectHeader } from '@/components/project-info/ProjectHeader';
 import { TurmasSelector } from '@/components/project-info/TurmasSelector';
 import { AddTurmaModal } from '@/components/project-info/AddTurmaModal';
 import { AlunosList } from "@/components/project-info/AlunosList";
 import { GruposList } from "@/components/project-info/GruposList";
-
 
 interface Turma {
   id: string;
@@ -26,13 +26,6 @@ interface Turma {
 interface Aluno {
   nome: string;
   ra: number;
-}
-
-interface ProfessorData {
-  profilePicture?: string;
-  nome: string;
-  email?: string;
-  uid?: string;
 }
 
 interface Grupo {
@@ -97,7 +90,7 @@ export default function ProjectInfoPage() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [turmaEditandoIndex, setTurmaEditandoIndex] = useState<number | null>(null);
 
-  const [professoresData, setProfessoresData] = useState<ProfessorData[]>([]);
+  const [professoresData, setProfessoresData] = useState<Professor[]>([]);
 
   // Autenticação do usuário
   useEffect(() => {
@@ -254,7 +247,6 @@ export default function ProjectInfoPage() {
     }
   };
 
-
   const handleDeleteProject = async () => {
     if (!projectId) return;
 
@@ -315,8 +307,6 @@ export default function ProjectInfoPage() {
       toast.error("Erro ao excluir aluno");
     }
   };
-
-
 
   return (
   <div className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2 sm:pl-4 lg:pl-6">

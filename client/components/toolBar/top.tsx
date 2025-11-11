@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import aurora from "@/public/AURORA.svg";
-import avatar from "@/public/avatar.png";
 import widget from "@/public/widgets.svg";
 import { MdOutlineCircleNotifications } from "react-icons/md";
 import { MdExitToApp } from "react-icons/md";
@@ -13,19 +12,14 @@ import { FaRegNoteSticky } from "react-icons/fa6";
 import icon from "@/public/for_you.svg";
 import 'primeicons/primeicons.css';
 import { usePathname, useRouter } from "next/navigation";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { auth, db, storage } from "@/firebase/clientApp";
+import { doc } from "firebase/firestore";
+import { auth, db } from "@/firebase/clientApp";
 import { onAuthStateChanged } from "firebase/auth";
-import account_circle from "@/public/account_circle.png";
 import { onSnapshot } from "firebase/firestore";
-
-interface Turma {
-  nome: string;
-  arquivo?: File | null;
-}
+import { Turma } from "@/types/turma";
 
 export default function ToolBarTop() {
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false); 
   const [isOpen, setIsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddClassOpen, setIsAddClassOpen] = useState(false);
