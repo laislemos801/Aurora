@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase/clientApp";
 import TemplateCard from "@/components/all-projects/card";
 import { IoSearchSharp } from "react-icons/io5";
@@ -22,40 +22,32 @@ export default function AllProjectsCards() {
 
   const { user, loading } = useAuthGuard();
 
-
   useEffect(() => {
-      const fetchProjetos = async () => {
-        if (!user) return;
+    if (!user) return;
 
-        setLoading(true);
-        try {
-          const projetosRef = collection(db, "Projetos");
-          const q = query(projetosRef, where("professores", "array-contains", user.uid));
-          const querySnapshot = await getDocs(q);
+    const projetosRef = collection(db, "Projetos");
+    const q = query(projetosRef, where("professores", "array-contains", user.uid));
 
-          const list: Projeto[] = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })) as Projeto[];
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const list = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Projeto[];
 
-          setProjetos(list);
-        } catch (error) {
-          console.error("Erro ao buscar projetos:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
+      setProjetos(list);
+      setLoading(false);
+    });
 
-      if (!loading && user) fetchProjetos();
-    }, [user, loading]);
+    return () => unsubscribe();
+  }, [user]);
 
-   if (loading) {
-      return (
-        <div className="flex items-center justify-center min-h-screen bg-[#F4EAF4]">
-          <p className="text-[#7A4C77] text-lg">Carregando informações...</p>
-        </div>
-      );
-    }
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#F4EAF4]">
+        <p className="text-[#7A4C77] text-lg">Carregando informações...</p>
+      </div>
+    );
+  }
 
   if (loadingpage) {
     return (
