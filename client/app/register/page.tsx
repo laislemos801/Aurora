@@ -183,7 +183,7 @@ export default function Register() {
 
   return (
     <div
-      className="min-h-screen bg-no-repeat bg-center bg-cover bg-right flex items-center justify-center md:justify-end md:overflow-hidden"
+      className="min-h-screen bg-no-repeat bg-center bg-cover flex items-center justify-center md:justify-end md:overflow-hidden"
       style={{ backgroundImage: "url('/bg.png')" }}
     >
 
@@ -251,7 +251,7 @@ export default function Register() {
 
       <div className="flex flex-col z-10">
         
-        <div className="relative flex w-80 h-[550px] py-8 border border-white/40 bg-white/25 rounded-[40px] backdrop-blur-sm justify-center
+        <div className="relative flex w-80 h-[550px] py-8 border bg-[#F6F6F6] rounded-[40px] backdrop-blur-sm justify-center
         md:w-120 md:h-[650px] md:py-12 md:left-8 lg:w-160 xl:h-[680px] 2xl:left-auto 2xl:mr-10 margin-3xl">
 
           <div className="absolute -top-18 left-1/2 -translate-x-1/2">
