@@ -1,30 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { db } from "@/firebase/clientApp";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { useSearchParams } from "next/navigation";
 
-interface ProjectCardProps {
-  initialName?: string;
-  initialDescription?: string;
-}
+export default function ProjectCard() {
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get("projectId");
+  const turmaId = searchParams.get("turmaId");
+  const grupoId = searchParams.get("grupoId");
 
-export default function ProjectCard({
-  initialName = "Nome do projeto",
-  initialDescription = "Edite para adicionar uma descrição ao projeto.",
-}: ProjectCardProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [projectName, setProjectName] = useState(initialName);
-  const [projectDescription, setProjectDescription] = useState(initialDescription);
+  const [projectName, setProjectName] = useState<string>("Nome do projeto");
+  const [projectDescription, setProjectDescription] = useState<string>(
+    "Edite para adicionar uma descrição ao projeto."
+  );
+  const [loading, setLoading] = useState(true);
 
-  const handleButtonClick = () => {
-    if (isEditing) {
-      console.log("Salvando:", { projectName, projectDescription });
+  useEffect(() => {
+    if (!projectId || !turmaId || !grupoId) return; // 👈 evita o erro
+
+    const fetchData = async () => {
+      try {
+        const grupoRef = doc(db, "Projetos", projectId, "Turmas", turmaId, "Grupos", grupoId);
+        const grupoSnap = await getDoc(grupoRef);
+
+        if (grupoSnap.exists()) {
+          const data = grupoSnap.data();
+          if (data.nomeProjeto) setProjectName(data.nomeProjeto);
+          if (data.descricao) setProjectDescription(data.descricao);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados do grupo:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [projectId, turmaId, grupoId]);
+
+  const handleButtonClick = async () => {
+    if (isEditing && projectId && turmaId && grupoId) {
+      try {
+        const grupoRef = doc(db, "Projetos", projectId, "Turmas", turmaId, "Grupos", grupoId);
+        await updateDoc(grupoRef, {
+          nomeProjeto: projectName,
+          descricao: projectDescription,
+        });
+        console.log("Salvo com sucesso!");
+      } catch (error) {
+        console.error("Erro ao salvar:", error);
+      }
     }
     setIsEditing(!isEditing);
   };
 
+  if (loading) {
+    return (
+      <div className="bg-[#F6F6F6] rounded-lg shadow-md p-4">
+        <p className="text-[#7A4C77] text-sm">Carregando projeto...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#F6F6F6] rounded-lg shadow-md px-3 pt-3 pb-2 w-full flex flex-col justify-between lg:h-full pb-4">
-      {/* Input */}
       <input
         type="text"
         value={projectName}
@@ -35,7 +77,6 @@ export default function ProjectCard({
                     ${isEditing ? "bg-white focus:border focus:border-[#C288B3] focus:rounded-md" : "bg-transparent"}`}
       />
 
-      {/* Textarea */}
       <textarea
         value={projectDescription}
         onChange={(e) => setProjectDescription(e.target.value)}
@@ -51,7 +92,6 @@ export default function ProjectCard({
                     ${isEditing ? "bg-white focus:border focus:border-[#C288B3] focus:rounded-sm" : "bg-transparent"}`}
       />
 
-      {/* Botão */}
       <button
         onClick={handleButtonClick}
         className="self-end mt-auto px-6 py-0.5 rounded-sm bg-[#C288B3] text-white hover:bg-[#6a5583] transition text-sm font-medium "
