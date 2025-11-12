@@ -24,6 +24,7 @@ interface ModalInviteProfessorProps {
   professores: Professor[];
   setProfessores: (value: Professor[]) => void;
   projetoUid?: string;
+   onProfessorAdicionado: () => void;
 }
 
 export default function ModalInviteProfessor({

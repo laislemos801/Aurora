@@ -102,7 +102,7 @@ const Calendar = () => {
 
   return (
     <div className="flex h-full justify-center">
-    <div className="w-12/12 h-full flex flex-col items-center justify-center text-black">
+    <div className="w-12/12 h-10/12 flex flex-col items-center justify-center text-black ">
       {renderHeader()}
       {renderDays()}
       {renderCells()}
