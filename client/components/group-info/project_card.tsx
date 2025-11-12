@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { db } from "@/firebase/clientApp";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useSearchParams } from "next/navigation";
+import { MdEdit } from "react-icons/md";
 
 export default function ProjectCard() {
   const searchParams = useSearchParams();
@@ -19,7 +20,7 @@ export default function ProjectCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!projectId || !turmaId || !grupoId) return; // 👈 evita o erro
+    if (!projectId || !turmaId || !grupoId) return;
 
     const fetchData = async () => {
       try {
@@ -66,7 +67,8 @@ export default function ProjectCard() {
   }
 
   return (
-    <div className="bg-[#F6F6F6] rounded-lg shadow-md px-3 pt-3 pb-2 w-full flex flex-col justify-between lg:h-full pb-4">
+    <div className="bg-[#F6F6F6] rounded-lg shadow-md px-3 pt-3 w-full flex flex-col justify-between relative lg:h-full pb-4">
+
       <input
         type="text"
         value={projectName}
@@ -92,12 +94,23 @@ export default function ProjectCard() {
                     ${isEditing ? "bg-white focus:border focus:border-[#C288B3] focus:rounded-sm" : "bg-transparent"}`}
       />
 
-      <button
-        onClick={handleButtonClick}
-        className="self-end mt-auto px-6 py-0.5 rounded-sm bg-[#C288B3] text-white hover:bg-[#6a5583] transition text-sm font-medium "
-      >
-        {isEditing ? "Salvar" : "Editar"}
-      </button>
+      <div className="flex justify-end items-center mt-2">
+        {isEditing ? (
+          <button
+            onClick={handleButtonClick}
+            className="px-6 py-0.5 rounded-sm bg-[#7B6294] cursor-pointer text-white hover:bg-[#6a5583] transition text-sm font-medium"
+          >
+            Salvar
+          </button>
+        ) : (
+          <button
+            onClick={handleButtonClick}
+            className="bg-[#7B6294] p-2 rounded-full shadow cursor-pointer hover:bg-[#674984] transition"
+          >
+            <MdEdit size={14} className="text-[#FCF3FA]" />
+          </button>
+        )}
+      </div>
     </div>
   );
 }

@@ -53,7 +53,7 @@ export default function ToolBarLeft() {
           } cursor-pointer`}
           onClick={() => router.push("/edit-profile")}
         >
-          <MdOutlineAccountCircle size={22}
+          <MdOutlineAccountCircle size={24}
           />
         </div>
       </div>

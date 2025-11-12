@@ -199,7 +199,7 @@ export default function CommentsCard() {
                     </p>
                   </div>
                 </div>
-                <span className="text-[10px] text-gray-400 self-end mt-1 mr-1">
+                <span className="text-[12px] text-[#949494] self-end mt-1 mr-1">
                   {c.data}
                 </span>
               </div>

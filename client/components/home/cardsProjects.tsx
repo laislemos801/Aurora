@@ -122,7 +122,7 @@ export default function CardsPorjects({ projetos }: CardsProjectsProps) {
                           setProjetoUid(content.id);
                           setIsInviteOpen(true);
                         }}
-                        className="w-7 h-7 flex items-center justify-center rounded-full bg-[#C288B3] text-md shadow-sm hover:scale-105 transition"
+                        className="cursor-pointer w-7 h-7 flex items-center justify-center rounded-full bg-[#C288B3] text-md shadow-sm hover:scale-105 transition"
                       >
                         +
                       </button>
@@ -131,7 +131,7 @@ export default function CardsPorjects({ projetos }: CardsProjectsProps) {
 
                   <button
                     onClick={() => router.push(`/projects-info/${content.id}`)}
-                    className="bg-[#3B3B3B] text-white px-4 rounded-full py-1 text-sm cursor-pointer"
+                    className="bg-[#7B6294] hover:bg-[#674984] text-white px-4 rounded-full py-1 text-sm cursor-pointer"
                   >
                     Ver mais
                   </button>
