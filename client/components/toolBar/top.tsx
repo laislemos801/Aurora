@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import aurora from "@/public/AURORA.svg";
-import avatar from "@/public/avatar.png";
 import widget from "@/public/widgets.svg";
 import { MdOutlineCircleNotifications } from "react-icons/md";
 import { MdExitToApp } from "react-icons/md";
@@ -13,15 +12,19 @@ import { FaRegNoteSticky } from "react-icons/fa6";
 import icon from "@/public/for_you.svg";
 import 'primeicons/primeicons.css';
 import { usePathname, useRouter } from "next/navigation";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { auth, db, storage } from "@/firebase/clientApp";
+import { doc} from "firebase/firestore";
+import { auth, db  } from "@/firebase/clientApp";
 import { onAuthStateChanged } from "firebase/auth";
-import account_circle from "@/public/account_circle.png";
 import { onSnapshot } from "firebase/firestore";
+
+interface Aluno {
+  nome: string;
+  ra: number;
+}
 
 interface Turma {
   nome: string;
-  arquivo?: File | null;
+  alunos: Aluno[];
 }
 
 export default function ToolBarTop() {
@@ -60,7 +63,7 @@ export default function ToolBarTop() {
       // Escuta mudanças em tempo real
       const unsubscribeSnapshot = onSnapshot(userRef, (snap) => {
         if (snap.exists()) {
-          const data = snap.data() as any;
+          const data = snap.data()
           setUserData({
             nome: data.nome || "Professor",
             profilePicture: data.profilePicture || "",

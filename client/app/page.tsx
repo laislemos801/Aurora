@@ -8,6 +8,7 @@ import { IoSearchSharp } from "react-icons/io5";
 import { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/firebase/clientApp";
+import NullProjects from "@/components/home/nullProjects";
 
 interface Projeto {
   id: string;
@@ -110,7 +111,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="w-full h-6/12 flex relative justify-end">
+      {estatisticas.totalProjetos ? <div className="w-full h-6/12 flex relative justify-end">
         <div className="flex absolute left-0 top-[25%] w-4/12">
           <AllProjects quantidade={estatisticas.totalProjetos}/>
         </div>
@@ -125,7 +126,8 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
+      </div>:
+      <NullProjects nome={user.name}/>}
 
       <div className="w-full h-6/12 pt-6 p-8">
         <Statistics
