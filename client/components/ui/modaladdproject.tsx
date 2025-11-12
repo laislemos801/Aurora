@@ -161,7 +161,7 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
             return;
         }
 
-        // 🔹 Garante que o criador seja adicionado como professor
+        // Garante que o criador seja adicionado como professor
         const professoresUIDs = Array.from(
             new Set([user.uid, ...professores.map((p) => p.uid)])
         );
@@ -360,9 +360,16 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
             </div>
 
             <div className="w-full flex justify-end items-end pt-2">
-                <button onClick={handleSalvarProjeto} className="bg-[#C288B3] text-[#FCF3FA] font-semibold px-8 py-2 sm:px-6 sm:py-2 md:px-16 md:py-2 text-center rounded-lg hover:bg-[#90416B] transition">
-                Salvar
+               <button
+                    onClick={handleSalvarProjeto}
+                    className={`font-semibold px-8 py-2 sm:px-6 sm:py-2 md:px-16 md:py-2 text-center rounded-lg transition
+                        ${!nome || !descricao || !semestre || !ano || !curso
+                            ? "bg-gray-300 text-gray-500 hover:bg-gray-300 cursor-pointer"
+                            : "bg-[#90416B] text-[#FCF3FA] hover:bg-[#782F56] cursor-pointer"}`}>
+                    Salvar
                 </button>
+
+
             </div>
         </div>
     </div>
@@ -409,7 +416,7 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
                             <button
                                 type="button"
                                 onClick={() => setUploadedFile(null)}
-                                className="text-[#90416B] hover:bg-[#C288B3] rounded-full p-1 transition"
+                                className="text-[#B65254] hover:bg-[#C288B3] rounded-full p-1 transition"
                             >
                                 <IoTrashOutline size={20} />
                             </button>
@@ -441,8 +448,11 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
                 <div className="flex justify-end mt-4">
                     <button
                         onClick={handleSalvarTurma}
-                        className="bg-[#C288B3] text-[#FCF3FA] font-semibold px-6 sm:px-10 py-2 rounded-lg hover:bg-[#90416B] transition"
-                    >
+                        className={`font-semibold px-6 sm:px-10 py-2 rounded-lg transition
+                            ${!nomeTurma || !uploadedFile
+                                ? "bg-gray-300 text-gray-500 hover:bg-gray-300 cursor-pointer"
+                                : "bg-[#90416B] text-[#FCF3FA] hover:bg-[#782F56] cursor-pointer"}`}
+                        >
                         Salvar turma
                     </button>
                 </div>
