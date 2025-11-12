@@ -12,23 +12,14 @@ import { FaRegNoteSticky } from "react-icons/fa6";
 import icon from "@/public/for_you.svg";
 import 'primeicons/primeicons.css';
 import { usePathname, useRouter } from "next/navigation";
-import { doc} from "firebase/firestore";
-import { auth, db  } from "@/firebase/clientApp";
+import { doc } from "firebase/firestore";
+import { auth, db } from "@/firebase/clientApp";
 import { onAuthStateChanged } from "firebase/auth";
 import { onSnapshot } from "firebase/firestore";
-
-interface Aluno {
-  nome: string;
-  ra: number;
-}
-
-interface Turma {
-  nome: string;
-  alunos: Aluno[];
-}
+import { Turma } from "@/types/turma";
 
 export default function ToolBarTop() {
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false); 
   const [isOpen, setIsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddClassOpen, setIsAddClassOpen] = useState(false);

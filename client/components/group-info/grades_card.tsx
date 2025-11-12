@@ -1,17 +1,102 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { FiPlus } from "react-icons/fi";
+import { db } from "@/firebase/clientApp";
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 
 interface GradeItem {
   key: string;
   label: string;
 }
 
+interface Aluno {
+  nome: string;
+  ra: number;
+}
+
 export default function GradesCard() {
   const [selectedStudent, setSelectedStudent] = useState("Alunos");
+  const [alunos, setAlunos] = useState<Aluno[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Estado das notas
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get("projectId");
+  const turmaId = searchParams.get("turmaId");
+  const grupoId = searchParams.get("grupoId");
+
+  // === BUSCAR ALUNOS ===
+  useEffect(() => {
+    const fetchAlunos = async () => {
+      if (!projectId || !turmaId || !grupoId) return;
+      setLoading(true);
+
+      try {
+        const grupoRef = doc(db, "Projetos", projectId, "Turmas", turmaId, "Grupos", grupoId);
+        const grupoSnap = await getDoc(grupoRef);
+
+        if (grupoSnap.exists()) {
+          const data = grupoSnap.data() as any;
+
+          if (Array.isArray(data.alunos) && data.alunos.length > 0) {
+            const listaOrdenada = data.alunos
+              .map((a: any) => ({
+                nome: String(a.nome ?? "Sem nome"),
+                ra: Number(a.ra ?? 0),
+              }))
+              // ✅ Ordena alfabeticamente (case-insensitive)
+              .sort((a: { nome: string; }, b: { nome: any; }) => a.nome.localeCompare(b.nome, "pt", { sensitivity: "base" }));
+
+            setAlunos(listaOrdenada);
+            setSelectedStudent(listaOrdenada[0]?.nome ?? "Alunos");
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Fallback: subcoleção
+        const alunosRef = collection(
+          db,
+          "Projetos",
+          projectId,
+          "Turmas",
+          turmaId,
+          "Grupos",
+          grupoId,
+          "alunos"
+        );
+        const snap = await getDocs(alunosRef);
+
+        if (!snap.empty) {
+          const lista = snap.docs.map((doc) => {
+            const d = doc.data() as any;
+            return { nome: String(d.nome ?? "Sem nome"), ra: Number(d.ra ?? 0) };
+          });
+
+          // ✅ Também ordena no fallback
+          const listaOrdenada = lista.sort((a, b) =>
+            a.nome.localeCompare(b.nome, "pt", { sensitivity: "base" })
+          );
+
+          setAlunos(listaOrdenada);
+          setSelectedStudent(listaOrdenada[0]?.nome ?? "Alunos");
+        } else {
+          setAlunos([]);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar alunos:", err);
+        setAlunos([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAlunos();
+  }, [projectId, turmaId, grupoId]);
+
+
+  // === ESTADOS DAS NOTAS ===
   const [grades, setGrades] = useState<Record<string, string>>({
     documentacao: "",
     fichaHoras: "",
@@ -19,7 +104,6 @@ export default function GradesCard() {
     apresentacao: "",
   });
 
-  // Estado dos campos exibidos
   const [gradeItems, setGradeItems] = useState<GradeItem[]>([
     { key: "documentacao", label: "Documentação" },
     { key: "fichaHoras", label: "Ficha de Horas" },
@@ -27,7 +111,6 @@ export default function GradesCard() {
     { key: "apresentacao", label: "Apresentação" },
   ]);
 
-  // Controle para adicionar novo campo
   const [adding, setAdding] = useState(false);
   const [newFieldName, setNewFieldName] = useState("");
 
@@ -39,7 +122,6 @@ export default function GradesCard() {
     if (!newFieldName.trim()) return;
     const key = newFieldName.toLowerCase().replace(/\s+/g, "_");
 
-    // Evita duplicados
     if (gradeItems.some((item) => item.key === key)) return;
 
     const newItem = { key, label: newFieldName };
@@ -56,17 +138,25 @@ export default function GradesCard() {
         <h2 className="text-md font-medium text-gray-800 2xl:text-[18px]">Notas</h2>
 
         <div className="relative w-max flex items-center">
-          <select
-            className="bg-[#3B3B3B] rounded-sm px-2 py-0.5 pr-6 text-[9px] text-[#FCF3FA] font-light border-[0.5px] border-[#FCF3FA] appearance-none 
-            sm:text-[11px] xl:text-[13px]"
-            value={selectedStudent}
-            onChange={(e) => setSelectedStudent(e.target.value)}
-          >
-            <option>Adriana Lopes</option>
-            <option>Afonso Martins</option>
-            <option>Alessandra Ribeiro</option>
-            <option>Amanda Nogueira</option>
-          </select>
+          {loading ? (
+            <div className="text-xs text-gray-500">Carregando...</div>
+          ) : alunos.length > 0 ? (
+            <select
+              className="bg-[#3B3B3B] rounded-sm px-2 py-0.5 pr-6 text-[9px] text-[#FCF3FA] font-light border-[0.5px] border-[#FCF3FA] appearance-none 
+              sm:text-[11px] xl:text-[13px]"
+              value={selectedStudent}
+              onChange={(e) => setSelectedStudent(e.target.value)}
+            >
+              {alunos.map((a) => (
+                <option key={a.ra} value={a.nome}>
+                  {a.nome}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="text-xs text-gray-500">Nenhum aluno</div>
+          )}
+
           <div className="pointer-events-none absolute right-2 flex items-center h-full">
             <i className="pi pi-chevron-down text-[10px] text-[#FCF3FA]"></i>
           </div>
@@ -80,7 +170,9 @@ export default function GradesCard() {
             key={item.key}
             className="flex justify-between items-center w-full bg-white py-2 px-2 rounded-sm"
           >
-            <span className="text-[#000000] text-[12px] lg:text-[13px] xl:text-[14px]">{item.label}</span>
+            <span className="text-[#000000] text-[12px] lg:text-[13px] xl:text-[14px]">
+              {item.label}
+            </span>
             <input
               type="number"
               value={grades[item.key] || ""}

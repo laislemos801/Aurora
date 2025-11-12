@@ -9,6 +9,8 @@ import { adicionarProfessorAoProjeto } from "@/firebase/addProfessor";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/firebase/clientApp";
 import { toast } from "react-hot-toast";
+import { removerProfessorDoProjeto } from "@/firebase/removeProfessor";
+
 
 interface Professor {
   nome: string;
@@ -79,16 +81,21 @@ export default function ModalInviteProfessor({
 
   const handleRemoverProfessor = async (index: number) => {
     const professorRemovido = professores[index];
-
     const novos = [...professores];
     novos.splice(index, 1);
     setProfessores(novos);
 
     if (projetoUid) {
-      // opcional: criar função removerProfessorDoProjeto()
-      toast.success(`Professor ${professorRemovido.nome} removido (lógica pode ser adicionada).`);
+      try {
+        await removerProfessorDoProjeto(projetoUid, professorRemovido.uid);
+        toast.success(`Professor ${professorRemovido.nome} removido do projeto.`);
+      } catch (error) {
+        console.error(error);
+        toast.error("Erro ao remover professor do projeto.");
+      }
     }
   };
+
 
   if (!isInviteOpen) return null;
 
@@ -139,7 +146,7 @@ export default function ModalInviteProfessor({
 
                 <button
                   onClick={() => handleRemoverProfessor(i)}
-                  className="text-[#D82042] hover:bg-gray-100 rounded-full p-2 transition"
+                  className="text-[#90416B] hover:bg-[#C288B3] cursor-pointer rounded-full p-2 transition"
                 >
                   <IoTrashOutline className="text-[18px]" />
                 </button>

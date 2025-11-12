@@ -8,7 +8,7 @@ import AttendanceCard from "@/components/group-info/attendance_card";
 import GradesCard from "@/components/group-info/grades_card";
 import CommentsCard from "@/components/group-info/comments_card";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase/clientApp";
@@ -21,6 +21,7 @@ export default function GroupInfo() {
   const grupoId = searchParams.get("grupoId");
 
   const [grupo, setGrupo] = useState<any>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (!projectId || !turmaId || !grupoId) return;
@@ -63,7 +64,7 @@ export default function GroupInfo() {
     >
       {/* Header */}
       <div className="flex items-center self-start gap-2 flex-shrink-0">
-        <button>
+        <button onClick={() => router.push(`/projects-info/${projectId}`)}>
           <Image src={backArrow} alt="Voltar" width={32} height={32} />
         </button>
         <p className="text-lg font-medium">Grupo 01</p>

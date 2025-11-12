@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { FiMoreVertical, FiSearch, FiPlus } from "react-icons/fi";
 import { toast } from "react-hot-toast";
-import { doc, updateDoc, arrayUnion, getDocs, collection } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion, getDocs, collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase/clientApp';
+import { RiDeleteBin6Line } from "react-icons/ri";
 
 interface Aluno {
   nome: string;
@@ -20,12 +21,13 @@ interface Grupo {
 interface Props {
   alunos: Aluno[];
   onAdd: (nome: string, ra: number) => void;
+  onDelete: (ra: number) => void;
   grupos?: Grupo[];
   turmaId: string;
   projectId: string;
 }
 
-export function AlunosList({ alunos, onAdd, grupos = [], turmaId, projectId }: Props) {
+export function AlunosList({ alunos, onAdd, grupos = [], turmaId, projectId, onDelete }: Props) {
   const [search, setSearch] = useState("");
   const [nomeAlunoNovo, setNomeAlunoNovo] = useState("");
   const [raAlunoNovo, setRaAlunoNovo] = useState("");
@@ -97,17 +99,23 @@ export function AlunosList({ alunos, onAdd, grupos = [], turmaId, projectId }: P
   };
 
   useEffect(() => {
-    if (!turmaId) return; 
-    const fetchGrupos = async () => {
-      const snap = await getDocs(collection(db, "Projetos", projectId, "Turmas", turmaId, "Grupos"));
+    if (!turmaId || !projectId) return;
+
+    const gruposRef = collection(db, "Projetos", projectId, "Turmas", turmaId, "Grupos");
+
+    const unsubscribe = onSnapshot(gruposRef, (snap) => {
+      const novosGrupos = snap.docs.map(docSnap => {
+        const data = docSnap.data() as Omit<Grupo, "id">;
+        return { id: docSnap.id, alunos: data.alunos ?? [], nome: data.nome };
+      });
       setGrupos(
-        snap.docs.map(docSnap => {
-          const data = docSnap.data() as Omit<Grupo, 'id'>;
-          return { id: docSnap.id, alunos: data.alunos ?? [], nome: data.nome };
-        })
+        novosGrupos.sort((a, b) =>
+          a.nome.localeCompare(b.nome, "pt", { numeric: true })
+        )
       );
-    };
-    fetchGrupos();
+    });
+
+    return () => unsubscribe();
   }, [turmaId, projectId]);
 
   return (
@@ -134,9 +142,18 @@ export function AlunosList({ alunos, onAdd, grupos = [], turmaId, projectId }: P
           >
             <span className="text-sm text-gray-800">{aluno.nome}</span>
 
-            <div className="relative">
+            <div className="flex items-center gap-2 relative">
+              {/*Botão de excluir antes dos três pontinhos */}
+              <RiDeleteBin6Line
+                className=" flex-shrink-0 text-[#90416B] p-2 hover:bg-[#C288B3] rounded-full transition"
+                size={30}
+                onClick={() => onDelete(aluno.ra)}
+                title="Excluir aluno"
+              />
+
+              {/* ⋮ Botão de menu */}
               <FiMoreVertical
-                className="text-[#9B6CC5]"
+                className="text-[#9B6CC5] cursor-pointer"
                 size={15}
                 onClick={() => setMenuAberto(menuAberto === aluno.ra ? null : aluno.ra)}
               />
@@ -144,36 +161,45 @@ export function AlunosList({ alunos, onAdd, grupos = [], turmaId, projectId }: P
               {menuAberto === aluno.ra && (
                 <div className="absolute right-0 top-5 bg-[#F4F4F4] rounded-xl shadow-lg border border-gray-200 
                   w-56 z-50 py-2 px-1 max-h-[130px] overflow-y-auto">
-                  {gruposState.map((g) => {
-                    const isAtual = grupoAtual(aluno.ra) === g.nome;
-                    return (
-                      <button
-                        key={g.id}
-                        onClick={() => {
-                          handleMoverAluno(aluno.ra, g.nome);
-                          setMenuAberto(null);
-                        }}
-                        className={`flex items-center w-full text-left px-1 py-1 text-[13px] hover:bg-gray-50 rounded ${
-                          isAtual ? "text-[#C288B3] font-semibold" : "text-gray-800 italic underline font-medium"
-                        }`}
-                      >
-                        {isAtual ? (
-                          <><span className="mr-2">✓</span>{g.nome}</>
-                        ) : (
-                          <>
-                            <img src="/plus_black.svg" alt="plus" className="w-2.5 h-2.5 mr-2" />
-                            Mover para {g.nome}
-                          </>
-                        )}
-                      </button>
-                    );
-                  })}
+                  {gruposState.length === 0 ? (
+                    <p className="text-gray-500 text-center text-sm italic px-2 py-1">
+                      Nenhum grupo criado ainda.
+                    </p>
+                  ) : (
+                    gruposState.map((g) => {
+                      const isAtual = grupoAtual(aluno.ra) === g.nome;
+                      return (
+                        <button
+                          key={g.id}
+                          onClick={() => {
+                            handleMoverAluno(aluno.ra, g.nome);
+                            setMenuAberto(null);
+                          }}
+                          className={`flex items-center w-full text-left px-1 py-1 text-[13px] hover:bg-gray-50 rounded ${
+                            isAtual ? "text-[#C288B3] font-semibold" : "text-gray-800 italic underline font-medium"
+                          }`}
+                        >
+                          {isAtual ? (
+                            <>
+                              <span className="mr-2">✓</span>{g.nome}
+                            </>
+                          ) : (
+                            <>
+                              <img src="/plus_black.svg" alt="plus" className="w-2.5 h-2.5 mr-2" />
+                              Mover para {g.nome}
+                            </>
+                          )}
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
               )}
             </div>
           </div>
         ))}
       </div>
+
 
       {/* ADICIONAR ALUNO */}
       <div className="mt-3">

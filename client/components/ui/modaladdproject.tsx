@@ -13,6 +13,8 @@ import { criarProjeto } from "@/firebase/addProject";
 import * as XLSX from "xlsx";
 import { toast } from "react-hot-toast";
 import { getAuth } from "firebase/auth";
+import { Turma } from "@/types/turma";
+import { Professor } from "@/types/professor";
 
 interface AlunoXLS {
   nome: string;
@@ -21,20 +23,7 @@ interface AlunoXLS {
 
 interface Aluno {
   nome: string;
-  ra: number;
-}
-
-
-interface Professor {
-  uid: string; 
-  nome: string;
-  email: string;
-}
-
-
-interface Turma {
-  nome: string;
-  alunos: Aluno[];
+  ra: number | null;
 }
 
 interface ModalAddProjectProps {
@@ -49,67 +38,54 @@ interface ModalAddProjectProps {
 // Extrair dados do arquivo .xls, .xlsx ou .csv
 export async function extrairAlunosDoArquivo(file: File): Promise<Aluno[]> {
   const fileName = file.name.toLowerCase();
-
   let data: any[] = [];
 
   try {
+    // Ler conteúdo dependendo da extensão
     if (fileName.endsWith(".csv")) {
-      // CSV (que é o que vem do canvas)
       const text = await file.text();
       const workbook = XLSX.read(text, { type: "string" });
-      const firstSheet = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheet];
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       data = XLSX.utils.sheet_to_json(worksheet);
     } else {
-      // XLS ou XLSX
       const arrayBuffer = await file.arrayBuffer();
       const workbook = XLSX.read(arrayBuffer, { type: "array" });
-      const firstSheet = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheet];
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       data = XLSX.utils.sheet_to_json(worksheet);
     }
 
-    // Extrai apenas o nome; o RA ta como opcional
-    const alunos: Aluno[] = data
-      .map((row: any) => {
-        const nome =
-          row.Student || // CSV do Canvas (em inglês)
-          row.Nome || // XLS genérico
-          row.Aluno || // XLS customizado
-          row["Nome do Aluno"] ||
-          null;
+    // Mapeia e normaliza os alunos
+    const alunos = data
+        .map((row: any, index: number): Aluno | null => {
+            const nome =
+            row.Student ||
+            row.Nome ||
+            row.Aluno ||
+            row["Nome do Aluno"] ||
+            null;
 
-        const ra =
-          row.RA ||
-          row.Id ||
-          null;
+            const ra = row.RA || row.Id;
 
-        // Se não houver nome, ignora a linha
-        if (!nome) return null;
+            if (!nome) return null;
 
-        return {
-          nome: String(nome).trim(),
-          ra: ra ? Number(ra) || 0 : 0, // RA opcional
-        };
-      })
-      .filter(
-        (a): a is Aluno =>
-          !!a && a.nome.toUpperCase() !== "POINTS POSSIBLE" // remove cabeçalho do arquivo
-      );
+            const safeRa =
+            ra && !isNaN(Number(ra)) ? Number(ra) : null;
 
-        
+            return { nome: String(nome).trim(), ra: safeRa };
+        })
+        .filter((a): a is Aluno => !!a && a.nome.toUpperCase() !== "POINTS POSSIBLE");
+
     if (!alunos.length) {
-        toast.error("Nenhum aluno encontrado no arquivo selecionado.");
+      toast.error("Nenhum aluno encontrado no arquivo.");
     }
-    return alunos;
 
+    return alunos;
   } catch (error) {
     console.error("Erro ao extrair alunos:", error);
-    throw new Error("Não foi possível ler o arquivo. Verifique o formato.");
+    toast.error("Não foi possível ler o arquivo.");
+    return [];
   }
 }
-
-
 
 
 export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAddClassOpen,turmas,setTurmas,
@@ -185,22 +161,28 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
             return;
         }
 
-        // 🔹 Garante que o criador seja adicionado como professor
+        // Garante que o criador seja adicionado como professor
         const professoresUIDs = Array.from(
             new Set([user.uid, ...professores.map((p) => p.uid)])
         );
 
         const projetoData = {
-            nome,
-            descricao,
-            semestre,
-            ano,
-            curso,
-            turmas, // cada turma já contém a lista de alunos
-            professores: professoresUIDs, // inclui o criador
+        nome,
+        descricao,
+        semestre,
+        ano,
+        curso,
+        turmas: turmas.map((t) => ({
+        ...t,
+            alunos: (t.alunos ?? []).map((a) => ({
+                ...a,
+                ra: a.ra ?? 0,
+            })),
+        })),
+        professores: professoresUIDs,
         };
 
-        const res = await criarProjeto(projetoData);
+        const res = await criarProjeto(projetoData as Parameters<typeof criarProjeto>[0]);
 
         if (res.sucesso) {
             if (!res.uid) {
@@ -319,7 +301,7 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
                                         e.stopPropagation(); // previne abrir o modal ao clicar no botão de remover
                                         handleRemoverTurma(i);
                                     }}
-                                    className="text-[#90416B] hover:bg-[#C288B3] rounded-full p-1 transition"
+                                    className="text-[#90416B] hover:bg-[#C288B3] cursor-pointer rounded-full p-1 transition"
                                     >
                                     <IoTrashOutline size={20} />
                                     </button>
@@ -379,9 +361,16 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
             </div>
 
             <div className="w-full flex justify-end items-end pt-2">
-                <button onClick={handleSalvarProjeto} className="bg-[#C288B3] text-[#FCF3FA] font-semibold px-8 py-2 sm:px-6 sm:py-2 md:px-16 md:py-2 text-center rounded-lg hover:bg-[#90416B] transition">
-                Salvar
+               <button
+                    onClick={handleSalvarProjeto}
+                    className={`font-semibold px-8 py-2 sm:px-6 sm:py-2 md:px-16 md:py-2 text-center rounded-lg transition
+                        ${!nome || !descricao || !semestre || !ano || !curso
+                            ? "bg-gray-300 text-gray-500 hover:bg-gray-300 cursor-pointer"
+                            : "bg-[#90416B] text-[#FCF3FA] hover:bg-[#782F56] cursor-pointer"}`}>
+                    Salvar
                 </button>
+
+
             </div>
         </div>
     </div>
@@ -428,7 +417,7 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
                             <button
                                 type="button"
                                 onClick={() => setUploadedFile(null)}
-                                className="text-[#90416B] hover:bg-[#C288B3] rounded-full p-1 transition"
+                                className="text-[#B65254] hover:bg-[#C288B3] rounded-full p-1 transition"
                             >
                                 <IoTrashOutline size={20} />
                             </button>
@@ -460,8 +449,11 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
                 <div className="flex justify-end mt-4">
                     <button
                         onClick={handleSalvarTurma}
-                        className="bg-[#C288B3] text-[#FCF3FA] font-semibold px-6 sm:px-10 py-2 rounded-lg hover:bg-[#90416B] transition"
-                    >
+                        className={`font-semibold px-6 sm:px-10 py-2 rounded-lg transition
+                            ${!nomeTurma || !uploadedFile
+                                ? "bg-gray-300 text-gray-500 hover:bg-gray-300 cursor-pointer"
+                                : "bg-[#90416B] text-[#FCF3FA] hover:bg-[#782F56] cursor-pointer"}`}
+                        >
                         Salvar turma
                     </button>
                 </div>

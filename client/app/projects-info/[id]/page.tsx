@@ -1,12 +1,14 @@
 'use client';
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { addDoc, doc, getDoc, collection, getDocs, updateDoc, arrayUnion } from 'firebase/firestore';
+import { addDoc, doc, getDoc, collection, getDocs, updateDoc, arrayUnion, deleteDoc } from 'firebase/firestore';
 import { auth, db } from '@/firebase/clientApp';
 import { onAuthStateChanged } from 'firebase/auth';
 import { toast } from "react-hot-toast";
 import * as XLSX from "xlsx";
+import { Professor } from "@/types/professor";
 
 import { ProjectHeader } from '@/components/project-info/ProjectHeader';
 import { TurmasSelector } from '@/components/project-info/TurmasSelector';
@@ -24,13 +26,6 @@ interface Turma {
 interface Aluno {
   nome: string;
   ra: number;
-}
-
-interface ProfessorData {
-  profilePicture?: string;
-  nome: string;
-  email?: string;
-  uid?: string;
 }
 
 interface Grupo {
@@ -57,11 +52,16 @@ export async function extrairAlunosDoArquivo(file: File): Promise<Aluno[]> {
   }
 
   const alunos = data
-    .map((row: any) => {
+    .map((row: any, index: number) => {
       const nome = row.Student || row.Nome || row.Aluno || row["Nome do Aluno"];
-      const ra = row.RA || row.Id || null;
+      const ra = row.RA || row.Id;
+
       if (!nome) return null;
-      return { nome: String(nome).trim(), ra: ra ? Number(ra) || 0 : 0 };
+
+      // Se não tiver RA ou for inválido, gera um único
+      const safeRa = ra && !isNaN(Number(ra)) ? Number(ra) : Date.now() + index;
+
+      return { nome: String(nome).trim(), ra: safeRa };
     })
     .filter((a): a is Aluno => !!a && a.nome.toUpperCase() !== "POINTS POSSIBLE");
 
@@ -69,7 +69,9 @@ export async function extrairAlunosDoArquivo(file: File): Promise<Aluno[]> {
   return alunos;
 }
 
+
 export default function ProjectInfoPage() {
+  const router = useRouter();
   const params = useParams();
   const projectId = params.id as string;
 
@@ -88,7 +90,7 @@ export default function ProjectInfoPage() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [turmaEditandoIndex, setTurmaEditandoIndex] = useState<number | null>(null);
 
-  const [professoresData, setProfessoresData] = useState<ProfessorData[]>([]);
+  const [professoresData, setProfessoresData] = useState<Professor[]>([]);
 
   // Autenticação do usuário
   useEffect(() => {
@@ -214,14 +216,112 @@ export default function ProjectInfoPage() {
   if (loading) return <p>Carregando...</p>;
   if (error) return <p>{error}</p>;
 
+  // Excluir uma turma e todos os seus grupos
+  const handleDeleteTurma = async (turmaId: string) => {
+
+    try {
+      // Buscar todos os grupos da turma
+      const gruposSnap = await getDocs(
+        collection(db, "Projetos", projectId, "Turmas", turmaId, "Grupos")
+      );
+
+      // Excluir cada grupo
+      const deletePromises = gruposSnap.docs.map((grupoDoc) =>
+        deleteDoc(
+          doc(db, "Projetos", projectId, "Turmas", turmaId, "Grupos", grupoDoc.id)
+        )
+      );
+      await Promise.all(deletePromises);
+
+      // Excluir a turma
+      await deleteDoc(doc(db, "Projetos", projectId, "Turmas", turmaId));
+
+      // Atualizar estado local
+      setTurmas((prev) => prev.filter((t) => t.id !== turmaId));
+      setTurmaSelecionadaId(null);
+
+      toast.success("Turma excluída com sucesso!");
+    } catch (err) {
+      console.error("Erro ao excluir turma:", err);
+      toast.error("Erro ao excluir a turma.");
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!projectId) return;
+
+    try {
+      // Buscar todas as turmas do projeto
+      const turmasSnap = await getDocs(collection(db, "Projetos", projectId, "Turmas"));
+
+      for (const turmaDoc of turmasSnap.docs) {
+        const turmaId = turmaDoc.id;
+
+        // Buscar todos os grupos dentro da turma
+        const gruposSnap = await getDocs(collection(db, "Projetos", projectId, "Turmas", turmaId, "Grupos"));
+
+        // Apagar todos os grupos dessa turma
+        for (const grupoDoc of gruposSnap.docs) {
+          await deleteDoc(doc(db, "Projetos", projectId, "Turmas", turmaId, "Grupos", grupoDoc.id));
+        }
+
+        // Apagar a turma após remover seus grupos
+        await deleteDoc(doc(db, "Projetos", projectId, "Turmas", turmaId));
+      }
+
+      // Apagar o documento principal do projeto
+      await deleteDoc(doc(db, "Projetos", projectId));
+
+      toast.success("Projeto excluído com sucesso!");
+      router.push("/all-projects");
+    } catch (err) {
+      console.error("Erro ao excluir projeto:", err);
+      toast.error("Erro ao excluir o projeto.");
+    }
+  };
+
+  const handleExcluirAluno = async (alunoRa: number) => {
+    if (!turmaSelecionadaId) {
+      toast.error("Nenhuma turma selecionada");
+      return;
+    }
+
+    try {
+      const turmaRef = doc(db, "Projetos", projectId, "Turmas", turmaSelecionadaId);
+      const turmaAtual = turmas.find(t => t.id === turmaSelecionadaId);
+      if (!turmaAtual) return;
+
+      const novaLista = turmaAtual.alunos.filter(a => a.ra !== alunoRa);
+
+      await updateDoc(turmaRef, { alunos: novaLista });
+
+      setTurmas(prev =>
+        prev.map(t =>
+          t.id === turmaSelecionadaId ? { ...t, alunos: novaLista } : t
+        )
+      );
+
+      toast.success("Aluno excluído!");
+    } catch (error) {
+      console.error("Erro ao excluir aluno:", error);
+      toast.error("Erro ao excluir aluno");
+    }
+  };
+
   return (
   <div className="flex flex-col w-full flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2 sm:pl-4 lg:pl-6">
     <ProjectHeader
       nome={project?.nome}
+      curso={project?.curso}
       semestre={project?.semestre}
       ano={project?.ano}
       professores={professoresData}
+      onDelete={handleDeleteProject}
+      projetoUid={projectId}
+      setProfessores={setProfessoresData}
+      onBack={() => router.push("/all-projects")}
     />
+
 
     <div className="flex-1 w-full pl-3 pt-5">
       <div className="flex flex-col bg-[#FCF3FA] shadow-md rounded-l-[15px] md:rounded-l-[25px] rounded-r-none 
@@ -241,6 +341,7 @@ export default function ProjectInfoPage() {
               <AlunosList
                 alunos={turmaSelecionada.alunos ?? []}
                 onAdd={handleAddAluno}
+                onDelete={handleExcluirAluno} 
                 grupos={grupos}
                 turmaId={turmaSelecionada.id}
                 projectId={projectId}
@@ -251,6 +352,7 @@ export default function ProjectInfoPage() {
               <GruposList
                 projectId={projectId}
                 turmaId={turmaSelecionada.id}
+                onDeleteTurma={() => handleDeleteTurma(turmaSelecionada.id)}
               />
             </div>
           </div>
