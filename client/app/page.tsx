@@ -23,7 +23,7 @@ export default function Home() {
   const { user, loading } = useAuthGuard();
   const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [loadingPage, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(""); // 🔍 novo estado
+  const [searchTerm, setSearchTerm] = useState(""); 
   const [estatisticas, setEstatisticas] = useState({
     totalProjetos: 0,
     totalTurmas: 0,

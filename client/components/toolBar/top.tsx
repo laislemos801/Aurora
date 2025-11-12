@@ -8,7 +8,6 @@ import { MdExitToApp } from "react-icons/md";
 import ModalAddProject from "../ui/modaladdproject";
 import { PiHouseBold } from "react-icons/pi";
 import { FaRegNoteSticky } from "react-icons/fa6";
-import icon from "@/public/for_you.svg";
 import 'primeicons/primeicons.css';
 import { usePathname, useRouter } from "next/navigation";
 import { doc } from "firebase/firestore";
