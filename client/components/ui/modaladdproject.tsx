@@ -221,6 +221,7 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
             setProfessores([]);
             setProfessorSelecionado("");
             setIsOpen(false);
+             window.location.reload();
         } else {
             toast.error("Erro ao criar o projeto: " + res.erro);
         }
