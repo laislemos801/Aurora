@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import aurora from "@/public/AURORA.svg";
-import widget from "@/public/widgets.svg";
 import { MdOutlineCircleNotifications } from "react-icons/md";
 import { MdExitToApp } from "react-icons/md";
 import ModalAddProject from "../ui/modaladdproject";
@@ -17,6 +16,9 @@ import { auth, db } from "@/firebase/clientApp";
 import { onAuthStateChanged } from "firebase/auth";
 import { onSnapshot } from "firebase/firestore";
 import { Turma } from "@/types/turma";
+import { GoPlus } from "react-icons/go";
+import { MdOutlineNotes } from "react-icons/md";
+import { MdOutlineAccountCircle } from "react-icons/md";
 
 export default function ToolBarTop() {
   const [mounted, setMounted] = useState(false); 
@@ -35,10 +37,10 @@ export default function ToolBarTop() {
 
   const navItems = [
     { path: "/", icon: <PiHouseBold size={23} /> },
-    { path: "/projects-info", icon: <FaRegNoteSticky size={20} /> },
+    { path: "/all-projects", icon: <FaRegNoteSticky size={20} /> },
     {
       path: "/edit-profile",
-      icon: <Image src={icon} alt="icone" width={26} height={26} />,
+      icon: <MdOutlineAccountCircle size={22} />
     },
   ];
 
@@ -77,8 +79,8 @@ export default function ToolBarTop() {
         {/* Grupo esquerdo: widget + aurora */}
         <div className="flex items-center gap-5 ml-3 xl:mt-3">
           {/* Widget mobile */}
-          <button className="sm:hidden" onClick={() => setIsSidebarOpen(true)}>
-            <Image src={widget} alt="widget" width={28} height={28} />
+          <button className="sm:hidden cursor-pointer" onClick={() => setIsSidebarOpen(true)}>
+            <MdOutlineNotes  size={28} className="text-[#C288B3]" /> 
           </button>
 
           <Image
@@ -92,46 +94,51 @@ export default function ToolBarTop() {
 
         {/* Botões e usuário */}
         <div className="flex items-center w-auto gap-3 sm:gap-5 xl:mt-3 xl:gap-8">
+          {/* Botão Novo Projeto */}
           <button
             onClick={() => setIsOpen(true)}
-            className="text-white bg-[#7B6294] rounded-md p-1.5 h-7 hover:bg-[#6a5583] transition flex items-center justify-center"
+            className="text-white bg-[#90416B] cursor-pointer rounded-md p-1.5 h-7 hover:bg-[#782F56] transition flex items-center justify-center"
           >
-            <span className="hidden sm:inline text-sm p-4 xl:px-5">Novo projeto</span>
-            <span className="sm:hidden text-3xl font-light">+</span>
+            <GoPlus size={18} className="sm:inline" />
+            <span className="sm:inline text-sm sm:text-md p-2 xl:px-5">Novo projeto</span>
           </button>
 
-          <button>
-            <MdOutlineCircleNotifications
-              size={34}
-              className="text-[#C288B3]"
-            />
-          </button>
+          {/* Ícones de notificação e perfil */}
+          <div className="flex items-center gap-3">
+            <button>
+              <MdOutlineCircleNotifications
+                size={30}
+                className="text-[#C288B3]"
+              />
+            </button>
 
-          <div className="hidden sm:block w-[1.5px] h-9 bg-[#C288B3] mx-2 opacity-70 xl:w-[2px]" />
+            <div
+              className="flex items-center gap-2 cursor-pointer rounded-full hover:bg-[#f0cde693]"
+              onClick={() => router.push("/edit-profile")}
+            >
+              <div className="relative w-8 h-8 sm:w-7 sm:h-7 md:w-10 md:h-10 rounded-full overflow-hidden">
+                {userData.profilePicture ? (
+                  <Image
+                    src={userData.profilePicture}
+                    alt={userData.nome || "Perfil"}
+                    width={40}
+                    height={40}
+                    className="object-cover w-full h-full rounded-full"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="w-full h-full border-4 border-t-[#7B6294] border-gray-300 rounded-full animate-spin"></div>
+                )}
+              </div>
 
-          <div
-            className="hidden sm:flex items-center gap-3 pr-3 xl:pr-6 cursor-pointer rounded-full hover:bg-[#f0cde693]"
-            onClick={() => router.push("/edit-profile")}>
-            <div className="relative w-7 h-7 sm:w-7 sm:h-7 md:w-10 md:h-10 rounded-full overflow-hidden">
-              {userData.profilePicture ? (
-                <Image
-                  src={userData.profilePicture}
-                  alt={userData.nome || "Perfil"}
-                  width={40}
-                  height={40}
-                  className="object-cover w-full h-full rounded-full"
-                  unoptimized
-                />
-              ) : (
-                <div className="w-full h-full border-4 border-t-[#7B6294] border-gray-300 rounded-full animate-spin"></div>
-              )}
+              {/* Nome escondido no mobile */}
+              <p className="hidden sm:block font-medium text-[#90416B] text-lg sm:text-xl xl:text-xl">
+                {userData.nome || "Carregando..."}
+              </p>
             </div>
-
-            <p className="font-medium text-[#90416B] text-lg sm:text-xl xl:text-xl">
-              {userData.nome || "Carregando..."}
-            </p>
           </div>
         </div>
+
       </div>
 
       {/* Modal Add Project */}
@@ -151,10 +158,10 @@ export default function ToolBarTop() {
           <div className="bg-[#FCF3FA] w-18 h-full p-4 flex flex-col justify-start items-center shadow-lg">
             {/* Botão fechar */}
             <button
-              className="mb-30 text-[#90416B] hover:text-[#7B6294] transition text-xl mt-2"
+              className="mb-30 text-[#90416B] hover:text-[#C288B3] rounded-full transition text-xl mt-2"
               onClick={() => setIsSidebarOpen(false)}
             >
-              <i className="pi pi-chevron-circle-left"></i>
+              <i className="pi pi-chevron-circle-left cursor-pointer"></i>
             </button>
 
             {/* Ícones mobile */}
