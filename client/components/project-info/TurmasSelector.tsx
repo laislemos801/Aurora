@@ -27,7 +27,7 @@ export function TurmasSelector({ turmas, turmaSelecionada, onSelect, onAdd }: Pr
           key={turma.id}
           onClick={() => onSelect(turma.id)}
           className={`
-            px-4 py-1.5 rounded-md text-[12px] font-medium transition shrink-0
+            px-4 py-1.5 rounded-md text-[12px] font-medium transition shrink-0 cursor-pointer
             ${turmaSelecionada === turma.id
               ? "bg-[#7B6294] text-[#EDECEC]"
               : "bg-[#3B3B3B] text-[#EDECEC] hover:opacity-80"}

@@ -301,7 +301,7 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
                                         e.stopPropagation(); // previne abrir o modal ao clicar no botão de remover
                                         handleRemoverTurma(i);
                                     }}
-                                    className="text-[#90416B] hover:bg-[#C288B3] cursor-pointer rounded-full p-1 transition"
+                                    className="text-[#B65254] hover:bg-[#E6C2D1] cursor-pointer rounded-full p-1 transition"
                                     >
                                     <IoTrashOutline size={20} />
                                     </button>
@@ -411,13 +411,14 @@ export default function ModalAddProject({isOpen,setIsOpen,isAddClassOpen,setIsAd
 
                     {uploadedFile ? (
                         <div className="flex items-center justify-between p-2 border-2 border-[#C288B3] rounded-lg">
-                            <p className="text-[#C288B3] text-sm sm:text-md">
+                            <p className="text-[#C288B3] text-sm sm:text-md truncate max-w-96" title={uploadedFile.name}>
                                 {uploadedFile.name}
                             </p>
+
                             <button
                                 type="button"
                                 onClick={() => setUploadedFile(null)}
-                                className="text-[#B65254] hover:bg-[#C288B3] rounded-full p-1 transition"
+                                className="text-[#B65254] hover:bg-[#E6C2D1] cursor-pointer rounded-full p-1 transition"
                             >
                                 <IoTrashOutline size={20} />
                             </button>

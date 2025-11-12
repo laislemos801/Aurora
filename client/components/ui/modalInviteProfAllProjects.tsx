@@ -127,7 +127,7 @@ export default function ModalInviteProfessor({
             <button
             onClick={handleAdicionarProfessor}
             disabled={carregando}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#C288B3] text-[#FCF3FA] font-medium text-sm sm:text-sm px-2 py-2 sm:px-2 md:px-4 lg:px-6 mr-2 rounded-lg hover:bg-[#90416B] transition flex items-center gap-2">
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#C288B3] cursor-pointer text-[#FCF3FA] font-medium text-sm sm:text-sm px-2 py-2 sm:px-2 md:px-4 lg:px-6 mr-2 rounded-lg hover:bg-[#90416B] transition flex items-center gap-2">
                 {carregando ? "Adicionando..." : "Convide"}  
             </button>
         </div>
@@ -146,7 +146,7 @@ export default function ModalInviteProfessor({
 
                 <button
                   onClick={() => handleRemoverProfessor(i)}
-                  className="text-[#90416B] hover:bg-[#C288B3] cursor-pointer rounded-full p-2 transition"
+                  className="text-[#B65254] hover:bg-[#E6C2D1] cursor-pointer rounded-full p-2 transition"
                 >
                   <IoTrashOutline className="text-[18px]" />
                 </button>

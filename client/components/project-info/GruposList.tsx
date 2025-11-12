@@ -100,7 +100,7 @@ export function GruposList({ projectId, turmaId, projectName, onDeleteTurma }: P
 
             <button
               onClick={() => handleManage(g.id)}
-              className="px-4 py-0.5 text-xs rounded-md bg-[#3B3B3B] text-[#FCF3FA] font-medium lg:py-1 lg:rounded-sm"
+              className="px-4 py-0.5 text-xs rounded-md bg-[#7B6294] hover:bg-[#674984] cursor-pointer text-[#FCF3FA] font-medium lg:py-1 lg:rounded-sm"
             >
               Gerenciar
             </button>
@@ -112,15 +112,15 @@ export function GruposList({ projectId, turmaId, projectName, onDeleteTurma }: P
       <div className="mt-3 flex gap-2 pr-4 pl-3 justify-start">
         <button
           onClick={handleAddGroup}
-          className="inline-flex items-center gap-2 justify-start rounded-sm py-1.5 px-4 bg-[#3B3B3B] text-[#FCF3FA]
-          text-[12px] font-semibold hover:opacity-90 transition"
+          className="inline-flex items-center gap-2 justify-start rounded-sm py-1.5 px-4 bg-[#3B3B3B] hover:opacity-80 cursor-pointer text-[#FCF3FA]
+          text-[12px] font-semibold transition"
         >
           <FiPlus size={16} /> Novo grupo
         </button>
 
         <button
           onClick={() => setShowModal(true)}
-          className="inline-flex items-center gap-2 justify-start rounded-sm py-1.5 px-4 bg-[#B65254] hover:bg-[#863435] text-[#FCF3FA]
+          className="inline-flex items-center gap-2 justify-start cursor-pointer rounded-sm py-1.5 px-4 bg-[#B65254] hover:bg-[#863435] text-[#FCF3FA]
           text-[12px] font-semibold hover:opacity-90 transition"
         >
           <RiDeleteBin6Line size={12} className="sm:size-4" />

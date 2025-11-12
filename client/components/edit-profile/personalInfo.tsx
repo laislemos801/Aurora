@@ -185,7 +185,7 @@ export default function PersonalInfo() {
         {/* Informações pessoais */}
         <div className="gap-6">
           <div className="flex items-start mt-1">
-            <h2 className="text-lg text-gray-500 font-medium">
+            <h2 className="text-lg text-[#878787] font-medium">
               Informações pessoais
             </h2>
             <button
@@ -196,7 +196,7 @@ export default function PersonalInfo() {
             </button>
           </div>
 
-          <p className="text-sm text-[#C9AFC8]">Dados de cadastro</p>
+          <p className="text-sm font-medium text-[#7B6294]">Dados de cadastro</p>
 
           <div className="mt-6 flex flex-col sm:flex-row gap-8 sm:gap-8">
             <div className="flex flex-col gap-6">
@@ -287,7 +287,7 @@ export default function PersonalInfo() {
        
         <div className="gap-6">
           <div className="flex items-start mt-1">
-            <h2 className="text-lg text-gray-500 font-medium">Login e senha</h2>
+            <h2 className="text-lg text-[#878787]  font-medium">Login e senha</h2>
             <button
               onClick={() => setIsEditingPassword(!isEditingPassword)}
               className="ml-2 p-1 bg-[#7B6294] hover:bg-[#674984] transition rounded-full cursor-pointer text-white"
@@ -296,7 +296,7 @@ export default function PersonalInfo() {
             </button>
           </div>
 
-          <p className="text-sm text-[#C9AFC8]">Mudar senha</p>
+          <p className="text-sm  font-medium text-[#7B6294]">Mudar senha</p>
 
           <div className="mt-6 flex flex-col sm:flex-row gap-8 sm:gap-8">
             <div className="flex flex-col gap-6">
@@ -331,29 +331,42 @@ export default function PersonalInfo() {
               {/* Nova senha */}
               <div>
                 <p className="font-medium text-[#2E1F36]">Nova Senha</p>
+
                 {isEditingPassword ? (
-                  <div className="relative w-full flex items-center">
-                    <input
-                      type={showNewPassword ? "text" : "password"}
-                      placeholder="Nova senha"
-                      value={passwordData.novaSenha}
-                      onChange={(e) =>
-                        setPasswordData({ ...passwordData, novaSenha: e.target.value })
-                      }
-                      className="border border-gray-300 rounded-lg px-3 py-2 w-full"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-2 text-[#7B6294]"
-                    >
-                      {showNewPassword ? <MdVisibility size={20} /> : <MdVisibilityOff size={20} />}
-                    </button>
+                  <div className="relative w-full flex flex-col items-start">
+                    <div className="w-full relative">
+                      <input
+                        type={showNewPassword ? "text" : "password"}
+                        placeholder="Nova senha"
+                        value={passwordData.novaSenha}
+                        onChange={(e) =>
+                          setPasswordData({ ...passwordData, novaSenha: e.target.value })
+                        }
+                        className="border border-gray-300 rounded-lg px-3 py-2 w-full"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-2 top-3 text-[#7B6294]"
+                      >
+                        {showNewPassword ? (
+                          <MdVisibility size={20} />
+                        ) : (
+                          <MdVisibilityOff size={20} />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Mensagem abaixo do input */}
+                    <p className="text-xs pt-2 text-[#8C8C8C]">
+                      Sua senha deve conter 8 ou mais caracteres.
+                    </p>
                   </div>
                 ) : (
                   <p className="text-gray-700">********</p>
                 )}
               </div>
+
 
               {/* Confirmar senha */}
               <div>

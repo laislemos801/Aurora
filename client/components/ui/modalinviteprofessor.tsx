@@ -104,7 +104,7 @@ export default function ModalInviteProfessor({
               <button
                 onClick={handleAdicionarProfessor}
                 disabled={carregando}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#C288B3] text-[#FCF3FA] font-medium text-sm px-4 py-2 mr-2 rounded-lg hover:bg-[#90416B] transition"
+                className="absolute right-1 top-1/2 -translate-y-1/2 cursor-pointer bg-[#C288B3] text-[#FCF3FA] font-medium text-sm px-3 py-2 mr-2 rounded-lg hover:bg-[#90416B] transition"
               >
                 {carregando ? "Adicionando..." : "Convide"}
               </button>
@@ -146,7 +146,7 @@ export default function ModalInviteProfessor({
 
                       <button
                         onClick={() => handleRemoverProfessor(i)}
-                        className="text-[#90416B] hover:bg-[#C288B3] cursor-pointer rounded-full p-2 transition"
+                        className="text-[#B65254] hover:bg-[#E6C2D1] cursor-pointer rounded-full p-2 transition"
                       >
                         <IoTrashOutline size={18} />
                       </button>

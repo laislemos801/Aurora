@@ -117,7 +117,7 @@ export default function TemplateCard({
 
               <button
                 onClick={() => setIsInviteOpen(true)}
-                className="w-6 h-6 flex items-center justify-center rounded-full bg-[#C288B3] text-md shadow-sm hover:scale-105 transition"
+                className="w-6 h-6 flex items-center justify-center cursor-pointer rounded-full bg-[#C288B3] text-md shadow-sm hover:scale-105 transition"
               >
                 +
               </button>
@@ -125,7 +125,7 @@ export default function TemplateCard({
 
             <button
               onClick={handleVerMais}
-              className="px-3 py-1 bg-[#3B3B3B] text-white text-[10px] italic rounded-full hover:opacity-90 transition md:px-4"
+              className="px-3 py-1 bg-[#7B6294] hover:bg-[#674984] cursor-pointer text-white text-[10px] italic rounded-full hover:opacity-90 transition md:px-4"
             >
               Ver mais
             </button>

@@ -37,7 +37,7 @@ export function ProjectHeader({ nome, curso, semestre, ano, professores = [], on
           <Image src={backArrow} alt="Voltar" width={32} height={32} />
         </button>
 
-        <p className="ml-2 text-sm sm:text-lg font-medium text-[#3B3B3B] flex-1">
+        <p className="ml-2 mt-[-2px] text-[12px] sm:text-lg font-medium text-[#3B3B3B] flex-1">
           {nome} - {curso}
         </p>
         
@@ -82,7 +82,7 @@ export function ProjectHeader({ nome, curso, semestre, ano, professores = [], on
       </div>
 
       {semestre && ano && (
-        <p className="ml-10 mt-[-4px] text-[12px] font-medium text-[#3B3B3B] lg:text-[14px]">
+        <p className="ml-10 mt-[-9px] text-[12px] font-medium text-[#3B3B3B] lg:text-[14px]">
           {semestre}° semestre - {ano}
         </p>
       )}
