@@ -3,7 +3,6 @@
 import "primeicons/primeicons.css";
 import HeaderPicture from "@/components/edit-profile/headerPicture";
 import PersonalInfo from "@/components/edit-profile/personalInfo";
-import Dashboard from "@/components/edit-profile/dashboards";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 export default function EditProfile() {
@@ -38,7 +37,6 @@ export default function EditProfile() {
       {/* Conteúdo da tela abaixo */}
       <div className="flex flex-col rounded-t-2xl gap-6">
         <PersonalInfo />
-        <Dashboard />
       </div>
 
       {/* espaçamento final */}
