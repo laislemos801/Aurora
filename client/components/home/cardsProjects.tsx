@@ -86,21 +86,23 @@ export default function CardsPorjects({ projetos }: CardsProjectsProps) {
 
   return (
     <div className="w-auto h-full">
-      <div className="flex gap-8 w-auto h-full overflow-x-auto scrollbar-hide">
-        <div className="flex gap-8 w-max">
+      <div className="flex gap-8 w-auto h-full md:overflow-x-auto md:scrollbar-hide">
+   <div className="grid grid-cols-2 md:flex md:flex-row gap-8">
           {projetos.map((content, index) => {
             const profs = professoresData[content.id] || [];
 
             return (
               <div
                 key={index}
-             className="bg-[#F6F6F6] rounded-4xl h-80 p-8 w-90 flex flex-col justify-between "
+             className="bg-[#F6F6F6] rounded-4xl h-50 w-55 md:h-80 p-4 md:p-8 md:w-90 flex flex-col justify-between "
               >
                 <div className="flex flex-col">
-                  <p className="text-4xl font-semibold mb-2">0{content.semestre}</p>
-                  <p className="text-[#90416B] text-xl">{content.nome}</p>
-                  <p className="italic text-[#3B3B3B] mb-2 font-semibold">{content.curso}</p>
-                  <p className="text-sm w-full">{content.descricao}</p>
+                  <p className="text-3xl md:text-4xl font-semibold md:mb-2">0{content.semestre}</p>
+                  <p className="text-[#90416B] text-xs md:text-xl">{content.nome}</p>
+                  <p className="italic text-[#3B3B3B] mb-2 font-semibold text-xs md:text-xl">{content.curso}</p>
+                  <p className="text-xs md:text-sm w-full"> {content.descricao.length > 100
+    ? content.descricao.slice(0, 50) + "..."
+    : content.descricao}</p>
                 </div>
 
                 <div className="flex items-end w-full justify-between">
@@ -131,7 +133,7 @@ export default function CardsPorjects({ projetos }: CardsProjectsProps) {
 
                   <button
                     onClick={() => router.push(`/projects-info/${content.id}`)}
-                    className="bg-[#7B6294] hover:bg-[#674984] text-white px-4 rounded-full py-1 text-sm cursor-pointer"
+                    className="bg-[#7B6294] hover:bg-[#674984] text-white px-4 rounded-full py-1 text-xs md:text-sm cursor-pointer"
                   >
                     Ver mais
                   </button>
