@@ -67,7 +67,7 @@ export default function GroupInfo() {
         <button onClick={() => router.push(`/projects-info/${projectId}`)}>
           <Image src={backArrow} alt="Voltar" width={32} height={32} />
         </button>
-        <p className="text-lg font-medium">Grupo 01</p>
+        <p className="text-lg font-medium">{grupo?.nome || "Grupo"}</p>
       </div>
 
       {/* Conteúdo principal */}

@@ -154,7 +154,8 @@ export default function GradesCard() {
               ))}
             </select>
           ) : (
-            <div className="text-xs text-gray-500">Nenhum aluno</div>
+            <div className="bg-[#3B3B3B] rounded-sm px-2 py-0.5 pr-6 text-[9px] text-[#FCF3FA] font-light border-[0.5px] border-[#FCF3FA] appearance-none 
+              sm:text-[11px] xl:text-[13px]">Nenhum aluno</div>
           )}
 
           <div className="pointer-events-none absolute right-2 flex items-center h-full">

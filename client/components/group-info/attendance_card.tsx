@@ -154,7 +154,16 @@ export default function AttendanceCard() {
       {/* Lista de alunos */}
       <div className="w-full max-h-[150px] overflow-y-auto pr-2 pl-4">
         {attendance.length === 0 ? (
-          <p className="text-gray-500 text-sm">Nenhum aluno encontrado.</p>
+          <div className="flex flex-col items-center justify-center w-full text-center">
+            <img
+              src="/no-students.png"
+              alt="Sem alunos"
+              className="w-24 h-24 opacity-80 mb-2 xl:w-28 xl:h-28"
+            />
+            <p className="text-gray-500 text-[12px] mb-2">
+              Nenhum aluno adicionado a esse <span className="font-semibold text-[#90416B]">grupo</span>.
+            </p>
+          </div>
         ) : (
           attendance.map((student, idx) => (
             <div

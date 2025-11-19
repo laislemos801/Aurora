@@ -76,7 +76,7 @@ export default function ToolBarTop() {
       {/* Toolbar */}
       <div className="bg-[#FCF3FA] w-full h-14 flex items-center justify-between pr-3 mt-2 relative xl:h-20">
         {/* Grupo esquerdo: widget + aurora */}
-        <div className="flex items-center gap-5 ml-3 xl:mt-2">
+        <div className="flex items-center gap-5 ml-1 sm:ml-3 xl:mt-2">
           {/* Widget mobile */}
           <button className="sm:hidden cursor-pointer" onClick={() => setIsSidebarOpen(true)}>
             <MdOutlineNotes  size={28} className="text-[#C288B3]" /> 
@@ -87,19 +87,20 @@ export default function ToolBarTop() {
             alt="aurora"
             width={1920}
             height={1080}
-            className="w-28 sm:w-20 xl:ml-4 xl:w-23 2xl:w-25 mt-2"
+            className="w-24 xl:ml-4 xl:w-28 mt-2"
           />
         </div>
 
         {/* Botões e usuário */}
-        <div className="flex items-center w-auto gap-3 sm:gap-5 xl:mt-3 xl:gap-8">
+        <div className="flex items-center w-auto gap-3 sm:mr-4 sm:gap-5 xl:mt-3 xl:gap-8">
           {/* Botão Novo Projeto */}
           <button
             onClick={() => setIsOpen(true)}
             className="text-white bg-[#90416B] cursor-pointer rounded-md p-1.5 h-8 hover:bg-[#782F56] transition flex items-center justify-center"
           >
             <GoPlus size={24} color="#FFFFFF" className="sm:inline" />
-            <span className="sm:inline text-sm sm:text-lg p-2 xl:px-5">Novo projeto</span>
+            <span className="inline sm:hidden text-[12px] p-1 xl:px-5">Projeto</span>
+            <span className="hidden sm:inline text-sm sm:text-md xl:text-[16px] p-2 xl:px-5">Novo projeto</span>
           </button>
 
           {/* Ícones de notificação e perfil */}
