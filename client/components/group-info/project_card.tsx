@@ -67,7 +67,7 @@ export default function ProjectCard() {
   }
 
   return (
-    <div className="bg-[#F6F6F6] rounded-lg shadow-md px-3 pt-3 w-full flex flex-col justify-between relative lg:h-full pb-4">
+    <div className="bg-[#F6F6F6] rounded-lg shadow-md px-3 pt-3 w-full flex flex-col justify-between relative pb-4">
 
       <input
         type="text"
@@ -86,7 +86,7 @@ export default function ProjectCard() {
         className={`p-1 text-[11px] text-[#3B3B3B] text-justify leading-relaxed w-full
                     border-none outline-none resize-none transition-all font-medium
                     overflow-y-auto mb-2 lg:text-[12px] xl:text-[13px]
-                    h-[70px] lg:h-[105px] 2xl:h-[130px]
+                    h-[70px] lg:h-[100px]
                     [&::-webkit-scrollbar]:w-0.75
                     [&::-webkit-scrollbar-thumb]:bg-[#3B3B3B]/60
                     [&::-webkit-scrollbar-thumb]:rounded-full

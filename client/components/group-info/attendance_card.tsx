@@ -293,7 +293,8 @@ export default function AttendanceCard() {
   }
 
  return (
-  <div className="bg-[#F6F6F6] rounded-lg shadow-md max-w-full flex flex-col gap-1 pb-3 relative overflow-x-auto">
+  <div className="bg-[#F6F6F6] rounded-lg shadow-md max-w-full flex flex-col gap-1 pb-3 relative
+                h-[330px]">
 
     {/* Header */}
     <div className="flex items-center w-full pr-3 pl-4 pt-4 gap-2">
@@ -382,7 +383,7 @@ export default function AttendanceCard() {
             key={a.ra}
             className="grid border-b py-2 gap-0 px-4"
             style={{
-              gridTemplateColumns: `minmax(90px, 90px) repeat(${presencasCols.length}, 60px)` 
+              gridTemplateColumns: `minmax(100px, 100px) repeat(${presencasCols.length}, 60px)` 
             }}
           >
             <div className="whitespace-nowrap overflow-hidden text-ellipsis">

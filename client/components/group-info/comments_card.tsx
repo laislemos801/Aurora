@@ -142,8 +142,8 @@ export default function CommentsCard() {
         userData.profilePicture || user.photoURL || "/avatar.png";
 
       setComments((prev) => [
-        { ...novoComentario, avatar },
         ...prev,
+        { ...novoComentario, avatar },
       ]);
 
       setNewComment("");
@@ -172,7 +172,7 @@ export default function CommentsCard() {
     </div>
 
     {/* Lista de comentários */}
-    <div className="flex flex-col w-full gap-4 max-h-100 overflow-y-auto pr-4 scrollbar-custom lg:max-h-[221px] xl:max-h-[246px] 2xl:max-h-[257px]">
+    <div className="flex flex-col w-full gap-4 max-h-60 lg:max-h-100 overflow-y-auto pr-4 scrollbar-custom ">
 
       {comments.length === 0 ? (
         <div className="flex flex-col items-center justify-center w-full py-2 text-center gap-3 lg:py-6 xl:py-8 2xl:py-12">

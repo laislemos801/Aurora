@@ -71,30 +71,22 @@ export default function GroupInfo() {
       </div>
 
       {/* Conteúdo principal */}
-      <div className="flex flex-col w-full gap-4 xl:gap-6">
-        {/* Linha 1: Project + Attendance */}
-        <div className="flex flex-col lg:flex-row gap-4 xl:gap-6">
-          <div className="flex-1">
-            <ProjectCard />
-          </div>
-          <div className="flex-1 min-w-0">
-            <AttendanceCard />
-          </div>
+      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 xl:gap-6">
+
+        {/* Coluna 1 */}
+        <div className="flex flex-col gap-4 lg:max-h-[440px]">
+          <ProjectCard />
+          <CommentsCard />
         </div>
 
-        {/* Linha 2: Grades + Comments */}
-        <div className="flex flex-col lg:flex-row gap-4 xl:gap-6">
-          <div className="flex-1 lg:basis-2/5 2xl:basis-2/6">
-            <GradesCard />
-          </div>
-
-          <div className="flex-1 lg:basis-3/5 2xl:basis-4/6">
-            <CommentsCard />
-          </div>
+        {/* Coluna 2 */}
+        <div className="flex flex-col gap-4">
+          <AttendanceCard />
+          <GradesCard />
         </div>
 
         {/* Espaço final */}
-        <div className="h-2 flex-shrink-0"></div>
+        <div className="h-1 flex-shrink-0"></div>
       </div>
     </div>
   );
