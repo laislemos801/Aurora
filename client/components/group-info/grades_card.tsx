@@ -188,6 +188,19 @@ export default function GradesCard() {
   };
 
 
+  const handleAddField = () => {
+    if (!newFieldName.trim()) return;
+    const key = newFieldName.toLowerCase().replace(/\s+/g, "_");
+
+    if (gradeItems.some((item) => item.key === key)) return;
+
+    const newItem = { key, label: newFieldName };
+    setGradeItems((prev) => [...prev, newItem]);
+    setGrades((prev) => ({ ...prev, [key]: "" }));
+    setNewFieldName("");
+    setAdding(false);
+  };
+
   return (
     <div className="bg-[#F6F6F6] rounded-lg shadow-md w-full flex flex-col items-start gap-1 pb-3 pr-2">
       {/* Header */}
