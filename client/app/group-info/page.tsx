@@ -55,9 +55,9 @@ export default function GroupInfo() {
         flex-1 
         min-h-0 
         overflow-y-auto 
-        overflow-x-hidden 
+        overflow-x-auto
         items-center 
-        px-2 sm:px-4 xl:px-8 
+        px-4 sm:px-4 xl:px-8 
         py-4 
         gap-6
       "
@@ -77,7 +77,7 @@ export default function GroupInfo() {
           <div className="flex-1">
             <ProjectCard />
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <AttendanceCard />
           </div>
         </div>

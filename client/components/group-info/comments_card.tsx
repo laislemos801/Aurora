@@ -39,7 +39,6 @@ export default function CommentsCard() {
   const turmaId = searchParams.get("turmaId");
   const grupoId = searchParams.get("grupoId");
 
-  // === BUSCAR COMENTÁRIOS DO GRUPO ===
   useEffect(() => {
     const fetchComments = async () => {
       if (!projectId || !turmaId || !grupoId) return;
@@ -167,13 +166,13 @@ export default function CommentsCard() {
   <div className="bg-[#F6F6F6] rounded-lg w-full flex flex-col items-start gap-1 pb-3 pr-2 pl-4 py-4 shadow-md h-full">
     {/* Header */}
     <div className="flex justify-between items-center w-full mb-2">
-      <h2 className="text-md font-medium text-gray-800 2xl:text-[18px]">
+      <h2 className="text-[14px] font-medium text-[#000000] 2xl:text-[18px]">
         Comentários
       </h2>
     </div>
 
     {/* Lista de comentários */}
-    <div className="flex flex-col w-full gap-4 max-h-40 overflow-y-auto pr-4 scrollbar-custom lg:max-h-[221px] xl:max-h-[246px] 2xl:max-h-[257px]">
+    <div className="flex flex-col w-full gap-4 max-h-100 overflow-y-auto pr-4 scrollbar-custom lg:max-h-[221px] xl:max-h-[246px] 2xl:max-h-[257px]">
 
       {comments.length === 0 ? (
         <div className="flex flex-col items-center justify-center w-full py-2 text-center gap-3 lg:py-6 xl:py-8 2xl:py-12">
@@ -191,27 +190,18 @@ export default function CommentsCard() {
           const isCurrentUser = c.uidAutor === auth.currentUser?.uid;
 
           return (
-            <div
-              key={idx}
-              className={`flex flex-col w-full ${
-                isCurrentUser ? "items-end" : "items-start"
-              }`}
-            >
+            <div key={idx} className="flex flex-col w-full items-start">
               <div
-                className={`flex items-start gap-3 p-2 rounded-lg max-w-[80%] ${
-                  isCurrentUser
-                    ? "bg-[#EBD9F1] flex-row-reverse"
-                    : "bg-white"
-                }`}
+                className="flex items-start gap-3 p-2 rounded-lg w-full bg-white"
               >
                 <img
                   src={c.avatar}
                   alt="Avatar"
-                  className="w-8 h-8 rounded-full object-cover"
+                  className="w-7 h-7 rounded-full object-cover"
                 />
 
                 <div className="flex flex-col">
-                  <span className="text-[12px] font-medium text-gray-700 xl:text-[13px]">
+                  <span className="text-[12px] font-medium text-[#000000] xl:text-[13px]">
                     {isCurrentUser ? "Você" : c.nomeAutor}
                   </span>
 
@@ -222,7 +212,7 @@ export default function CommentsCard() {
               </div>
 
               <span
-                className={`text-[12px] text-[#949494] mt-1 ${
+                className={`text-[10px] text-[#3B3B3B] self-end mt-1 font-medium ${
                   isCurrentUser ? "mr-1" : "ml-1"
                 }`}
               >
