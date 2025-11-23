@@ -11,10 +11,13 @@ import {
   setDoc,
   getDocs,
   collection,
+  writeBatch,
+  increment,
 } from "firebase/firestore";
 import { db, auth } from "@/firebase/clientApp";
 import { useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { v4 as uuid } from "uuid";
 
 interface Comment {
   uidAutor: string;
@@ -113,6 +116,7 @@ export default function CommentsCard() {
     }
 
     try {
+      // pega dados do autor
       const profRef = doc(db, "Professores", user.uid);
       const profSnap = await getDoc(profRef);
       const userData = profSnap.exists() ? profSnap.data() : {};
@@ -134,25 +138,106 @@ export default function CommentsCard() {
         grupoId!
       );
 
+      // adiciona comentário no grupo
       await updateDoc(grupoRef, {
         comentarios: arrayUnion(novoComentario),
       });
 
-      const avatar =
-        userData.profilePicture || user.photoURL || "/avatar.png";
-
-      setComments((prev) => [
-        ...prev,
-        { ...novoComentario, avatar },
-      ]);
-
+      // atualiza UI local
+      const avatar = userData.profilePicture || user.photoURL || "/avatar.png";
+      setComments((prev) => [...prev, { ...novoComentario, avatar }]);
       setNewComment("");
       setAdding(false);
+
+      // -------------------------------
+      // 🔥 BUSCAR NOMES PARA EXIBIR
+      // -------------------------------
+
+      // nome do projeto
+      const projetoSnap = await getDoc(doc(db, "Projetos", projectId!));
+      const nomeProjeto = projetoSnap.exists()
+        ? projetoSnap.data().nome || projectId
+        : projectId;
+
+      // nome da turma
+      const turmaSnap = await getDoc(
+        doc(db, "Projetos", projectId!, "Turmas", turmaId!)
+      );
+      const nomeTurma = turmaSnap.exists()
+        ? turmaSnap.data().nome || turmaId
+        : turmaId;
+
+      // nome do grupo
+      const grupoSnap = await getDoc(grupoRef);
+      const nomeGrupo = grupoSnap.exists()
+        ? grupoSnap.data().nome || grupoId
+        : grupoId;
+
+      // 🔥 pegar lista de professores DO PROJETO
+      const profsIds: string[] = projetoSnap.exists()
+        ? projetoSnap.data().professores || []
+        : [];
+
+      if (!Array.isArray(profsIds)) {
+        console.warn("Campo 'professores' do projeto não é array", profsIds);
+        return;
+      }
+
+      // -------------------------------
+      // 🔥 CRIAR OBJETO DE NOTIFICAÇÃO
+      // -------------------------------
+      const notiObj = {
+        id: uuid(),
+
+        // para exibir na UI
+        autor: userData.nome || "Professor",
+        projetoNome: nomeProjeto,
+        turmaNome: nomeTurma,
+        grupoNome: nomeGrupo,
+
+        // para navegação
+        autorUid: user.uid,
+        projetoId: projectId,
+        turmaId: turmaId,
+        grupoId: grupoId,
+
+        mensagem: `Comentou em ${nomeGrupo}`,
+        timestamp: Date.now(),
+      };
+
+      // -------------------------------
+      // 🔥 ENVIAR PARA TODOS DO PROJETO
+      // -------------------------------
+      const batch = writeBatch(db);
+      let someoneToNotify = false;
+
+      for (const profId of profsIds) {
+        if (!profId) continue;
+        if (profId === user.uid) continue; // não notifica o próprio autor
+        someoneToNotify = true;
+
+        const profDocRef = doc(db, "Professores", profId);
+
+        batch.update(profDocRef, {
+          "notificacoes.comentarios": increment(1),
+          "notificacoes.lista": arrayUnion(notiObj),
+        });
+      }
+
+      if (!someoneToNotify) {
+        console.info("Nenhum professor para notificar.");
+        return;
+      }
+
+      await batch.commit();
+      console.log("Notificação enviada:", notiObj);
+
     } catch (error) {
       console.error("Erro ao adicionar comentário:", error);
       toast.error("Erro ao salvar comentário.");
     }
   };
+
 
   if (loading) {
     return (
