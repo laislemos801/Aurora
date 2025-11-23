@@ -126,8 +126,9 @@ export function ProjectHeader({ nome, curso, semestre, ano, professores = [], on
           setIsInviteOpen={setIsInviteOpen}
           professores={professores}
           setProfessores={setProfessores}
-          projetoUid={projetoUid}
-        />
+          projetoUid={projetoUid} onProfessorAdicionado={function (): void {
+            throw new Error("Function not implemented.");
+          } }        />
       )}
     </div>
   );

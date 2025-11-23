@@ -105,9 +105,9 @@ export default function ProjectCard() {
         ) : (
           <button
             onClick={handleButtonClick}
-            className="bg-[#7B6294] p-1.5 rounded-full shadow cursor-pointer hover:bg-[#674984] transition"
+            className="bg-[#7B6294] p-1.5 rounded-full shadow cursor-pointer hover:bg-[#674984] transition lg:p-2"
           >
-            <MdEdit size={12} className="text-[#FCF3FA]" />
+            <MdEdit size={14} className="text-[#FCF3FA]" />
           </button>
         )}
       </div>

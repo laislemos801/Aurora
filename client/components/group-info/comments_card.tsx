@@ -260,13 +260,13 @@ export default function CommentsCard() {
     <div className="flex flex-col w-full gap-4 max-h-60 lg:max-h-100 overflow-y-auto pr-4 scrollbar-custom ">
 
       {comments.length === 0 ? (
-        <div className="flex flex-col items-center justify-center w-full py-2 text-center gap-3 lg:py-6 xl:py-8 2xl:py-12">
+        <div className="flex flex-col items-center justify-center w-full py-2 mt-4 text-center gap-3 lg:py-6 xl:py-8 2xl:py-12">
           <img
             src="/no-comments.png" 
             alt="Sem comentários"
             className="w-20 h-20 opacity-80 lg:w-28 lg:h-28"
           />
-          <p className="text-gray-500 text-[12px]">
+          <p className="text-gray-500 text-[12px] mt-4">
             Ainda não há comentários. Seja o <span className="font-semibold text-[#90416B]">primeiro</span> a comentar!
           </p>
         </div>

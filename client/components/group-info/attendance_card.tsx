@@ -313,15 +313,15 @@ export default function AttendanceCard() {
         ) : (
           <button
             onClick={handleEditar}
-            className="bg-[#7B6294] p-1.5 rounded-full shadow hover:bg-[#674984] transition"
+            className="bg-[#7B6294] p-1.5 rounded-full shadow hover:bg-[#674984] transition lg:p-2"
           >
-            <MdEdit size={12} className="text-[#FCF3FA]" />
+            <MdEdit size={14} className="text-[#FCF3FA]" />
           </button>
         )}
 
         <button
           onClick={handleHoje}
-          className="px-3 py-0.5 rounded-sm bg-[#3B3B3B] text-[#FCF3FA] text-[12px] hover:bg-[#6a5583] transition"
+          className="px-3 py-0.5 rounded-sm bg-[#3B3B3B] text-[#FCF3FA] text-[12px] hover:bg-[#6a5583] transition lg:py-1.5 "
         >
           Hoje
         </button>
@@ -329,10 +329,16 @@ export default function AttendanceCard() {
         <button
           ref={buttonRef}
           onClick={() => setCalendarOpen((p) => !p)}
-          className="bg-[#3B3B3B] p-1.5 rounded-full shadow cursor-pointer hover:bg-[#674984] transition"
+          className="bg-[#3B3B3B] flex items-center gap-2 p-1.5 rounded-full shadow cursor-pointer hover:bg-[#674984] transition lg:rounded-md"
         >
           <MdCalendarMonth size={14} className="text-[#FCF3FA]" />
+
+          {/* Texto visível só em telas >= lg */}
+          <span className="hidden lg:inline text-[12px] text-[#FCF3FA] pr-1">
+            Escolha uma data
+          </span>
         </button>
+
       </div>
     </div>
 
@@ -352,66 +358,81 @@ export default function AttendanceCard() {
     {/* linha separadora */}
     <div className="w-full border-b border-[#D9D9D9] mb-2 mt-2"></div>
 
-    {/* Tabela */}
-    <div className="overflow-x-auto min-w-0">
-      <div className="min-w-max">
-
-        {/* HEADER */}
-        <div
-          className="grid border-b pb-2 gap-0"
-          style={{
-            gridTemplateColumns: `minmax(110px, 110px) repeat(${presencasCols.length}, 60px)` 
-          }}
-        >
-          <div className="font-medium text-[12px] px-4 whitespace-nowrap overflow-hidden text-ellipsis">
-            Nome / RA
-          </div>
-
-          {presencasCols.map((col) => (
-            <div
-              key={col.data}
-              className="text-center text-[12px] font-medium"
-            >
-              {col.data}
-            </div>
-          ))}
+    {/* Se NÃO houver alunos */}
+      {alunos.length === 0 && (
+        <div className="flex flex-col items-center justify-center w-full py-6 text-center gap-3">
+          <img
+            src="/no-students.png" 
+            alt="Sem alunos"
+            className="w-22 h-22 opacity-80 lg:w-32 lg:h-32"
+          />
+          <p className="text-gray-500 text-[12px]">
+            Ainda não há <span className="font-semibold text-[#90416B]">alunos</span> neste grupo.
+            <br />
+            <span className="font-semibold text-[#90416B]">Adicione</span> alunos para começar a marcar presença!
+          </p>
         </div>
+      )}
 
-        {/* LINHAS */}
-        {alunos.map((a) => (
-          <div
-            key={a.ra}
-            className="grid border-b py-2 gap-0 px-4"
-            style={{
-              gridTemplateColumns: `minmax(100px, 100px) repeat(${presencasCols.length}, 60px)` 
-            }}
-          >
-            <div className="whitespace-nowrap overflow-hidden text-ellipsis">
-              <div className="font-medium text-[14px] text-[#3B3B3B]">{a.nome}</div>
-              <div className="text-[12px] text-[#6B6B6B]">({a.ra})</div>
+      {/* Se houver alunos */}
+      {alunos.length > 0 && (
+        <div className="overflow-x-auto min-w-0">
+          <div className="min-w-max">
+
+            {/* HEADER */}
+            <div
+              className="grid border-b pb-2 gap-0"
+              style={{
+                gridTemplateColumns: `minmax(110px, 110px) repeat(${presencasCols.length}, 60px)`
+              }}
+            >
+              <div className="font-medium text-[12px] px-4 whitespace-nowrap overflow-hidden text-ellipsis">
+                Nome / RA
+              </div>
+
+              {presencasCols.map((col) => (
+                <div
+                  key={col.data}
+                  className="text-center text-[12px] font-medium"
+                >
+                  {col.data}
+                </div>
+              ))}
             </div>
 
-            {presencasCols.map((col) => (
-              <div key={col.data} className="flex items-center justify-center">
-                <label className="cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(col.presencas[a.nome])}
-                    onChange={() => togglePresenca(col.data, a.nome)}
-                    className="peer sr-only"
-                  />
-                  <div className="w-4 h-4 border border-[#C288B3] rounded bg-white peer-checked:bg-[#C288B3]"></div>
-                </label>
+            {/* LINHAS */}
+            {alunos.map((a) => (
+              <div
+                key={a.ra}
+                className="grid border-b py-2 gap-0 px-4"
+                style={{
+                  gridTemplateColumns: `minmax(100px, 100px) repeat(${presencasCols.length}, 60px)`
+                }}
+              >
+                <div className="whitespace-nowrap overflow-hidden text-ellipsis">
+                  <div className="font-medium text-[14px] text-[#3B3B3B]">{a.nome}</div>
+                  <div className="text-[12px] text-[#6B6B6B]">({a.ra})</div>
+                </div>
+
+                {presencasCols.map((col) => (
+                  <div key={col.data} className="flex items-center justify-center">
+                    <label className="cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(col.presencas[a.nome])}
+                        onChange={() => togglePresenca(col.data, a.nome)}
+                        className="peer sr-only"
+                      />
+                      <div className="w-4 h-4 border border-[#C288B3] rounded bg-white peer-checked:bg-[#C288B3]"></div>
+                    </label>
+                  </div>
+                ))}
               </div>
             ))}
+
           </div>
-        ))}
-
-      </div>
-    </div>
-
+        </div>
+      )}
   </div>
-);
-
-
+  );
 }
