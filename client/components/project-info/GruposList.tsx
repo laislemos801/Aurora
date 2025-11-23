@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 interface Grupo {
   id: string;
   nome: string;
+  alunos?: string[];
   nomeProjeto?: string;
 }
 
@@ -93,10 +94,30 @@ export function GruposList({ projectId, turmaId, projectName, onDeleteTurma }: P
             key={g.id}
             className="flex justify-between items-center px-3 py-2 rounded-md shadow-inner bg-[#FCF3FA] lg:py-4 lg:px-5"
           >
-            <span className="text-sm font-medium text-[#4A3A55] lg:text-[16px]">
-              {g.nome}
-              {g.nomeProjeto ? ` - ${g.nomeProjeto}` : ""}
-            </span>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-[#4A3A55] lg:text-[16px]">
+                {g.nome}
+                {g.nomeProjeto ? ` - ${g.nomeProjeto}` : ""}
+              </span>
+
+              {/* Lista de alunos do grupo lado a lado */}
+              {g.alunos && g.alunos.length > 0 ? (
+                <div className="flex flex-wrap gap-4 mt-1 ml-1">
+                  {g.alunos.map((aluno: any) => (
+                    <span
+                      key={aluno.ra}
+                      className="text-xs text-[#3B3B3B] px-2 py-[2px] rounded-md"
+                    >
+                      {aluno.nome}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-xs text-gray-400 italic ml-1 mt-1">
+                  Nenhum aluno alocado
+                </span>
+              )}
+            </div>
 
             <button
               onClick={() => handleManage(g.id)}
