@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { collection, getDocs, query, where, onSnapshot } from "firebase/firestore";
+import { useEffect, useState, useMemo } from "react";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase/clientApp";
 import TemplateCard from "@/components/all-projects/card";
 import { IoSearchSharp } from "react-icons/io5";
@@ -14,6 +14,7 @@ interface Projeto {
   semestre: number;
   descricao: string;
   professores: string[];
+  ano?: number;
 }
 
 export default function AllProjectsCards() {
@@ -21,6 +22,63 @@ export default function AllProjectsCards() {
   const [loadingpage, setLoading] = useState(true);
 
   const { user, loading } = useAuthGuard();
+
+  // -------------------------------
+  // ESTADOS DOS FILTROS
+  // -------------------------------
+  const [pesquisa, setPesquisa] = useState("");
+  const [filtroCurso, setFiltroCurso] = useState("Todos");
+  const [filtroSemestre, setFiltroSemestre] = useState("Todos");
+  const [filtroAno, setFiltroAno] = useState("Todos");
+
+  // Lista de cursos completos
+  const cursos = [
+    "Administração",
+    "Administração – Comércio Exterior",
+    "Administração – Finanças Corporativas e Mercado de Capitais",
+    "Administração – Marketing e Inovação",
+    "Arquitetura e Urbanismo",
+    "Ciências Contábeis",
+    "Ciências Econômicas",
+    "Ciências Sociais (Bacharelado)",
+    "Ciências Sociais (Licenciatura)",
+    "Direito",
+    "Educação Física (Bacharelado)",
+    "Educação Física (Licenciatura)",
+    "Engenharia Ambiental e Sanitária",
+    "Engenharia Civil",
+    "Engenharia de Computação",
+    "Engenharia de Controle e Automação",
+    "Engenharia de Produção",
+    "Engenharia de Software",
+    "Engenharia Elétrica",
+    "Engenharia Mecânica",
+    "Engenharia Química",
+    "Engenharia Biomédica",
+    "Matemática",
+    "Química",
+    "Sistemas de Informação",
+    "Gestão da Tecnologia da Informação",
+    "Jogos Digitais",
+    "Ciência de Dados e Inteligência Artificial",
+    "Geografia (Bacharelado)",
+    "Geografia (Licenciatura)",
+    "Ciência da Informação",
+    "Comunicação",
+    "Jornalismo",
+    "Relações Públicas",
+    "Publicidade e Propaganda",
+    "Letras: Português/Inglês (Bacharelado)",
+    "Letras: Português/Inglês (Licenciatura)",
+    "Filosofia (Bacharelado)",
+    "Filosofia (Licenciatura)",
+    "Serviço Social",
+    "Turismo"
+  ];
+
+
+  // Semestres 1 → 12
+  const semestres = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
 
   useEffect(() => {
     if (!user) return;
@@ -41,7 +99,27 @@ export default function AllProjectsCards() {
     return () => unsubscribe();
   }, [user]);
 
-  if (loading) {
+  // -------------------------------
+  // APLICAÇÃO DOS FILTROS + PESQUISA
+  // -------------------------------
+
+  const projetosFiltrados = useMemo(() => {
+    return projetos
+      .filter((p) =>
+        p.nome.toLowerCase().includes(pesquisa.toLowerCase())
+      )
+      .filter((p) =>
+        filtroCurso === "Todos" ? true : p.curso === filtroCurso
+      )
+      .filter((p) =>
+        filtroSemestre === "Todos" ? true : p.semestre === Number(filtroSemestre)
+      )
+      .filter((p) =>
+        filtroAno === "Todos" ? true : p.ano === Number(filtroAno)
+      );
+  }, [projetos, pesquisa, filtroCurso, filtroSemestre, filtroAno]);
+
+  if (loading || loadingpage) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#F4EAF4]">
         <p className="text-[#7A4C77] text-lg">Carregando informações...</p>
@@ -49,40 +127,86 @@ export default function AllProjectsCards() {
     );
   }
 
-  if (loadingpage) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-[#7A4C77] text-lg">Carregando projetos...</p>
-      </div>
-    );
-  }
-
   return (
-    <div
-    className="
-      flex flex-col items-start 
-      w-full 
-      min-h-0 
-      flex-1
-      pr-4 gap-4 
-      sm:pl-4 sm:pt-4 md:pr-8 
-      overflow-y-auto
-    "
-  >
-    {/* Topo */}
-    <div className="flex flex-col sm:flex-row sm:justify-between sm:w-full lg:mb-4 flex-shrink-0">
-        <p className="font-medium text-xl mb-3 sm:mb-0">Meus projetos</p>
+    <div className="flex flex-col items-start w-full min-h-0 flex-1 pr-4 gap-4 sm:pl-4 sm:pt-4 md:pr-8 overflow-y-auto">
+      
+      {/* TOPO */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:w-full lg:mb-4 flex-shrink-0 gap-3">
+        <p className="font-medium text-xl">Meus projetos</p>
 
-        <div className="flex bg-[#F6F6F6] text-[#8C8C8C] items-center gap-2 py-1.5 px-4 rounded-full text-[13px] w-60 md:w-80 2xl:w-100">
+        {/* PESQUISA */}
+        <div className="flex bg-[#F6F6F6] text-[#8C8C8C] items-center gap-2 py-1.5 px-4 rounded-full text-[13px] w-60 md:w-80">
           <IoSearchSharp />
           <input
             type="text"
-            placeholder="Pesquisar"
+            placeholder="Pesquisar projeto"
+            value={pesquisa}
+            onChange={(e) => setPesquisa(e.target.value)}
             className="bg-transparent outline-none w-full"
           />
         </div>
       </div>
 
+      {/* FILTROS */}
+      <div className="flex flex-wrap gap-3 mb-2 w-full">
+
+        {/* Filtro Curso */}
+        <select
+          value={filtroCurso}
+          onChange={(e) => setFiltroCurso(e.target.value)}
+          className="px-3 py-1 text-sm bg-[#F6F6F6] rounded-md border border-gray-300"
+        >
+          <option value="Todos">Todos os cursos</option>
+
+          {[...new Set(projetos.map((p) => p.curso))].map(
+            (curso) =>
+              curso && (
+                <option key={curso} value={curso}>
+                  {curso}
+                </option>
+              )
+          )}
+        </select>
+
+
+        {/* Filtro Semestre */}
+        <select
+          value={filtroSemestre}
+          onChange={(e) => setFiltroSemestre(e.target.value)}
+          className="px-3 py-1 text-sm bg-[#F6F6F6] rounded-md border border-gray-300"
+        >
+          <option value="Todos">Todos os semestres</option>
+
+          {[...new Set(projetos.map((p) => p.semestre))].map(
+            (sem) =>
+              sem && (
+                <option key={sem} value={sem}>
+                  {sem}º semestre
+                </option>
+              )
+          )}
+        </select>
+
+        {/* Filtro Ano */}
+        <select
+          value={filtroAno}
+          onChange={(e) => setFiltroAno(e.target.value)}
+          className="px-3 py-1 text-sm bg-[#F6F6F6] rounded-md border border-gray-300"
+        >
+          <option value="Todos">Todos os anos</option>
+          {/* Gera anos com base nos projetos */}
+          {[...new Set(projetos.map((p) => p.ano))].map(
+            (ano) =>
+              ano && (
+                <option key={ano} value={ano}>
+                  {ano}
+                </option>
+              )
+          )}
+        </select>
+      </div>
+
+      {/* GRID DE PROJETOS */}
       <div
         className="
           grid 
@@ -91,16 +215,12 @@ export default function AllProjectsCards() {
           lg:grid-cols-4  
           xl:grid-cols-5
           2xl:grid-cols-6
-          gap-x-2
-          gap-y-2
-          sm:gap-x-3
-          sm:gap-y-4
-          sm:gap-y-6
+          gap-x-2 gap-y-4 sm:gap-x-3 sm:gap-y-6
           w-full
         "
       >
-        {projetos.length > 0 ? (
-          projetos.map((proj) => (
+        {projetosFiltrados.length > 0 ? (
+          projetosFiltrados.map((proj) => (
             <div key={proj.id} className="w-full">
               <TemplateCard
                 nome={proj.nome}
@@ -113,7 +233,7 @@ export default function AllProjectsCards() {
             </div>
           ))
         ) : (
-          <p>Você ainda não criou ou foi convidado para nenhum projeto.</p>
+          <p className="text-sm">Nenhum projeto encontrado com os filtros selecionados.</p>
         )}
       </div>
 

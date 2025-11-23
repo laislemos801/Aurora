@@ -112,7 +112,7 @@ export default function Home() {
 
       {estatisticas.totalProjetos ? <div className="w-full h-3/12 md:h-6/12 flex relative justify-end bg-[#C288B3] md:bg-transparent rounded-4xl">
         <div className="flex absolute left-0 md:top-[25%] md:w-4/12">
-          <AllProjects quantidade={estatisticas.totalProjetos}/>
+          <AllProjects nome={user.name} quantidade={estatisticas.totalProjetos} />
         </div>
         <div className="md:w-[97%] h-full bg-[#C288B3] rounded-4xl flex">
           <div className="h-full w-4/12 realtive" />
