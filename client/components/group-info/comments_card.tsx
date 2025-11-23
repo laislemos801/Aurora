@@ -106,6 +106,32 @@ export default function CommentsCard() {
     return "/avatar.png";
   };
 
+  const deletarComentario = async (comentario: Comment) => {
+    if (!projectId || !turmaId || !grupoId) return;
+
+    try {
+      const grupoRef = doc(
+        db,
+        "Projetos",
+        projectId,
+        "Turmas",
+        turmaId,
+        "Grupos",
+        grupoId
+      );
+
+      await updateDoc(grupoRef, {
+        comentarios: comments.filter((c) => c !== comentario)
+      });
+
+      setComments((prev) => prev.filter((c) => c !== comentario));
+      toast.success("Comentário excluído.");
+    } catch (error) {
+      console.error("Erro ao excluir comentário:", error);
+      toast.error("Erro ao excluir comentário.");
+    }
+  };
+
   // === ADICIONAR NOVO COMENTÁRIO ===
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
@@ -271,41 +297,61 @@ export default function CommentsCard() {
           </p>
         </div>
       ) : (
-        comments.map((c, idx) => {
-          const isCurrentUser = c.uidAutor === auth.currentUser?.uid;
+      comments.map((c, idx) => {
+        const isCurrentUser = c.uidAutor === auth.currentUser?.uid;
 
-          return (
-            <div key={idx} className="flex flex-col w-full items-start">
-              <div
-                className="flex items-start gap-3 p-2 rounded-lg w-full bg-white"
-              >
-                <img
-                  src={c.avatar}
-                  alt="Avatar"
-                  className="w-7 h-7 rounded-full object-cover"
-                />
+        return (
+          <div key={idx} className="flex flex-col w-full items-start">
+            <div
+              className="flex items-start gap-3 p-2 rounded-lg w-full bg-white relative"
+            >
+              <img
+                src={c.avatar}
+                alt="Avatar"
+                className="w-7 h-7 rounded-full object-cover"
+              />
 
-                <div className="flex flex-col">
-                  <span className="text-[12px] font-medium text-[#000000] xl:text-[13px]">
-                    {isCurrentUser ? "Você" : c.nomeAutor}
-                  </span>
+              <div className="flex flex-col pr-6"> 
+                <span className="text-[12px] font-medium text-[#000000] xl:text-[13px]">
+                  {isCurrentUser ? "Você" : c.nomeAutor}
+                </span>
 
-                  <p className="text-[12px] text-[#3B3B3B] mt-1 xl:text-[13px]">
-                    {c.conteudo}
-                  </p>
-                </div>
+                <p className="text-[12px] text-[#3B3B3B] mt-1 xl:text-[13px]">
+                  {c.conteudo}
+                </p>
               </div>
 
-              <span
-                className={`text-[10px] text-[#3B3B3B] self-end mt-1 font-medium ${
-                  isCurrentUser ? "mr-1" : "ml-1"
-                }`}
-              >
-                {c.data}
-              </span>
+              {/* 🔥 Lixeira — aparece ONLY se o comentário for do usuário logado */}
+              {isCurrentUser && (
+                <button
+                  onClick={() => deletarComentario(c)}
+                  className="
+                    absolute 
+                    right-2 
+                    top-1/2 
+                    -translate-y-1/2
+                    text-red-700 
+                    hover:text-red-800
+                    mr-2
+                  "
+                  title="Excluir comentário"
+                >
+                  <i className="pi pi-trash text-[15px]" />
+                </button>
+              )}
             </div>
-          );
-        })
+
+            <span
+              className={`text-[10px] text-[#3B3B3B] self-end mt-1 font-medium ${
+                isCurrentUser ? "mr-1" : "ml-1"
+              }`}
+            >
+              {c.data}
+            </span>
+          </div>
+        );
+      })
+
       )}
     </div>
 
