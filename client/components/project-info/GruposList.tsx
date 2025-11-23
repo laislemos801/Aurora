@@ -61,24 +61,17 @@ export function GruposList({ projectId, turmaId, projectName, onDeleteTurma }: P
   const handleAddGroup = async () => {
     const indice = grupos.length + 1;
     const nome = `Grupo ${String(indice).padStart(2, "0")}`;
-    const nomeProjeto = projectName || undefined;
 
-    const docRef = await addDoc(
+    await addDoc(
       collection(db, "Projetos", projectId, "Turmas", turmaId, "Grupos"),
       { nome }
-    );
-
-    setGrupos((prev) =>
-      [...prev, { id: docRef.id, nome, nomeProjeto }].sort((a, b) =>
-        a.nome.localeCompare(b.nome, "pt", { numeric: true })
-      )
     );
 
     toast.success(`${nome} criado com sucesso!`);
   };
 
   return (
-    <div className="bg-white shadow-xl rounded-2xl py-4 w-full flex flex-col mt-5 px-4 max-h-[240px] md:max-h-[300px] 
+    <div className="bg-white shadow-xl rounded-2xl py-4 w-full h-full flex flex-col mt-5 px-4 max-h-[240px] md:max-h-[300px] 
     md:ml-4 lg:max-h-[609px]">
       {/* Lista de grupos — rolagem apenas aqui */}
       <div className="flex flex-col gap-2 overflow-y-auto flex-1 lg:gap-4">

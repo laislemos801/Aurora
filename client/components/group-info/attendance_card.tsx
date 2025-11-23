@@ -383,7 +383,7 @@ export default function AttendanceCard() {
             <div
               className="grid border-b pb-2 gap-0"
               style={{
-                gridTemplateColumns: `minmax(110px, 110px) repeat(${presencasCols.length}, 60px)`
+                gridTemplateColumns: `minmax(145px, 145px) repeat(${presencasCols.length}, 60px)`
               }}
             >
               <div className="font-medium text-[12px] px-4 whitespace-nowrap overflow-hidden text-ellipsis">
@@ -406,7 +406,7 @@ export default function AttendanceCard() {
                 key={a.ra}
                 className="grid border-b py-2 gap-0 px-4"
                 style={{
-                  gridTemplateColumns: `minmax(100px, 100px) repeat(${presencasCols.length}, 60px)`
+                  gridTemplateColumns: `minmax(130px, 130px) repeat(${presencasCols.length}, 60px)`
                 }}
               >
                 <div className="whitespace-nowrap overflow-hidden text-ellipsis">
