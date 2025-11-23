@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, getDocs, addDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase/clientApp";
 import { FiPlus } from "react-icons/fi";
 import { useRouter } from "next/navigation";
@@ -37,28 +37,25 @@ export function GruposList({ projectId, turmaId, projectName, onDeleteTurma }: P
   useEffect(() => {
     if (!turmaId) return;
 
-    const fetchGroups = async () => {
-      setLoading(true);
-      const snap = await getDocs(
-        collection(db, "Projetos", projectId, "Turmas", turmaId, "Grupos")
-      );
+    const unsubscribe = onSnapshot(
+      collection(db, "Projetos", projectId, "Turmas", turmaId, "Grupos"),
+      (snap) => {
+        const gruposData = snap.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as any),
+          nomeProjeto: projectName || undefined,
+        }));
 
-      const gruposData = snap.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as any),
-        nomeProjeto: projectName || undefined,
-      }));
+        gruposData.sort((a, b) =>
+          a.nome.localeCompare(b.nome, "pt", { numeric: true })
+        );
 
-      // 🔽 Ordena naturalmente por nome (Grupo 01, 02, 10 etc.)
-      gruposData.sort((a, b) =>
-        a.nome.localeCompare(b.nome, "pt", { numeric: true })
-      );
+        setGrupos(gruposData);
+        setLoading(false);
+      }
+    );
 
-      setGrupos(gruposData);
-      setLoading(false);
-    };
-
-    fetchGroups();
+    return () => unsubscribe();
   }, [projectId, turmaId, projectName]);
 
   const handleAddGroup = async () => {
