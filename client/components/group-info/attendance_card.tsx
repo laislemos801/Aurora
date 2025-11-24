@@ -215,6 +215,35 @@ export default function AttendanceCard() {
     }
   };
 
+  const deletarColuna = async (colData: string) => {
+    if (!projectId || !turmaId || !grupoId) {
+      toast.error("Parâmetros faltando.");
+      return;
+    }
+
+    const grupoRef = doc(
+      db,
+      "Projetos",
+      projectId,
+      "Turmas",
+      turmaId,
+      "Grupos",
+      grupoId
+    );
+
+    try {
+      const novoArray = presencasCols.filter((c) => c.data !== colData);
+      await updateDoc(grupoRef, { presencas: novoArray });
+
+      setPresencasCols(novoArray);
+      toast.success("Coluna removida!");
+    } catch (error) {
+      console.error("Erro ao deletar coluna:", error);
+      toast.error("Erro ao deletar coluna.");
+    }
+  };
+
+
   // -------------------------
   // atualizar uma presença (checkbox)
   // -------------------------
@@ -306,7 +335,7 @@ export default function AttendanceCard() {
         {isEditing ? (
           <button
             onClick={handleSalvar}
-            className="px-3 py-0.5 rounded-sm bg-[#7B6294] text-white hover:bg-[#6a5583] transition text-[12px]"
+            className="px-3 py-0.5 rounded-sm bg-[#7B6294] text-[#FCF3FA] hover:bg-[#6a5583] transition text-[12px] lg:py-1.5"
           >
             Salvar
           </button>
@@ -383,7 +412,7 @@ export default function AttendanceCard() {
             <div
               className="grid border-b pb-2 gap-0"
               style={{
-                gridTemplateColumns: `minmax(145px, 145px) repeat(${presencasCols.length}, 60px)`
+                gridTemplateColumns: `minmax(145px, 145px) repeat(${presencasCols.length}, 80px)`
               }}
             >
               <div className="font-medium text-[12px] px-4 whitespace-nowrap overflow-hidden text-ellipsis">
@@ -393,12 +422,28 @@ export default function AttendanceCard() {
               {presencasCols.map((col) => (
                 <div
                   key={col.data}
-                  className="text-center text-[12px] font-medium"
+                  className="relative flex items-center justify-center text-[12px] font-medium"
                 >
-                  {col.data}
+                  {/* WRAPPER HORIZONTAL – NOME + LIXEIRA */}
+                  <div className="flex items-center gap-1">
+                    <span>{col.data}</span>
+
+                    {isEditing && (
+                      <button
+                        onClick={() => deletarColuna(col.data)}
+                        className="text-red-700 hover:text-red-800"
+                        title="Excluir coluna"
+                      >
+                        <i className="pi pi-trash text-[12px] sm:text-[14px]" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
+
+
             </div>
+
 
             {/* LINHAS */}
             {alunos.map((a) => (
@@ -406,7 +451,7 @@ export default function AttendanceCard() {
                 key={a.ra}
                 className="grid border-b py-2 gap-0 px-4"
                 style={{
-                  gridTemplateColumns: `minmax(130px, 130px) repeat(${presencasCols.length}, 60px)`
+                  gridTemplateColumns: `minmax(130px, 130px) repeat(${presencasCols.length}, 80px)`
                 }}
               >
                 <div className="whitespace-nowrap overflow-hidden text-ellipsis">
