@@ -8,25 +8,36 @@ import { MdExitToApp } from "react-icons/md";
 import ModalAddProject from "../ui/modaladdproject";
 import { PiHouseBold } from "react-icons/pi";
 import { FaRegNoteSticky } from "react-icons/fa6";
-import 'primeicons/primeicons.css';
+import "primeicons/primeicons.css";
 import { usePathname, useRouter } from "next/navigation";
-import { doc } from "firebase/firestore";
+import {
+  doc,
+  updateDoc,
+  onSnapshot,
+  arrayRemove,
+} from "firebase/firestore";
 import { auth, db } from "@/firebase/clientApp";
 import { onAuthStateChanged } from "firebase/auth";
-import { onSnapshot } from "firebase/firestore";
 import { Turma } from "@/types/turma";
 import { GoPlus } from "react-icons/go";
 import { MdOutlineNotes } from "react-icons/md";
 import { MdOutlineAccountCircle } from "react-icons/md";
 
 export default function ToolBarTop() {
-  const [mounted, setMounted] = useState(false); 
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAddClassOpen, setIsAddClassOpen] = useState(false);
   const [turmas, setTurmas] = useState<Turma[]>([]);
+  const [commentNotiCount, setCommentNotiCount] = useState(0);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [showNotiMenu, setShowNotiMenu] = useState(false);
+  const [notiList, setNotiList] = useState<any[]>([]);
 
-  const [userData, setUserData] = useState<{ nome: string; profilePicture: string }>({
+  const [userData, setUserData] = useState<{
+    nome: string;
+    profilePicture: string;
+  }>({
     nome: "",
     profilePicture: "",
   });
@@ -39,27 +50,46 @@ export default function ToolBarTop() {
     { path: "/all-projects", icon: <FaRegNoteSticky size={20} /> },
     {
       path: "/edit-profile",
-      icon: <MdOutlineAccountCircle size={22} />
+      icon: <MdOutlineAccountCircle size={22} />,
     },
   ];
 
-    // Montagem do componente
+  async function removerNotificacao(id: string) {
+    if (!currentUser) return;
+
+    const userRef = doc(db, "Professores", currentUser.uid);
+
+    const noti = notiList.find((n) => n.id === id);
+    if (!noti) return;
+
+    await updateDoc(userRef, {
+      "notificacoes.lista": arrayRemove(noti),
+    });
+  }
+
   useEffect(() => {
     setMounted(true);
 
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (!user) return;
+      if (!user) {
+        setCurrentUser(null);
+        return;
+      }
 
+      setCurrentUser(user);
       const userRef = doc(db, "Professores", user.uid);
 
-      // Escuta mudanças em tempo real
       const unsubscribeSnapshot = onSnapshot(userRef, (snap) => {
         if (snap.exists()) {
-          const data = snap.data()
+          const data = snap.data();
+
           setUserData({
             nome: data.nome || "Professor",
             profilePicture: data.profilePicture || "",
           });
+
+          setCommentNotiCount(data.notificacoes?.comentarios || 0);
+          setNotiList(data.notificacoes?.lista || []);
         }
       });
 
@@ -69,17 +99,18 @@ export default function ToolBarTop() {
     return () => unsubscribeAuth();
   }, []);
 
-  if (!mounted) return null; 
+  if (!mounted) return null;
 
   return (
     <>
       {/* Toolbar */}
       <div className="bg-[#FCF3FA] w-full h-14 flex items-center justify-between pr-3 mt-2 relative xl:h-20">
-        {/* Grupo esquerdo: widget + aurora */}
-        <div className="flex items-center gap-5 ml-3 xl:mt-2">
-          {/* Widget mobile */}
-          <button className="sm:hidden cursor-pointer" onClick={() => setIsSidebarOpen(true)}>
-            <MdOutlineNotes  size={28} className="text-[#C288B3]" /> 
+        <div className="flex items-center gap-5 ml-1 sm:ml-3 xl:mt-2">
+          <button
+            className="sm:hidden cursor-pointer"
+            onClick={() => setIsSidebarOpen(true)}
+          >
+            <MdOutlineNotes size={28} className="text-[#C288B3]" />
           </button>
 
           <Image
@@ -87,30 +118,95 @@ export default function ToolBarTop() {
             alt="aurora"
             width={1920}
             height={1080}
-            className="w-28 sm:w-20 xl:ml-4 xl:w-23 2xl:w-25 mt-2"
+            className="w-24 xl:ml-4 xl:w-28 mt-2"
           />
         </div>
 
-        {/* Botões e usuário */}
-        <div className="flex items-center w-auto gap-3 sm:gap-5 xl:mt-3 xl:gap-8">
-          {/* Botão Novo Projeto */}
+        {/* Botões */}
+        <div className="flex items-center w-auto gap-3 sm:mr-4 sm:gap-5 xl:mt-3 xl:gap-8">
           <button
             onClick={() => setIsOpen(true)}
             className="text-white bg-[#90416B] cursor-pointer rounded-md p-1.5 h-8 hover:bg-[#782F56] transition flex items-center justify-center"
           >
             <GoPlus size={24} color="#FFFFFF" className="sm:inline" />
-            <span className="sm:inline text-sm sm:text-lg p-2 xl:px-5">Novo projeto</span>
+            <span className="inline sm:hidden text-[12px] p-1 xl:px-5">
+              Projeto
+            </span>
+            <span className="hidden sm:inline text-sm sm:text-md xl:text-[16px] p-2 xl:px-5">
+              Novo projeto
+            </span>
           </button>
 
-          {/* Ícones de notificação e perfil */}
           <div className="flex items-center gap-3">
-            <button>
+            {/* NOTIFICAÇÕES */}
+            <button className="relative">
               <MdOutlineCircleNotifications
                 size={40}
-                className="text-[#C288B3] relative w-8 h-8 sm:w-7 sm:h-7 md:w-10 md:h-10 "
+                onClick={async () => {
+                  setShowNotiMenu(!showNotiMenu);
+                  if (!currentUser) return;
+
+                  await updateDoc(doc(db, "Professores", currentUser.uid), {
+                    "notificacoes.comentarios": 0,
+                  });
+                }}
+                className="text-[#C288B3] relative w-8 h-8 sm:w-7 sm:h-7 md:w-10 md:h-10"
               />
+
+              {commentNotiCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full px-2 py-[1px] text-[10px]">
+                  {commentNotiCount}
+                </span>
+              )}
             </button>
 
+            {/* MENU DROPDOWN DE NOTIFICAÇÕES */}
+            {showNotiMenu && (
+              <div className="absolute right-14 top-16 bg-white shadow-xl p-3 rounded-lg w-80 z-50">
+                <h3 className="font-semibold text-[#90416B] mb-2">
+                  Notificações
+                </h3>
+
+                {notiList.length === 0 && (
+                  <p className="text-sm text-gray-500">
+                    Nenhuma notificação nova.
+                  </p>
+                )}
+
+                {notiList.map((noti) => (
+                  <div
+                    key={noti.id}
+                    className="border-b py-2 text-sm flex flex-col"
+                  >
+                    <b>{noti.autor}</b> adicionou um comentário em {noti.grupoNome}
+                    <p>{noti.turmaNome} — {noti.projetoNome}</p>
+
+                    <div className="flex gap-3 mt-2">
+                      <button
+                        className="text-[#90416B] underline text-xs"
+                        onClick={() =>
+                          router.push(
+                            `/group-info?page=group-info&projectId=${noti.projetoId}&turmaId=${noti.turmaId}&grupoId=${noti.grupoId}`
+                          )
+                        }
+                      >
+                        Acessar
+                      </button>
+
+                      <button
+                        className="text-red-500 underline text-xs"
+                        onClick={() => removerNotificacao(noti.id)}
+                      >
+                        Remover
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+              </div>
+            )}
+
+            {/* PERFIL */}
             <div
               className="flex items-center gap-2 cursor-pointer rounded-full hover:bg-[#f0cde693]"
               onClick={() => router.push("/edit-profile")}
@@ -130,17 +226,14 @@ export default function ToolBarTop() {
                 )}
               </div>
 
-              {/* Nome escondido no mobile */}
               <p className="hidden sm:block font-medium text-[#90416B] text-lg sm:text-xl xl:text-xl">
                 {userData.nome || "Carregando..."}
               </p>
             </div>
           </div>
         </div>
-
       </div>
 
-      {/* Modal Add Project */}
       <ModalAddProject
         isOpen={isOpen}
         setIsOpen={setIsOpen}
@@ -149,50 +242,6 @@ export default function ToolBarTop() {
         turmas={turmas}
         setTurmas={setTurmas}
       />
-
-      {/* Sidebar mobile overlay */}
-      {isSidebarOpen && (
-        <div className="fixed inset-0 z-50 flex bg-[rgba(128,128,128,0.4)] sm:hidden"
-        onClick={() => setIsSidebarOpen(false)}>
-          <div className="bg-[#FCF3FA] w-18 h-full p-4 flex flex-col justify-start items-center shadow-lg">
-            {/* Botão fechar */}
-            <button
-              className="mb-30 text-[#90416B] hover:text-[#C288B3] rounded-full transition text-xl mt-2"
-              onClick={() => setIsSidebarOpen(false)}
-            >
-              <i className="pi pi-chevron-circle-left cursor-pointer"></i>
-            </button>
-
-            {/* Ícones mobile */}
-            <div className="flex flex-col items-center mt-4 gap-6">
-              {navItems.map((item, idx) => (
-                <div
-                  key={idx}
-                  className={`flex items-center justify-center w-10 h-10 cursor-pointer transition
-                    ${pathname === item.path ? "bg-[#90416B] text-white rounded-full" : "bg-transparent text-[#C288B3] rounded-full"}`}
-                  onClick={() => {
-                    router.push(item.path);
-                    setIsSidebarOpen(false);
-                  }}
-                >
-                  <span className="text-xl">{item.icon}</span>
-                </div>
-              ))}
-            </div>
-
-            <button
-              className="mt-auto text-[#C288B3] hover:text-[#90416B] transition text-2xl"
-              onClick={() => {
-                // logica logout
-                setIsSidebarOpen(false);
-              }}
-            >
-              <MdExitToApp size={25} />
-            </button>
-
-          </div>
-        </div>
-      )}
     </>
   );
 }

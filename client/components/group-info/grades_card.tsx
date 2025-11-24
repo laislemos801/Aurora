@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { FiPlus } from "react-icons/fi";
 import { db } from "@/firebase/clientApp";
-import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, setDoc, updateDoc } from "firebase/firestore";
 
 interface GradeItem {
   key: string;
@@ -95,6 +95,43 @@ export default function GradesCard() {
     fetchAlunos();
   }, [projectId, turmaId, grupoId]);
 
+  useEffect(() => {
+    const fetchNotas = async () => {
+      if (!selectedStudent || alunos.length === 0) return;
+
+      const aluno = alunos.find(a => a.nome === selectedStudent);
+      if (!aluno) return;
+
+      const notasRef = doc(
+        db,
+        "Projetos",
+        projectId!,
+        "Turmas",
+        turmaId!,
+        "Grupos",
+        grupoId!,
+        "notas",
+        String(aluno.ra)
+      );
+
+      const snap = await getDoc(notasRef);
+
+      if (snap.exists()) {
+        setGrades(snap.data() as Record<string, string>);
+      } else {
+        // inicializa vazio para novo aluno
+        setGrades({
+          documentacao: "",
+          fichaHoras: "",
+          relatorioExtensao: "",
+          apresentacao: "",
+        });
+      }
+    };
+
+    fetchNotas();
+  }, [selectedStudent]);
+
 
   // === ESTADOS DAS NOTAS ===
   const [grades, setGrades] = useState<Record<string, string>>({
@@ -114,9 +151,42 @@ export default function GradesCard() {
   const [adding, setAdding] = useState(false);
   const [newFieldName, setNewFieldName] = useState("");
 
-  const handleGradeChange = (key: string, value: string) => {
+  const handleGradeChange = async (key: string, value: string) => {
+    const aluno = alunos.find(a => a.nome === selectedStudent);
+    if (!aluno) return;
+
+    // Atualiza estado local imediatamente
     setGrades((prev) => ({ ...prev, [key]: value }));
+
+    const notasRef = doc(
+      db,
+      "Projetos",
+      projectId!,
+      "Turmas",
+      turmaId!,
+      "Grupos",
+      grupoId!,
+      "notas",
+      String(aluno.ra)
+    );
+
+    const snap = await getDoc(notasRef);
+
+    if (!snap.exists()) {
+      // === PRIMEIRA VEZ SALVANDO ===
+      await setDoc(notasRef, {
+        ...grades,
+        [key]: value,
+      });
+      return;
+    }
+
+    // === ATUALIZA SOMENTE O QUE MUDOU ===
+    await updateDoc(notasRef, {
+      [key]: value,
+    });
   };
+
 
   const handleAddField = () => {
     if (!newFieldName.trim()) return;
@@ -154,7 +224,8 @@ export default function GradesCard() {
               ))}
             </select>
           ) : (
-            <div className="text-xs text-gray-500">Nenhum aluno</div>
+            <div className="bg-[#3B3B3B] rounded-sm px-2 py-0.5 pr-6 text-[9px] text-[#FCF3FA] font-light border-[0.5px] border-[#FCF3FA] appearance-none 
+              sm:text-[11px] xl:text-[13px]">Nenhum aluno</div>
           )}
 
           <div className="pointer-events-none absolute right-2 flex items-center h-full">
@@ -164,7 +235,7 @@ export default function GradesCard() {
       </div>
 
       {/* Lista de Inputs com scroll */}
-      <div className="w-full mt-3 px-4 flex flex-col gap-2 max-h-[100px] overflow-y-auto lg:max-h-[240px] xl:gap-4 2xl:gap-5 2xl:max-h-[260px]">
+      <div className="w-full mt-3 px-4 flex flex-col gap-2 max-h-[100px] overflow-y-auto lg:max-h-[189px] xl:gap-4 2xl:gap-5">
         {gradeItems.map((item) => (
           <div
             key={item.key}

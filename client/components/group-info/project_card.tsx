@@ -67,14 +67,14 @@ export default function ProjectCard() {
   }
 
   return (
-    <div className="bg-[#F6F6F6] rounded-lg shadow-md px-3 pt-3 w-full flex flex-col justify-between relative lg:h-full pb-4">
+    <div className="bg-[#F6F6F6] rounded-lg shadow-md px-3 pt-3 w-full flex flex-col justify-between relative pb-4">
 
       <input
         type="text"
         value={projectName}
         onChange={(e) => setProjectName(e.target.value)}
         readOnly={!isEditing}
-        className={`p-1 text-[#3B3B3B] text-[14px] font-medium w-full mb-1
+        className={`p-1 text-[#000000] text-[14px] font-medium w-full mb-1
                     border-none outline-none transition-all md:text-[15px] xl:text-[16px] 2xl:text-[18px]
                     ${isEditing ? "bg-white focus:border focus:border-[#C288B3] focus:rounded-md" : "bg-transparent"}`}
       />
@@ -83,12 +83,12 @@ export default function ProjectCard() {
         value={projectDescription}
         onChange={(e) => setProjectDescription(e.target.value)}
         readOnly={!isEditing}
-        className={`p-1 text-[11px] text-[#B8B8B8] text-justify leading-relaxed w-full
-                    border-none outline-none resize-none transition-all
+        className={`p-1 text-[11px] text-[#3B3B3B] text-justify leading-relaxed w-full
+                    border-none outline-none resize-none transition-all font-medium
                     overflow-y-auto mb-2 lg:text-[12px] xl:text-[13px]
-                    h-[70px] lg:h-[105px] 2xl:h-[130px]
+                    h-[70px] lg:h-[100px]
                     [&::-webkit-scrollbar]:w-0.75
-                    [&::-webkit-scrollbar-thumb]:bg-[#B8B8B8]/60
+                    [&::-webkit-scrollbar-thumb]:bg-[#3B3B3B]/60
                     [&::-webkit-scrollbar-thumb]:rounded-full
                     [&::-webkit-scrollbar-track]:bg-transparent
                     ${isEditing ? "bg-white focus:border focus:border-[#C288B3] focus:rounded-sm" : "bg-transparent"}`}
@@ -105,7 +105,7 @@ export default function ProjectCard() {
         ) : (
           <button
             onClick={handleButtonClick}
-            className="bg-[#7B6294] p-2 rounded-full shadow cursor-pointer hover:bg-[#674984] transition"
+            className="bg-[#7B6294] p-1.5 rounded-full shadow cursor-pointer hover:bg-[#674984] transition lg:p-2"
           >
             <MdEdit size={14} className="text-[#FCF3FA]" />
           </button>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, getDocs, addDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase/clientApp";
 import { FiPlus } from "react-icons/fi";
 import { useRouter } from "next/navigation";
@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 interface Grupo {
   id: string;
   nome: string;
+  alunos?: string[];
   nomeProjeto?: string;
 }
 
@@ -36,51 +37,41 @@ export function GruposList({ projectId, turmaId, projectName, onDeleteTurma }: P
   useEffect(() => {
     if (!turmaId) return;
 
-    const fetchGroups = async () => {
-      setLoading(true);
-      const snap = await getDocs(
-        collection(db, "Projetos", projectId, "Turmas", turmaId, "Grupos")
-      );
+    const unsubscribe = onSnapshot(
+      collection(db, "Projetos", projectId, "Turmas", turmaId, "Grupos"),
+      (snap) => {
+        const gruposData = snap.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as any),
+          nomeProjeto: projectName || undefined,
+        }));
 
-      const gruposData = snap.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as any),
-        nomeProjeto: projectName || undefined,
-      }));
+        gruposData.sort((a, b) =>
+          a.nome.localeCompare(b.nome, "pt", { numeric: true })
+        );
 
-      // 🔽 Ordena naturalmente por nome (Grupo 01, 02, 10 etc.)
-      gruposData.sort((a, b) =>
-        a.nome.localeCompare(b.nome, "pt", { numeric: true })
-      );
+        setGrupos(gruposData);
+        setLoading(false);
+      }
+    );
 
-      setGrupos(gruposData);
-      setLoading(false);
-    };
-
-    fetchGroups();
+    return () => unsubscribe();
   }, [projectId, turmaId, projectName]);
 
   const handleAddGroup = async () => {
     const indice = grupos.length + 1;
     const nome = `Grupo ${String(indice).padStart(2, "0")}`;
-    const nomeProjeto = projectName || undefined;
 
-    const docRef = await addDoc(
+    await addDoc(
       collection(db, "Projetos", projectId, "Turmas", turmaId, "Grupos"),
       { nome }
-    );
-
-    setGrupos((prev) =>
-      [...prev, { id: docRef.id, nome, nomeProjeto }].sort((a, b) =>
-        a.nome.localeCompare(b.nome, "pt", { numeric: true })
-      )
     );
 
     toast.success(`${nome} criado com sucesso!`);
   };
 
   return (
-    <div className="bg-white shadow-xl rounded-2xl py-4 w-full flex flex-col mt-5 px-4 max-h-[240px] md:max-h-[300px] 
+    <div className="bg-white shadow-xl rounded-2xl py-4 w-full h-full flex flex-col mt-5 px-4 max-h-[240px] md:max-h-[300px] 
     md:ml-4 lg:max-h-[609px]">
       {/* Lista de grupos — rolagem apenas aqui */}
       <div className="flex flex-col gap-2 overflow-y-auto flex-1 lg:gap-4">
@@ -93,10 +84,30 @@ export function GruposList({ projectId, turmaId, projectName, onDeleteTurma }: P
             key={g.id}
             className="flex justify-between items-center px-3 py-2 rounded-md shadow-inner bg-[#FCF3FA] lg:py-4 lg:px-5"
           >
-            <span className="text-sm font-medium text-[#4A3A55] lg:text-[16px]">
-              {g.nome}
-              {g.nomeProjeto ? ` - ${g.nomeProjeto}` : ""}
-            </span>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-[#4A3A55] lg:text-[16px]">
+                {g.nome}
+                {g.nomeProjeto ? ` - ${g.nomeProjeto}` : ""}
+              </span>
+
+              {/* Lista de alunos do grupo lado a lado */}
+              {g.alunos && g.alunos.length > 0 ? (
+                <div className="flex flex-wrap gap-4 mt-1 ml-1">
+                  {g.alunos.map((aluno: any) => (
+                    <span
+                      key={aluno.ra}
+                      className="text-xs text-[#3B3B3B] px-2 py-[2px] rounded-md"
+                    >
+                      {aluno.nome}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-xs text-gray-400 italic ml-1 mt-1">
+                  Nenhum aluno alocado
+                </span>
+              )}
+            </div>
 
             <button
               onClick={() => handleManage(g.id)}

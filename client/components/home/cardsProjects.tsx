@@ -133,7 +133,7 @@ export default function CardsPorjects({ projetos }: CardsProjectsProps) {
 
                   <button
                     onClick={() => router.push(`/projects-info/${content.id}`)}
-                    className="bg-[#7B6294] hover:bg-[#674984] text-white px-4 rounded-full py-1 text-xs md:text-sm cursor-pointer"
+                    className="bg-[#7B6294] hover:bg-[#674984] text-white italic px-4 rounded-full py-1 text-xs md:text-sm cursor-pointer"
                   >
                     Ver mais
                   </button>
