@@ -10,8 +10,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/clientApp";
 import { useRouter } from "next/navigation";
-import EyeOpen from "@/public/eye_open.svg";
-import EyeClosed from "@/public/eye_closed.svg";
+import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 
 const lexendExa = Lexend_Exa({
   weight: "400",
@@ -23,7 +22,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // 👁️ estado para alternar visibilidade
+  const [showPassword, setShowPassword] = useState(false); 
 
   const mapError = (code: string) => {
     switch (code) {
@@ -96,49 +95,46 @@ export default function Login() {
       <div
         className="
           relative flex flex-col justify-center items-center text-center
-          w-80 h-[550px] sm:w-120 sm:h-[600px] md:w-120 md:h-[650px] md:py-12 lg:w-160 xl:h-[680px] 2xl:mr-10
+          w-96 h-[680px] sm:w-120 sm:h-[700px] md:w-120 md:h-[740px] lg:w-140 xl:h-[780px] 2xl:mr-10
           border border-white/30 rounded-[35px]
-          backdrop-blur-md bg-white/25 shadow-lg
+          backdrop-blur-md bg-white/40 shadow-lg
         "
       >
         {/* LOGO */}
-        <div className="absolute -top-8 sm:-top-8 left-1/2 -translate-x-1/2">
+        <div className="flex flex-col justify-start items-center">
           <Image
             src="/logo aurora em svg.svg"
             alt="Logo Aurora"
-            width={80}
-            height={80}
-            className="drop-shadow-md w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20"
+            width={30}
+            height={30}
+            className="drop-shadow-md w-12 h-12 mt-6"
           />
         </div>
 
         <h1
-          className={`${lexendExa.className} text-[#90416B] text-xl md:text-[26px] xl:text-[30px] font-semibold mt-2 tracking-[0.3em]`}
+          className={`${lexendExa.className} text-[#90416B] text-xl md:text-[26px] xl:text-[30px] font-semibold mt-2 mb-4 tracking-[0.3em]`}
         >
           AURORA
         </h1>
 
         {/* CONTEÚDO */}
-        <p className="text-2xl md:text-4xl xl:text-6xl text-[#7B6294] mt-6 font-medium">
-          Bem-vindo
+        <p className="text-xl md:text-2xl xl:text-3xl text-[#3B3B3B] mt-6 font-semibold">
+          Bem-vindo de volta!
         </p>
-        <p className="text-xl md:text-3xl xl:text-4xl text-[#7B6294] font-medium">
-          de volta!
-        </p>
-        <p className="text-sm sm:text-sm md:text-lg text-white mt-3">
-          Faça <span className="text-[#90416B] font-bold italic">login</span> e comece <br /> ampliando seu horizonte.
+        <p className="text-sm sm:text-sm md:text-lg text-[#3B3B3B] mt-3 font-medium">
+          Faça <span className="text-[#7B6294] font-bold italic">login</span> e comece <br /> ampliando seu horizonte.
         </p>
 
         {/* FORM */}
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col mt-10 sm:mt-10 w-64 sm:w-3/5 gap-2"
+          className="flex flex-col mt-10 sm:mt-10 w-64 sm:w-96 gap-2"
         >
           {/* E-MAIL */}
           <div>
             <Label
               htmlFor="email"
-              className="text-[13px] sm:text-[15px] text-left text-[#7B6294] ml-1"
+              className="text-[13px] sm:text-[15px] text-left text-[#3B3B3B] ml-1"
             >
               E-mail
             </Label>
@@ -150,9 +146,9 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="E-mail"
               className="
-                border-[#7B6294] border-2 text-[#7B6294] rounded-md
+                border-[#3B3B3B] border-2 text-[#3B3B3B] rounded-md
                 text-[13px] sm:text-[15px] h-11 sm:h-12 w-full
-                placeholder-[#7B6294]
+                placeholder-[#3B3B3B]
                 focus:outline-none shadow-none focus:ring-0
               "
             />
@@ -162,7 +158,7 @@ export default function Login() {
           <div className="relative">
             <Label
               htmlFor="password"
-              className="text-[13px] sm:text-[15px] text-left text-[#7B6294] ml-1"
+              className="text-[13px] sm:text-[15px] text-left text-[#3B3B3B] ml-1"
             >
               Senha
             </Label>
@@ -174,28 +170,27 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Senha"
               className="
-                border-[#7B6294] border-2 text-[#7B6294] rounded-md
+                border-[#3B3B3B] border-2 text-[#3B3B3B] rounded-md
                 text-[13px] sm:text-[15px] h-11 sm:h-12 w-full
-                placeholder-[#7B6294]
+                placeholder-[#3B3B3B]
                 focus:outline-none shadow-none focus:ring-0 pr-10
               "
             />
-            {/* Botão com SVG para alternar visibilidade */}
+            {/* Botão com ícone para alternar visibilidade */}
             <button
               type="button"
               aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
               onClick={() => setShowPassword((s) => !s)}
-              className="absolute right-3 top-8 sm:top-9 w-6 h-6 flex items-center justify-center"
+              className="cursor-pointer absolute right-3 top-8 sm:top-9 w-6 h-6 flex items-center justify-center text-[#3B3B3B] hover:text-[#90416B]"
             >
-              <Image
-                src={showPassword ? EyeClosed : EyeOpen}
-                alt={showPassword ? "Ocultar" : "Mostrar"}
-                width={20}
-                height={20}
-                priority
-              />
+              {showPassword ? (
+                <IoEyeOffOutline size={20} />
+              ) : (
+                <IoEyeOutline size={20} />
+              )}
             </button>
           </div>
+
 
           <div className="w-full flex justify-end">
             <p className="text-xs sm:text-sm">
@@ -214,8 +209,8 @@ export default function Login() {
             type="submit"
             disabled={loading}
             className="
-              mt-5 sm:mt-6 h-11 sm:h-12 bg-[#C288B3] text-white font-medium rounded-md
-              hover:bg-[#b676a2] transition-all text-[15px] sm:text-[17px]
+              mt-5 sm:mt-6 h-11 sm:h-12 bg-[#90416B] hover:bg-[#782F56] text-white font-medium rounded-md
+               transition-all text-[15px] sm:text-[17px]
               cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed
             "
           >
@@ -232,20 +227,6 @@ export default function Login() {
             Cadastre-se
           </span>
         </p>
-      </div>
-
-      {/* IMAGEM PEOPLE */}
-      <div className="fixed bottom-0 w-full flex justify-center pointer-events-none z-0">
-        <Image
-          src="/people.png"
-          alt="Personagens Aurora"
-          width={1920}
-          height={1080}
-          className="
-            w-10/12 sm:w-8/12 md:w-6/12 lg:w-4/12 xl:w-3/12
-            h-auto object-contain drop-shadow-lg
-          "
-        />
       </div>
     </div>
   );

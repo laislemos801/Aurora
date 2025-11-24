@@ -78,30 +78,28 @@ export default function ResetPassword() {
       {/* CARD */}
       <div
         className="
-          relative flex flex-col justify-center items-center text-center
-          w-80 h-[550px] sm:w-120 sm:h-[600px] md:w-120 md:h-[650px] md:py-12 lg:w-160 xl:h-[680px] 2xl:mr-10
+          relative flex flex-col justify-start items-center text-center
+          w-96 h-[700px] sm:w-130 sm:h-[700px] md:w-130 md:h-[740px] py-12 lg:w-140 xl:h-[780px] 2xl:mr-10
           border border-white/30 rounded-[35px]
-          backdrop-blur-md bg-white/25 shadow-lg
+          backdrop-blur-md bg-white/40 shadow-lg
         "
       >
         {/* LOGO */}
-        <div className="absolute -top-8 sm:-top-8 left-1/2 -translate-x-1/2">
+        <div className="flex flex-col justify-start items-center">
           <Image
             src="/logo aurora em svg.svg"
             alt="Logo Aurora"
-            width={80}
-            height={80}
-            className="drop-shadow-md w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20"
+            width={30}
+            height={30}
+            className="drop-shadow-md w-12 h-12 mt-8"
           />
         </div>
 
         <h1
-          className={`${lexendExa.className} text-[#90416B] text-xl md:text-[26px] xl:text-[30px] font-semibold mt-2 tracking-[0.3em]`}
+          className={`${lexendExa.className} text-[#90416B] text-xl md:text-[26px] xl:text-[30px] font-semibold mt-2 mb-6 tracking-[0.3em]`}
         >
           AURORA
         </h1>
-
-        
 
         {/* FORM */}
         {step === 'email' && (
@@ -113,20 +111,20 @@ export default function ResetPassword() {
               height={85}
               className="mt-6 sm:mt-5 sm:w-[110px] sm:h-[110px]"
             />
-            <h2 className="text-xl md:text-2xl xl:text-4xl text-[#614281] font-semibold mt-4 leading-tight">
+            <h2 className="text-xl md:text-2xl xl:text-3xl text-[#3B3B3B] font-semibold mt-6 leading-tight">
               Redefinição de senha
             </h2>
-            <p className="text-xs sm:text-sm md:text-md text-[#353535]/90 mt-1 leading-5 px-4 sm:px-8">
+            <p className="text-xs sm:text-sm md:text-md text-[#3B3B3B] font-medium mt-1 leading-5 px-4 sm:px-8">
               Digite seu e-mail para redefinir a senha.
             </p>
 
             <form
               onSubmit={handleSubmit}
-              className="flex flex-col mt-6 sm:mt-10 w-64 sm:w-3/5 gap-2"
+              className="flex flex-col mt-6 sm:mt-12 w-64 sm:w-96 gap-2"
             >
               <Label
                 htmlFor="email"
-                className="text-[13px] sm:text-[15px] text-left text-[#7B6294] ml-1 mb-1"
+                className="text-[13px] sm:text-[15px] text-left text-[#3B3B3B] ml-1 mb-1"
               >
                 E-mail
               </Label>
@@ -138,9 +136,9 @@ export default function ResetPassword() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="E-mail"
                 className="
-                  border-[#7B6294] border-2 text-[#7B6294] rounded-md
+                  border-[#3B3B3B] border-2 text-[#3B3B3B] rounded-md
                   text-[13px] sm:text-[15px] h-11 sm:h-12 w-full
-                  placeholder-[#7B6294]
+                  placeholder-[#3B3B3B]
                   focus:outline-none shadow-none focus:ring-0
                 "
               />
@@ -149,8 +147,8 @@ export default function ResetPassword() {
                 type="submit"
                 disabled={loading}
                 className="
-                  mt-2 sm:mt-4 h-11 sm:h-12 bg-[#C288B3] text-white font-medium rounded-md
-                  hover:bg-[#b676a2] transition-all text-[15px] sm:text-[17px]
+                  mt-2 sm:mt-4 h-11 sm:h-12 bg-[#90416B] hover:bg-[#782F56] text-white font-medium rounded-md
+                  transition-all text-[15px] sm:text-[17px]
                   disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer
                 "
               >
@@ -159,7 +157,7 @@ export default function ResetPassword() {
               <p
                 onClick={() => router.push("/login")}
                 className="
-                  text-xs sm:text-sm md:text-md lg:text-md hover:underline font-medium
+                  text-xs sm:text-sm md:text-md lg:text-md hover:underline font-semibold
                   text-[#7B6294]/90 text-center mt-2 mb-4 leading-6 px-6 sm:px-12
                   cursor-pointer hover:text-[#7B6294] transition-colors duration-200
                 "
@@ -180,20 +178,20 @@ export default function ResetPassword() {
             <Image
               src="/emailsend.svg"
               alt="Ícone Cadeado"
-              width={85}
-              height={85}
-              className="mt-6 sm:mt-5 sm:w-[110px] sm:h-[110px]"
+              width={70}
+              height={70}
+              className="mt-12 sm:mt-12 "
             />
-            <h2 className="text-2xl md:text-4xl xl:text-4xl text-[#614281] font-semibold mt-4">
+            <h2 className="text-2xl md:text-4xl xl:text-4xl text-[#3B3B3B] font-semibold mt-4">
               E-mail enviado!
             </h2>
-            <p className="text-sm sm:text-sm md:text-md lg:text-xl text-[#353535]/90 text-center mt-4 leading-6 px-6 sm:px-12">
-              Verifique sua <span className="italic font-semibold">caixa de mensagens</span> ou <span className="italic font-semibold">spam</span>, 
+            <p className="text-sm sm:text-sm md:text-sm lg:text-md text-[#353535]/90 text-center mt-4 leading-6 px-6 sm:px-12">
+              Verifique sua <span className="italic font-semibold text-[#7B6294]">caixa de mensagens</span> ou <span className="text-[#7B6294] italic font-semibold">spam</span>, 
               para redefinir sua senha.
             </p>
             <div className="mt-6 sm:mt-10">
               <Button
-                className="w-[240px] sm:w-[280px] h-11 sm:h-12 bg-[#C288B3] cursor-pointer text-white font-medium rounded-md hover:bg-[#b676a2] transition-all"
+                className="w-64 sm:w-96 h-11 sm:h-12 cursor-pointer text-white font-medium rounded-md bg-[#90416B] hover:bg-[#782F56] transition-all"
                 onClick={() => (window.location.href = '/login')}
               >
                 Voltar para o Login
@@ -201,22 +199,6 @@ export default function ResetPassword() {
             </div>
           </>
         )}
-      </div>
-
-      {/* IMAGEM PEOPLE */}
-      <div className="fixed bottom-0 w-full flex justify-center pointer-events-none z-0">
-        <Image
-          src="/people.png"
-          alt="Personagens Aurora"
-          width={1920}
-          height={1080}
-          className="
-            w-10/12 sm:w-2/12 md:w-4/12 lg:w-4/12 xl:w-3/10
-            h-auto
-            object-contain
-            drop-shadow-lg
-          "
-        />
       </div>
     </div>
   );

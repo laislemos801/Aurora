@@ -8,6 +8,7 @@ import { IoSearchSharp } from "react-icons/io5";
 import { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/firebase/clientApp";
+import NullProjects from "@/components/home/nullProjects";
 
 interface Projeto {
   id: string;
@@ -22,7 +23,7 @@ export default function Home() {
   const { user, loading } = useAuthGuard();
   const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [loadingPage, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(""); // 🔍 novo estado
+  const [searchTerm, setSearchTerm] = useState(""); 
   const [estatisticas, setEstatisticas] = useState({
     totalProjetos: 0,
     totalTurmas: 0,
@@ -89,14 +90,13 @@ export default function Home() {
 
   if (!user) return null;
 
-  // 🔍 Filtrando os projetos com base no termo digitado
   const projetosFiltrados = projetos.filter((projeto) =>
     projeto.nome.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="w-full h-full px-8">
-      <div className="flex w-full justify-between px-8 mb-4">
+    <div className="w-full h-full overflow-auto md:overflow-hidden  px-1 md:px-8">
+      <div className=" w-full justify-between px-8 mb-4 hidden md:flex">
         <p className="text-3xl">Meus projetos</p>
         <div className="flex bg-[#F6F6F6] text-[#8C8C8C] items-center gap-2 py-3 px-4 rounded-full w-3/12">
           <IoSearchSharp />
@@ -105,29 +105,46 @@ export default function Home() {
             placeholder="Pesquisar"
             className="bg-transparent outline-none w-full"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)} // 🟢 atualização em tempo real
+            onChange={(e) => setSearchTerm(e.target.value)} 
           />
         </div>
       </div>
 
-      <div className="w-full h-6/12 flex relative justify-end">
-        <div className="flex absolute left-0 top-[25%] w-4/12">
-          <AllProjects quantidade={estatisticas.totalProjetos}/>
+      {estatisticas.totalProjetos ? <div className="w-full h-3/12 md:h-6/12 flex relative justify-end bg-[#C288B3] md:bg-transparent rounded-4xl">
+        <div className="flex absolute left-0 md:top-[25%] md:w-4/12">
+          <AllProjects nome={user.name} quantidade={estatisticas.totalProjetos} />
         </div>
-        <div className="w-[97%] h-full bg-[#C288B3] rounded-4xl flex">
+        <div className="md:w-[97%] h-full bg-[#C288B3] rounded-4xl flex">
           <div className="h-full w-4/12 realtive" />
           <div
-            className="h-full w-300 flex items-center pl-8 overflow-y-auto px-8"
+            className="h-full md:w-300 flex items-center pl-8 overflow-y-auto px-8"
             style={{ scrollbarWidth: "none" }}
           >
-            <div>
+            <div className="hidden md:flex">
               <CardsPorjects projetos={projetosFiltrados} />
             </div>
           </div>
         </div>
+      </div>:
+      <NullProjects nome={user.name}/>}
+        <div className=" w-full justify-between pt-6 px-2 mb-4 flex flex-col md:hidden">
+        <p className="text-3xl">Meus projetos</p>
+        <div className="flex bg-[#F6F6F6] text-[#8C8C8C] items-center gap-2 py-3 px-4 rounded-full md:w-3/12">
+          <IoSearchSharp />
+          <input
+            type="text"
+            placeholder="Pesquisar"
+            className="bg-transparent outline-none w-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} 
+          />
+        </div>
       </div>
+       <div className="flex md:hidden">
+              <CardsPorjects projetos={projetosFiltrados} />
+            </div>
 
-      <div className="w-full h-6/12 pt-6 p-8">
+      <div className="w-full h-6/12 pt-6 md:p-8">
         <Statistics
           totalProjetos={estatisticas.totalProjetos}
           totalTurmas={estatisticas.totalTurmas}

@@ -11,10 +11,13 @@ import {
   setDoc,
   getDocs,
   collection,
+  writeBatch,
+  increment,
 } from "firebase/firestore";
 import { db, auth } from "@/firebase/clientApp";
 import { useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
+import { v4 as uuid } from "uuid";
 
 interface Comment {
   uidAutor: string;
@@ -39,7 +42,6 @@ export default function CommentsCard() {
   const turmaId = searchParams.get("turmaId");
   const grupoId = searchParams.get("grupoId");
 
-  // === BUSCAR COMENTÁRIOS DO GRUPO ===
   useEffect(() => {
     const fetchComments = async () => {
       if (!projectId || !turmaId || !grupoId) return;
@@ -104,6 +106,32 @@ export default function CommentsCard() {
     return "/avatar.png";
   };
 
+  const deletarComentario = async (comentario: Comment) => {
+    if (!projectId || !turmaId || !grupoId) return;
+
+    try {
+      const grupoRef = doc(
+        db,
+        "Projetos",
+        projectId,
+        "Turmas",
+        turmaId,
+        "Grupos",
+        grupoId
+      );
+
+      await updateDoc(grupoRef, {
+        comentarios: comments.filter((c) => c !== comentario)
+      });
+
+      setComments((prev) => prev.filter((c) => c !== comentario));
+      toast.success("Comentário excluído.");
+    } catch (error) {
+      console.error("Erro ao excluir comentário:", error);
+      toast.error("Erro ao excluir comentário.");
+    }
+  };
+
   // === ADICIONAR NOVO COMENTÁRIO ===
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
@@ -114,6 +142,7 @@ export default function CommentsCard() {
     }
 
     try {
+      // pega dados do autor
       const profRef = doc(db, "Professores", user.uid);
       const profSnap = await getDoc(profRef);
       const userData = profSnap.exists() ? profSnap.data() : {};
@@ -135,25 +164,106 @@ export default function CommentsCard() {
         grupoId!
       );
 
+      // adiciona comentário no grupo
       await updateDoc(grupoRef, {
         comentarios: arrayUnion(novoComentario),
       });
 
-      const avatar =
-        userData.profilePicture || user.photoURL || "/avatar.png";
-
-      setComments((prev) => [
-        { ...novoComentario, avatar },
-        ...prev,
-      ]);
-
+      // atualiza UI local
+      const avatar = userData.profilePicture || user.photoURL || "/avatar.png";
+      setComments((prev) => [...prev, { ...novoComentario, avatar }]);
       setNewComment("");
       setAdding(false);
+
+      // -------------------------------
+      // 🔥 BUSCAR NOMES PARA EXIBIR
+      // -------------------------------
+
+      // nome do projeto
+      const projetoSnap = await getDoc(doc(db, "Projetos", projectId!));
+      const nomeProjeto = projetoSnap.exists()
+        ? projetoSnap.data().nome || projectId
+        : projectId;
+
+      // nome da turma
+      const turmaSnap = await getDoc(
+        doc(db, "Projetos", projectId!, "Turmas", turmaId!)
+      );
+      const nomeTurma = turmaSnap.exists()
+        ? turmaSnap.data().nome || turmaId
+        : turmaId;
+
+      // nome do grupo
+      const grupoSnap = await getDoc(grupoRef);
+      const nomeGrupo = grupoSnap.exists()
+        ? grupoSnap.data().nome || grupoId
+        : grupoId;
+
+      // 🔥 pegar lista de professores DO PROJETO
+      const profsIds: string[] = projetoSnap.exists()
+        ? projetoSnap.data().professores || []
+        : [];
+
+      if (!Array.isArray(profsIds)) {
+        console.warn("Campo 'professores' do projeto não é array", profsIds);
+        return;
+      }
+
+      // -------------------------------
+      // 🔥 CRIAR OBJETO DE NOTIFICAÇÃO
+      // -------------------------------
+      const notiObj = {
+        id: uuid(),
+
+        // para exibir na UI
+        autor: userData.nome || "Professor",
+        projetoNome: nomeProjeto,
+        turmaNome: nomeTurma,
+        grupoNome: nomeGrupo,
+
+        // para navegação
+        autorUid: user.uid,
+        projetoId: projectId,
+        turmaId: turmaId,
+        grupoId: grupoId,
+
+        mensagem: `Comentou em ${nomeGrupo}`,
+        timestamp: Date.now(),
+      };
+
+      // -------------------------------
+      // 🔥 ENVIAR PARA TODOS DO PROJETO
+      // -------------------------------
+      const batch = writeBatch(db);
+      let someoneToNotify = false;
+
+      for (const profId of profsIds) {
+        if (!profId) continue;
+        if (profId === user.uid) continue; // não notifica o próprio autor
+        someoneToNotify = true;
+
+        const profDocRef = doc(db, "Professores", profId);
+
+        batch.update(profDocRef, {
+          "notificacoes.comentarios": increment(1),
+          "notificacoes.lista": arrayUnion(notiObj),
+        });
+      }
+
+      if (!someoneToNotify) {
+        console.info("Nenhum professor para notificar.");
+        return;
+      }
+
+      await batch.commit();
+      console.log("Notificação enviada:", notiObj);
+
     } catch (error) {
       console.error("Erro ao adicionar comentário:", error);
       toast.error("Erro ao salvar comentário.");
     }
   };
+
 
   if (loading) {
     return (
@@ -164,78 +274,118 @@ export default function CommentsCard() {
   }
 
   return (
-    <div className="bg-[#F6F6F6] rounded-lg w-full flex flex-col items-start gap-1 pb-3 pr-2 pl-4 py-4 shadow-md h-full">
-      {/* Header */}
-      <div className="flex justify-between items-center w-full mb-2">
-        <h2 className="text-md font-medium text-gray-800 2xl:text-[18px]">
-          Comentários
-        </h2>
-      </div>
-
-      {/* Lista de comentários */}
-      <div className="flex flex-col w-full gap-4 max-h-40 overflow-y-auto pr-4 scrollbar-custom lg:max-h-[221px] xl:max-h-[246px] 2xl:max-h-[257px]">
-        {comments.length === 0 ? (
-          <p className="text-gray-500 text-sm">
-            Nenhum comentário ainda. Seja o primeiro a comentar!
-          </p>
-        ) : (
-          comments
-            .slice()
-            .reverse()
-            .map((c, idx) => (
-              <div key={idx} className="flex flex-col">
-                <div className="flex items-start gap-3 bg-white rounded-lg p-2">
-                  <img
-                    src={c.avatar}
-                    alt="Avatar"
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                  <div className="flex flex-col w-full">
-                    <span className="text-[12px] font-medium text-gray-700 xl:text-[13px]">
-                      {c.nomeAutor}
-                    </span>
-                    <p className="text-[12px] text-[#3B3B3B] mt-1 xl:text-[13px]">
-                      {c.conteudo}
-                    </p>
-                  </div>
-                </div>
-                <span className="text-[10px] text-gray-400 self-end mt-1 mr-1">
-                  {c.data}
-                </span>
-              </div>
-            ))
-        )}
-      </div>
-
-      {/* Novo comentário */}
-      <div className="w-full pr-4 mt-auto">
-        {adding ? (
-          <div className="flex items-center gap-2 mt-3">
-            <input
-              type="text"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Escreva seu comentário..."
-              className="flex-1 bg-white rounded-lg border border-gray-200 text-[13px] p-2 focus:outline-none focus:ring-1 focus:ring-[#B86B9F]"
-            />
-            <button
-              onClick={handleAddComment}
-              className="bg-[#C288B3] text-white font-medium px-3 py-1 rounded-md text-sm hover:bg-[#6a5583]"
-            >
-              Enviar
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setAdding(true)}
-            className="bg-white w-full flex items-center gap-2 text-[#B86B9F] text-[13px] rounded-md mt-2 p-2 hover:underline xl:text-[14px]"
-          >
-            <FiPlus size={16} />
-            Novo comentário
-          </button>
-        )}
-      </div>
+  <div className="bg-[#F6F6F6] rounded-lg w-full flex flex-col items-start gap-1 pb-3 pr-2 pl-4 py-4 shadow-md h-full">
+    {/* Header */}
+    <div className="flex justify-between items-center w-full mb-2">
+      <h2 className="text-[14px] font-medium text-[#000000] 2xl:text-[18px]">
+        Comentários
+      </h2>
     </div>
-  );
+
+    {/* Lista de comentários */}
+    <div className="flex flex-col w-full gap-4 max-h-60 lg:max-h-100 overflow-y-auto pr-4 scrollbar-custom ">
+
+      {comments.length === 0 ? (
+        <div className="flex flex-col items-center justify-center w-full py-2 mt-4 text-center gap-3 lg:py-6 xl:py-8 2xl:py-12">
+          <img
+            src="/no-comments.png" 
+            alt="Sem comentários"
+            className="w-20 h-20 opacity-80 lg:w-28 lg:h-28"
+          />
+          <p className="text-gray-500 text-[12px] mt-4">
+            Ainda não há comentários. Seja o <span className="font-semibold text-[#90416B]">primeiro</span> a comentar!
+          </p>
+        </div>
+      ) : (
+      comments.map((c, idx) => {
+        const isCurrentUser = c.uidAutor === auth.currentUser?.uid;
+
+        return (
+          <div key={idx} className="flex flex-col w-full items-start">
+            <div
+              className="flex items-start gap-3 p-2 rounded-lg w-full bg-white relative"
+            >
+              <img
+                src={c.avatar}
+                alt="Avatar"
+                className="w-7 h-7 rounded-full object-cover"
+              />
+
+              <div className="flex flex-col pr-6"> 
+                <span className="text-[12px] font-medium text-[#000000] xl:text-[13px]">
+                  {isCurrentUser ? "Você" : c.nomeAutor}
+                </span>
+
+                <p className="text-[12px] text-[#3B3B3B] mt-1 xl:text-[13px]">
+                  {c.conteudo}
+                </p>
+              </div>
+
+              {/* 🔥 Lixeira — aparece ONLY se o comentário for do usuário logado */}
+              {isCurrentUser && (
+                <button
+                  onClick={() => deletarComentario(c)}
+                  className="
+                    absolute 
+                    right-2 
+                    top-1/2 
+                    -translate-y-1/2
+                    text-red-700 
+                    hover:text-red-800
+                    mr-2
+                  "
+                  title="Excluir comentário"
+                >
+                  <i className="pi pi-trash text-[15px]" />
+                </button>
+              )}
+            </div>
+
+            <span
+              className={`text-[10px] text-[#3B3B3B] self-end mt-1 font-medium ${
+                isCurrentUser ? "mr-1" : "ml-1"
+              }`}
+            >
+              {c.data}
+            </span>
+          </div>
+        );
+      })
+
+      )}
+    </div>
+
+    {/* Novo comentário */}
+    <div className="w-full pr-4 mt-auto">
+      {adding ? (
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Escreva um comentário..."
+            className="flex-1 bg-gray-50 rounded-xl border border-gray-200 text-sm px-3 py-2
+                       focus:ring-2 focus:ring-[#B86B9F]/40 focus:outline-none"
+          />
+          <button
+            onClick={handleAddComment}
+            className="bg-[#B86B9F] text-white px-4 py-2 rounded-xl text-sm font-medium 
+                       hover:bg-[#9c5a89] transition-all"
+          >
+            Enviar
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setAdding(true)}
+          className="bg-white w-full flex items-center gap-2 text-[#B86B9F] text-[13px] rounded-md mt-2 p-2 hover:underline xl:text-[14px]"
+        >
+          <FiPlus size={16} />
+          Novo comentário
+        </button>
+      )}
+    </div>
+  </div>
+);
 
 }

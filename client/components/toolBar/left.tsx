@@ -3,10 +3,10 @@
 import Image from "next/image";
 import { PiHouseBold } from "react-icons/pi";
 import { FaRegNoteSticky } from "react-icons/fa6";
-import icon from "@/public/for_you.svg";
 import logo from "@/public/logo aurora em svg.svg";
 import { MdExitToApp } from "react-icons/md";
 import { usePathname, useRouter } from "next/navigation";
+import { MdOutlineAccountCircle } from "react-icons/md";
 
 export default function ToolBarLeft() {
   const pathname = usePathname();
@@ -53,12 +53,7 @@ export default function ToolBarLeft() {
           } cursor-pointer`}
           onClick={() => router.push("/edit-profile")}
         >
-          <Image
-            src={icon}
-            alt="icone"
-            width={1920}
-            height={1080}
-            className="w-[26px]"
+          <MdOutlineAccountCircle size={28}
           />
         </div>
       </div>

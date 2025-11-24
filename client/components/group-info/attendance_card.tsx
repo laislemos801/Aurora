@@ -1,184 +1,483 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "@/firebase/clientApp";
+import { MdEdit, MdCalendarMonth } from "react-icons/md";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { ptBR } from "date-fns/locale";
+import dayjs from "dayjs";
+import { toast } from "react-hot-toast";
+
 
 interface Aluno {
   nome: string;
   ra: number;
-  present: boolean;
+}
+
+interface PresencaCol {
+  data: string; // ex: "20/Nov"
+  presencas: Record<string, boolean>;
 }
 
 export default function AttendanceCard() {
-  const [selectedWeek, setSelectedWeek] = useState("Semana 1 - 25/04/2025");
-  const [attendance, setAttendance] = useState<Aluno[]>([]);
+  const [alunos, setAlunos] = useState<Aluno[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [presencasCols, setPresencasCols] = useState<PresencaCol[]>([]);
+
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const calendarRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  const [isEditing, setIsEditing] = useState(false);
 
   const searchParams = useSearchParams();
   const projectId = searchParams.get("projectId");
   const turmaId = searchParams.get("turmaId");
   const grupoId = searchParams.get("grupoId");
 
-  // === BUSCAR ALUNOS CADASTRADOS (ARRAY no documento OU subcoleção) ===
-  useEffect(() => {
-    const fetchAlunos = async () => {
-      setLoading(true);
-      setAttendance([]);
+  // -------------------------
+  // util: formatar para "DD/Mon" (pt-BR abreviado)
+  // -------------------------
+  function formatarDataColuna(date: Date) {
+    const dia = String(date.getDate()).padStart(2, "0");
+    const meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+    const mes = meses[date.getMonth()];
+    return `${dia}/${mes}`;
+  }
 
+  // -------------------------
+  // Buscar alunos e colunas de presença do grupo
+  // -------------------------
+  useEffect(() => {
+    const fetchTudo = async () => {
+      setLoading(true);
       if (!projectId || !turmaId || !grupoId) {
         setLoading(false);
         return;
       }
 
       try {
-        const grupoRef = doc(db, "Projetos", projectId, "Turmas", turmaId, "Grupos", grupoId);
-        const grupoSnap = await getDoc(grupoRef);
-
-        if (grupoSnap.exists()) {
-          const data = grupoSnap.data() as any;
-
-          if (Array.isArray(data.alunos) && data.alunos.length > 0) {
-            // === Ordena alfabeticamente o array ===
-            const alunosList: Aluno[] = data.alunos
-              .map((a: any) => ({
-                nome: String(a.nome ?? "Sem nome"),
-                ra: Number(a.ra ?? 0),
-                present: false,
-              }))
-              .sort((a: { nome: string; }, b: { nome: any; }) => a.nome.localeCompare(b.nome, "pt", { sensitivity: "base" }));
-
-            setAttendance(alunosList);
-            setLoading(false);
-            return;
-          }
-        }
-
-        // === Fallback: subcoleção ===
-        const alunosRef = collection(
+        // pega doc do grupo
+        const grupoRef = doc(
           db,
           "Projetos",
           projectId,
           "Turmas",
           turmaId,
           "Grupos",
-          grupoId,
-          "alunos"
+          grupoId
         );
-        const snapshot = await getDocs(alunosRef);
+        const grupoSnap = await getDoc(grupoRef);
+        let alunosList: Aluno[] = [];
 
-        if (!snapshot.empty) {
-          const alunosList = snapshot.docs
-            .map((d) => {
-              const data = d.data() as any;
-              return {
-                nome: String(data.nome ?? "Sem nome"),
-                ra: Number(data.ra ?? 0),
-                present: false,
-              } as Aluno;
-            })
-            // === Também ordena aqui ===
-            .sort((a, b) => a.nome.localeCompare(b.nome, "pt", { sensitivity: "base" }));
+        if (grupoSnap.exists()) {
+          const data = grupoSnap.data() as any;
 
-          setAttendance(alunosList);
-        } else {
-          setAttendance([]);
+          // Alunos podem estar em data.alunos (array) ou em subcoleção 'alunos'
+          if (Array.isArray(data.alunos) && data.alunos.length > 0) {
+            alunosList = data.alunos
+              .map((a: any) => ({
+                nome: String(a.nome ?? "Sem nome"),
+                ra: Number(a.ra ?? 0),
+              }))
+              .sort((a: Aluno, b: Aluno) =>
+                a.nome.localeCompare(b.nome, "pt", { sensitivity: "base" })
+              );
+          } else {
+            // fallback: subcoleção
+            const alunosRef = collection(
+              db,
+              "Projetos",
+              projectId,
+              "Turmas",
+              turmaId,
+              "Grupos",
+              grupoId,
+              "alunos"
+            );
+            const snap = await getDocs(alunosRef);
+            alunosList = snap.docs
+              .map((d) => d.data() as any)
+              .map((s) => ({
+                nome: String(s.nome ?? "Sem nome"),
+                ra: Number(s.ra ?? 0),
+              }))
+              .sort((a: Aluno, b: Aluno) =>
+                a.nome.localeCompare(b.nome, "pt", { sensitivity: "base" })
+              );
+          }
+
+          // carrega presencas (se houver)
+          const pres = (grupoSnap.data() as any).presencas || [];
+          // pres deve ser array de {data: string, presencas: Record<string,boolean>}
+          setPresencasCols(pres);
         }
+
+        setAlunos(alunosList);
       } catch (error) {
-        console.error("Erro ao buscar alunos:", error);
-        setAttendance([]);
+        console.error("Erro ao buscar dados do grupo:", error);
+        toast.error("Erro ao carregar dados do grupo.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAlunos();
+    fetchTudo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, turmaId, grupoId]);
 
-  // === TOGGLE PRESENÇA ===
-  const togglePresence = (index: number) => {
-    setAttendance((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], present: !copy[index].present };
-      return copy;
-    });
+  // -------------------------
+  // clique fora do calendário
+  // -------------------------
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      const t = e.target as Node;
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(t) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(t)
+      ) {
+        setCalendarOpen(false);
+      }
+    }
+
+    if (calendarOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [calendarOpen]);
+
+  // -------------------------
+  // criar nova coluna (Today ou calendar)
+  // -------------------------
+  const criarColuna = async (date: Date) => {
+    if (!projectId || !turmaId || !grupoId) {
+      toast.error("Parâmetros do projeto/turma/grupo faltando.");
+      return;
+    }
+
+    const dataFormatada = formatarDataColuna(date); // ex: "20/Nov"
+
+    const grupoRef = doc(
+      db,
+      "Projetos",
+      projectId,
+      "Turmas",
+      turmaId,
+      "Grupos",
+      grupoId
+    );
+
+    try {
+      const grupoSnap = await getDoc(grupoRef);
+      const dados = grupoSnap.exists() ? (grupoSnap.data() as any) : {};
+
+      const presArray: PresencaCol[] = dados.presencas || [];
+
+      // checar duplicata
+      const existe = presArray.some((p) => p.data === dataFormatada);
+      if (existe) {
+        toast.error("A presença para este dia já foi atribuída.");
+        return;
+      }
+
+      // construir mapa { nome: false }
+      const mapa: Record<string, boolean> = {};
+      alunos.forEach((a) => (mapa[a.nome] = false));
+
+      const novaCol: PresencaCol = {
+        data: dataFormatada,
+        presencas: mapa,
+      };
+
+      const novoArray = [...presArray, novaCol];
+
+      // salvar
+      await updateDoc(grupoRef, { presencas: novoArray });
+
+      // atualizar estado local
+      setPresencasCols(novoArray);
+      toast.success("Coluna de presença criada!");
+    } catch (error) {
+      console.error("Erro ao criar coluna:", error);
+      toast.error("Erro ao criar coluna de presença.");
+    }
   };
 
+  const deletarColuna = async (colData: string) => {
+    if (!projectId || !turmaId || !grupoId) {
+      toast.error("Parâmetros faltando.");
+      return;
+    }
+
+    const grupoRef = doc(
+      db,
+      "Projetos",
+      projectId,
+      "Turmas",
+      turmaId,
+      "Grupos",
+      grupoId
+    );
+
+    try {
+      const novoArray = presencasCols.filter((c) => c.data !== colData);
+      await updateDoc(grupoRef, { presencas: novoArray });
+
+      setPresencasCols(novoArray);
+      toast.success("Coluna removida!");
+    } catch (error) {
+      console.error("Erro ao deletar coluna:", error);
+      toast.error("Erro ao deletar coluna.");
+    }
+  };
+
+
+  // -------------------------
+  // atualizar uma presença (checkbox)
+  // -------------------------
+  const togglePresenca = async (colData: string, nomeAluno: string) => {
+    if (!projectId || !turmaId || !grupoId) {
+      toast.error("Parâmetros do projeto/turma/grupo faltando.");
+      return;
+    }
+
+    const grupoRef = doc(
+      db,
+      "Projetos",
+      projectId,
+      "Turmas",
+      turmaId,
+      "Grupos",
+      grupoId
+    );
+
+    try {
+      // encontra coluna
+      const idx = presencasCols.findIndex((c) => c.data === colData);
+      if (idx === -1) return;
+
+      // copia e inverte valor
+      const novoArray = presencasCols.map((c) =>
+        c.data === colData
+          ? {
+              ...c,
+              presencas: {
+                ...c.presencas,
+                [nomeAluno]: !c.presencas[nomeAluno],
+              },
+            }
+          : c
+      );
+
+      // salva todo o array (simples e seguro)
+      await updateDoc(grupoRef, { presencas: novoArray });
+
+      // atualiza UI local
+      setPresencasCols(novoArray);
+    } catch (error) {
+      console.error("Erro ao atualizar presença:", error);
+      toast.error("Erro ao atualizar presença.");
+    }
+  };
+
+  // -------------------------
+  // handlers para os botões
+  // -------------------------
+  const handleHoje = async () => {
+    await criarColuna(new Date());
+  };
+
+  const handleSelecionarData = async (d: Date | null) => {
+    if (!d) return;
+    setSelectedDate(d);
+    setCalendarOpen(false);
+    await criarColuna(d);
+  };
+
+  // placeholder editar/salvar (você adapta)
+  const handleEditar = () => setIsEditing(true);
+  const handleSalvar = () => setIsEditing(false);
+
+  // -------------------------
+  // render
+  // -------------------------
   if (loading) {
     return (
       <div className="bg-[#F6F6F6] rounded-lg shadow-md w-full flex justify-center items-center py-6">
-        <p className="text-gray-500 text-sm">Carregando alunos...</p>
+        <p className="text-gray-500 text-sm">Carregando...</p>
       </div>
     );
   }
 
-  return (
-    <div className="bg-[#F6F6F6] rounded-lg shadow-md w-full flex flex-col items-start gap-1 pb-3 h-full">
-      {/* Header */}
-      <div className="flex justify-between items-center w-full pr-3 pl-4 pt-4">
-        <h2 className="text-md font-medium text-gray-800 xl:text-[16px] 2xl:text-[18px]">
-          Marcar Presença
-        </h2>
-        <div className="relative w-max flex items-center">
-          <select
-            className="bg-[#3B3B3B] rounded-sm px-2 py-0.5 pr-6 text-[9px] text-[#FCF3FA] font-light border-[0.5px] border-[#FCF3FA] appearance-none
-            sm:text-[11px] xl:text-[13px]"
-            value={selectedWeek}
-            onChange={(e) => setSelectedWeek(e.target.value)}
+ return (
+  <div className="bg-[#F6F6F6] rounded-lg shadow-md max-w-full flex flex-col gap-1 pb-3 relative
+                h-[330px]">
+
+    {/* Header */}
+    <div className="flex items-center w-full pr-3 pl-4 pt-4 gap-2">
+      <h2 className="text-[14px] font-medium text-[#000000] xl:text-[16px] 2xl:text-[18px]">
+        Marcar Presença
+      </h2>
+
+      <div className="flex items-center gap-2 ml-auto">
+        {isEditing ? (
+          <button
+            onClick={handleSalvar}
+            className="px-3 py-0.5 rounded-sm bg-[#7B6294] text-[#FCF3FA] hover:bg-[#6a5583] transition text-[12px] lg:py-1.5"
           >
-            <option>Semana 1 - 25/04/2025</option>
-            <option>Semana 2 - 02/05/2025</option>
-            <option>Semana 3 - 09/05/2025</option>
-          </select>
-
-          <div className="pointer-events-none absolute right-2 flex items-center h-full">
-            <i className="pi pi-chevron-down text-[10px] text-[#FCF3FA]"></i>
-          </div>
-        </div>
-      </div>
-
-      {/* Linha separadora */}
-      <div className="w-full border-b border-[#D9D9D9] mb-2"></div>
-
-      {/* Cabeçalho da tabela */}
-      <div
-        className="grid grid-cols-[2fr_1fr_1fr] w-full mb-2 text-[12px] font-normal text-[#000000] 
-        pr-3 pl-4 xl:text-[15px]"
-      >
-        <span className="text-left pr-4">Nome</span>
-        <span className="text-center">RA</span>
-        <span className="text-center">Presença</span>
-      </div>
-
-      {/* Lista de alunos */}
-      <div className="w-full max-h-[150px] overflow-y-auto pr-2 pl-4">
-        {attendance.length === 0 ? (
-          <p className="text-gray-500 text-sm">Nenhum aluno encontrado.</p>
+            Salvar
+          </button>
         ) : (
-          attendance.map((student, idx) => (
-            <div
-              key={student.ra ?? idx}
-              className="grid grid-cols-[2fr_1fr_1fr] w-full mb-2 text-[12px] font-normal text-[#000000] leading-none items-center
-              xl:text-[14px] 2xl:mb-3"
-            >
-              <span className="text-left text-[#3B3B3B]">{student.nome}</span>
-              <span className="text-center">{student.ra}</span>
-              <div className="flex justify-center">
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={student.present}
-                    onChange={() => togglePresence(idx)}
-                    className="peer sr-only"
-                  />
-                  <div className="w-3 h-3 border border-[#C288B3] rounded-[3px] bg-white peer-checked:bg-[#C288B3] sm:w-3.5 sm:h-3.5 2xl:w-4 2xl:h-4"></div>
-                </label>
-              </div>
-            </div>
-          ))
+          <button
+            onClick={handleEditar}
+            className="bg-[#7B6294] p-1.5 rounded-full shadow hover:bg-[#674984] transition lg:p-2"
+          >
+            <MdEdit size={14} className="text-[#FCF3FA]" />
+          </button>
         )}
+
+        <button
+          onClick={handleHoje}
+          className="px-3 py-0.5 rounded-sm bg-[#3B3B3B] text-[#FCF3FA] text-[12px] hover:bg-[#6a5583] transition lg:py-1.5 "
+        >
+          Hoje
+        </button>
+
+        <button
+          ref={buttonRef}
+          onClick={() => setCalendarOpen((p) => !p)}
+          className="bg-[#3B3B3B] flex items-center gap-2 p-1.5 rounded-full shadow cursor-pointer hover:bg-[#674984] transition lg:rounded-md"
+        >
+          <MdCalendarMonth size={14} className="text-[#FCF3FA]" />
+
+          {/* Texto visível só em telas >= lg */}
+          <span className="hidden lg:inline text-[12px] text-[#FCF3FA] pr-1">
+            Escolha uma data
+          </span>
+        </button>
+
       </div>
     </div>
+
+    {/* calendário */}
+    {calendarOpen && (
+      <div ref={calendarRef} className="absolute right-4 top-16 z-50">
+        <DatePicker
+          selected={selectedDate}
+          onChange={(d) => handleSelecionarData(d)}
+          locale={ptBR}
+          dateFormat="dd/MM/yyyy"
+          inline
+        />
+      </div>
+    )}
+
+    {/* linha separadora */}
+    <div className="w-full border-b border-[#D9D9D9] mb-2 mt-2"></div>
+
+    {/* Se NÃO houver alunos */}
+      {alunos.length === 0 && (
+        <div className="flex flex-col items-center justify-center w-full py-6 text-center gap-3">
+          <img
+            src="/no-students.png" 
+            alt="Sem alunos"
+            className="w-22 h-22 opacity-80 lg:w-32 lg:h-32"
+          />
+          <p className="text-gray-500 text-[12px]">
+            Ainda não há <span className="font-semibold text-[#90416B]">alunos</span> neste grupo.
+            <br />
+            <span className="font-semibold text-[#90416B]">Adicione</span> alunos para começar a marcar presença!
+          </p>
+        </div>
+      )}
+
+      {/* Se houver alunos */}
+      {alunos.length > 0 && (
+        <div className="overflow-x-auto min-w-0">
+          <div className="min-w-max">
+
+            {/* HEADER */}
+            <div
+              className="grid border-b pb-2 gap-0"
+              style={{
+                gridTemplateColumns: `minmax(145px, 145px) repeat(${presencasCols.length}, 80px)`
+              }}
+            >
+              <div className="font-medium text-[12px] px-4 whitespace-nowrap overflow-hidden text-ellipsis">
+                Nome / RA
+              </div>
+
+              {presencasCols.map((col) => (
+                <div
+                  key={col.data}
+                  className="relative flex items-center justify-center text-[12px] font-medium"
+                >
+                  {/* WRAPPER HORIZONTAL – NOME + LIXEIRA */}
+                  <div className="flex items-center gap-1">
+                    <span>{col.data}</span>
+
+                    {isEditing && (
+                      <button
+                        onClick={() => deletarColuna(col.data)}
+                        className="text-red-700 hover:text-red-800"
+                        title="Excluir coluna"
+                      >
+                        <i className="pi pi-trash text-[12px] sm:text-[14px]" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+
+            </div>
+
+
+            {/* LINHAS */}
+            {alunos.map((a) => (
+              <div
+                key={a.ra}
+                className="grid border-b py-2 gap-0 px-4"
+                style={{
+                  gridTemplateColumns: `minmax(130px, 130px) repeat(${presencasCols.length}, 80px)`
+                }}
+              >
+                <div className="whitespace-nowrap overflow-hidden text-ellipsis">
+                  <div className="font-medium text-[14px] text-[#3B3B3B]">{a.nome}</div>
+                  <div className="text-[12px] text-[#6B6B6B]">({a.ra})</div>
+                </div>
+
+                {presencasCols.map((col) => (
+                  <div key={col.data} className="flex items-center justify-center">
+                    <label className="cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(col.presencas[a.nome])}
+                        onChange={() => togglePresenca(col.data, a.nome)}
+                        className="peer sr-only"
+                      />
+                      <div className="w-4 h-4 border border-[#C288B3] rounded bg-white peer-checked:bg-[#C288B3]"></div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+            ))}
+
+          </div>
+        </div>
+      )}
+  </div>
   );
 }

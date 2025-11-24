@@ -145,7 +145,7 @@ export function AlunosList({ alunos, onAdd, grupos = [], turmaId, projectId, onD
             <div className="flex items-center gap-2 relative">
               {/*Botão de excluir antes dos três pontinhos */}
               <RiDeleteBin6Line
-                className=" flex-shrink-0 text-[#90416B] p-2 hover:bg-[#C288B3] rounded-full transition"
+                className=" flex-shrink-0 p-2 text-[#B65254] hover:bg-[#E6C2D1] rounded-full transition"
                 size={30}
                 onClick={() => onDelete(aluno.ra)}
                 title="Excluir aluno"
@@ -206,7 +206,7 @@ export function AlunosList({ alunos, onAdd, grupos = [], turmaId, projectId, onD
         {!addMode ? (
           <button
             onClick={() => setAddMode(true)}
-            className="flex items-center gap-2 rounded-full py-1.5 px-2 bg-[#FBF2F9] text-[#7B6294] text-sm font-semibold hover:bg-[#ead8f6] transition"
+            className="flex items-center gap-2 rounded-full py-1.5 px-2 bg-[#3B3B3B] hover:opacity-80 text-white cursor-pointer text-sm font-semibold transition"
           >
             <FiPlus size={16} /> Adicionar aluno
           </button>
@@ -230,7 +230,7 @@ export function AlunosList({ alunos, onAdd, grupos = [], turmaId, projectId, onD
 
             <button
               onClick={handleSalvarAluno}
-              className="rounded-lg bg-[#7B6294] px-3 py-1 text-[#FCF3FA] text-sm w-full hover:opacity-90 self-start font-semibold"
+              className="rounded-lg bg-[#7B6294] cursor-pointer px-3 py-1 text-[#FCF3FA] text-sm w-full hover:opacity-90 self-start font-semibold"
             >
               Salvar
             </button>

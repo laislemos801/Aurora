@@ -87,13 +87,13 @@ export default function TemplateCard({
     <>
       <div className="bg-[#F6F6F6] rounded-xl p-3 w-full flex flex-col h-52 transition text-left md:h-54 xl:p-4 xl:h-56 2xl:h-58">
 
-        <p className="text-3xl font-medium">{semestreFormatado}</p>
+        <p className="text-3xl font-medium">PI {semestreFormatado}</p>
 
         <p className="text-[12px] font-medium text-[#90416B] md:text-[13px] 2xl:text-[14px]">{nome}</p>
         <p className="text-[10px] italic text-[#3B3B3B] font-medium md:text-[11px]">{curso}</p>
 
         <div className="flex-1 mt-3 2xl:mt-4">
-          <p className="text-[8px] line-clamp-3 text-[#333] font-medium italic sm:text-[9px] 2xl:text-[9.5px]">
+          <p className="text-[8px] line-clamp-3 text-[#333] font-medium italic sm:text-[9px] xl:text-[11px]">
             {descricao}
           </p>
         </div>
@@ -117,7 +117,7 @@ export default function TemplateCard({
 
               <button
                 onClick={() => setIsInviteOpen(true)}
-                className="w-6 h-6 flex items-center justify-center rounded-full bg-[#C288B3] text-md shadow-sm hover:scale-105 transition"
+                className="w-6 h-6 flex items-center justify-center cursor-pointer rounded-full bg-[#C288B3] text-md shadow-sm hover:scale-105 transition"
               >
                 +
               </button>
@@ -125,7 +125,7 @@ export default function TemplateCard({
 
             <button
               onClick={handleVerMais}
-              className="px-3 py-1 bg-[#3B3B3B] text-white text-[10px] italic rounded-full hover:opacity-90 transition md:px-4"
+              className="px-3 py-1 bg-[#7B6294] hover:bg-[#674984] cursor-pointer text-white text-[10px] italic rounded-full hover:opacity-90 transition md:px-4"
             >
               Ver mais
             </button>
